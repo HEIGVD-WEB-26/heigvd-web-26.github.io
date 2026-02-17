@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Introduction</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.css"
+      id="theme"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css"
+    />
+
+    <link rel="stylesheet" href="./fontawesome-6.2.0/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <script src="print.js"></script>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-background="#333333">
+          <h2>Web</h2>
+          <h1>Introduction</h1>
+
+          <aside class="notes">
+            Slides by Bertil Chapuis, Olivier Lemer, Olivier Tischhauser &
+            Vincent Guidoux
+          </aside>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+                        ## <i class="fas fa-tasks"></i> Overview of Today's Class
+                        - Internet
+                        - World Wide Web (WWW)
+                        - Uniform Resource Locator (URL)
+                        - HyperText Transfer Protocol (HTTP)
+                        - Hello, World (Client/Server)!
+                    </textarea>
+        </section>
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fas fa-network-wired"></i> Internet</h2>
+          </section>
+
+          <section
+            data-markdown
+            style="font-size: 0.8em"
+            data-separator-notes="^Notes:"
+          >
+            <textarea data-template>
+                        ## <i class="fas fa-network-wired"></i> Internet's Conceptual Model
+
+                        ### IPS (Internet Protocol Suite)
+
+                        Conceptual model of the protocol structure allowing *the internet*.
+
+                        Consists of 4 layers :
+                        - **Application Layer** : Interfaces and communication protocols, specific to the applications using the network. <span class="detail">(HTTP, HTTPS, FTP, SSH, SMTP, IMAP, Telnet, ...)</span>
+                        - **Transport Layer** : Adds advanced communication features : connexions, reliability, flow control, etc. <span class="detail">(TCP, UDP, ...)</span>
+                        - **Internet Layer** : Routes packets between hosts, identified by an IP address. <span class="detail">(IP, ICMP, IPsec, ...)</span>
+                        - **Link Layer** : Communication on actual tangible media. <span class="detail">(ARP, PPP, MAC, Ethernet, Wifi, DSL, Fibre, ...)</span>
+
+                        <span class="detail">
+
+                          Read more [here](https://en.wikipedia.org/wiki/Internet_protocol_suite), [here](https://hacks.mozilla.org/2018/05/a-cartoon-intro-to-dns-over-https/) and [here](https://www.cloudflare.com/learning/ddos/glossary/domain-name-system-dns/).
+
+                        </span>
+
+                        Notes:
+
+                        Some details on the mentionned protocols, if interested.
+
+                        Link Layer
+                        - ARP is a protocol used to map IP addresses to MAC addresses.
+                        - PPP is a protocol used to establish a direct connection between two nodes.
+
+                        Internet Layer
+                        - IP is a connectionless protocol that is responsible for routing packets between hosts given only their IP addresses. It is responsible for the addressing and fragmentation of the packets.
+                        - ICMP is a protocol used for error reporting and diagnostic on the Internet layer. It is used for example to report that a packet could not be delivered.
+
+                        Transport layer
+                        - TCP is a connection-oriented protocol that ensures the delivery of a message to its destination. It is responsible for the reliability of the communication, the flow control and the congestion control.
+                        - UDP is a connectionless protocol that does not ensure the delivery of a message to its destination. It is used when reliability is not required but responsiveness is valued, for example for video streaming.
+
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-network-wired"></i> Internet's Conceptual Model
+                        ![Networking](images/network_reminder.svg)
+
+                        Notes:
+
+                        The OSI model, when compared to the IPS model, is more abstract and more complete. It is used to describe the different layers of a theoretical network, but is not used in practice. The IPS model is a simplification of the OSI model that more closely resembles reality, and is used to describe the Internet.
+
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-network-wired"></i> Domain Name System (DNS)
+
+                        Hierarchical and decentralized implementation of a dictionary :
+
+                        <div class="centered">
+
+                          **Domain name ⟼ IP Address**
+
+                        </div>
+
+                        The domain name realm is structured into a tree of (sub)domains, grouped into **zones**. Each zone is managed by a (group of) **DNS server(s)**.
+
+                        <img alt="Networking" src="images/network_dns.svg" style="width: 65%;" />
+
+                        Uses TCP for zone transfer and UDP for name queries.
+
+                        Notes:
+
+                        The <b>Domain Name System (DNS)</b> is a hierarchical and decentralized naming system (phone book) for computers connected to the Internet.
+                        It translates domain names to IP addresses needed for locating and identifying computers.
+
+                        A DNS request happens roughly as follows:
+                        - Your computer makes a request to translate a domain name into an IP address that it will then be able to use to retrieve resources.
+                        - That request goes to a DNS resolver, which will handle the conceptually "recursive" retrieval of the information.
+                        - The DNS resolver essentially asks DNS servers for information recursively, starting from the most generic one to the most specific one, each giving information about where to find more specific information.
+                        - The first server to be contacted is the root DNS server, which only knows about Top Level Domain (TLD) servers. Each TLD server is responsible for the top-level part of the domain name, i.e. `.com`, `.net` etc. The root server thus answers the resolver with information about where to find the TLD server that will know more about the requested address. If the requested address is `www.example.com`, it will thus redirect to the `.com` TLD.
+                        - The resolver receives that message telling him who to ask next. It does so and receives another answer, again for who to ask next. It does that recursively until it reaches a Name Server knowing the IP address of the full requested domain name.
+                        - The resolver sends that address to your computer, which can now use that address to send a request for resources on that server.
+
+                        Note that each involved machine (Root, TLD, Name
+                        servers, DNS resolver, even your computer) can cache
+                        information. For instance, the resolver may remember
+                        where to find a TLD server responsible for the `.com`
+                        domain, and ask that one directly.
+
+                        #### Replication
+
+                        The servers listed above are rarely alone: for example,
+                        there are multiple root servers, and multiple TLD
+                        servers. Even name servers, at the bottom of the chain,
+                        are often replicated in more than one, in order to
+                        ensure redundancy and fault tolerance. DNS Zone Transfer
+                        is what is used to ensure that these replication servers
+                        all hold consistent data.
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                        ## <i class="fas fa-network-wired"></i> Zone file
+
+                        Each DNS zone has a file containing the list of the IP addresses associated to its domain names, within **Resource Records (RR)**.
+
+                        ```text
+                        $ORIGIN example.com.    ; start of this zone
+                        $TTL 1h                 ; default expiration time
+                        example.com.  IN  MX    10 mail.example.com.  ; mailserver for example.com
+                        example.com.  IN  A     192.0.2.1             ; IPv4 address for example.com
+                        example.com.  IN  AAAA  2001:db8:10::1        ; IPv6 address for example.com
+                        www           IN  CNAME example.com.          ; alias for example.com
+                        ```
+
+                        Notes:
+
+                        - A Domain Name System (DNS) zone file is a text file that describes a DNS zone.
+                        - A DNS zone is a subset, often a single domain, of the hierarchical domain name structure of the DNS.
+                        - The zone file contains mappings between domain names and IP addresses and other resources, organized in the form of text representations of resource records (RR).
+
+                        #### Resource Records
+
+                        Each line starting with a domain name corresponds to a Resource Record. It is formatted as follows:
+
+                        ```
+                        name record_class record_type record_data
+                        ```
+
+                        - `name`: the name of the (sub)domain corresponding to that RR. If it does not end with a `.`, it is a *relatively* qualified name, relative to the current origin. This explains the `www` record, which thus corresponds to `www.example.com`.
+                        - `record_class`: indicates the namespace of the information. Usually, the namespace is that of the internet, denoted `IN`.
+                        - `record_type`: the type of information in the record. For example, `A` and `AAAA` for *address record* (IPv4 and IPv6, respectively), `MX` for the mail host of the SMTP domain, or `CNAME` for declaring aliases.
+                        - `record_data`: the data associated to the name, depending on the `record_type`. For example, an IPv4 address for type `A` records, or another domain name for `CNAME`.
+
+
+                        #### More about DNS
+
+                        Mozilla provides a nice cartoon of how DNS works, what are its limitations in terms of security and privacy, and why DNS over HTTPS is needed.
+
+                        https://hacks.mozilla.org/2018/05/a-cartoon-intro-to-dns-over-https/
+
+                        Cloudflare provides a good introduction to DNS, DNS amplification attacks and DNS flood attacks.
+
+                        https://www.cloudflare.com/learning/ddos/glossary/domain-name-system-dns/
+                    </textarea>
+          </section>
+
+          <section data-markdown>
+            <textarea data-template>
+                        ## <i class="fas fa-network-wired"></i> Interacting with DNS
+
+                        ```bash
+                        # DNS lookup
+                        nslookup heig-vd.ch
+                        dig heig-vd.ch
+
+                        # Reverse DNS lookup
+                        host 91.198.174.192
+
+                        # Info on the domain owner
+                        whois heig-vd.ch
+                        ```
+
+                        <span class="detail">
+
+                          Read more [here](https://hacks.mozilla.org/2018/05/a-cartoon-intro-to-dns-over-https/) and [here](https://www.cloudflare.com/learning/ddos/glossary/domain-name-system-dns/).
+
+                        </span>
+
+                        Notes:
+
+                        - `dig`: the second column of an answer output by `dig` is the TTL (Time To Live) of the record, in seconds. It indicates how long the record can be cached before it should be refreshed.
+
+                    </textarea>
+          </section>
+
+          <section
+            data-markdown
+            style="font-size: 0.8em"
+            data-visibility="hidden"
+          >
+            <textarea data-template>
+                        ## <i class="fas fa-hand-paper"></i> Hands on!
+
+                        Perform some DNS lookups with the following commands:
+
+                        ```bash
+                        nslookup -type=any heig-vd.ch
+                        dig heig-vd.ch
+                        ```
+
+                        Perform a reverse DNS lookup with the host command:
+
+                        ```bash
+                        host wikipedia.org
+                        host 91.198.174.192
+                        ```
+
+                        Query the whois directory to check domain name ownership:
+
+                        ```bash
+                        whois heig-vd.ch
+                        ```
+
+                        *Bonus* : print the route packets trace to network host:
+
+                        ```bash
+                        traceroute heig-vd.ch
+                        ```
+                    </textarea>
+          </section>
+        </section>
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fas fa-network-wired"></i> World Wide Web</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                    ## <i class="fas fa-window-maximize"></i>  World Wide Web
+
+                    Created by Tim Berners-Lee at CERN in 1990, made public in 1991.
+
+                    #### Definition
+                    Interconnected system of public pages. One of the many applications *using* the internet.
+
+                    Hence, internet ≠ web : the web *lives* on the internet.
+
+                    #### Major components
+
+                    - *HTTP* : Data transfer protocol between client and server.
+                    - *URL* : Universal identification standard for web content.
+                    - *HTML* \&co : Common format for web documents.
+
+                    <div class="vspace"></div>
+
+                    <span class="detail">
+
+                      Read more [here](https://developer.mozilla.org/en-US/docs/Glossary/World_Wide_Web).
+
+                    </span>
+
+                    Notes:
+
+                    ## <i class="fas fa-window-maximize"></i>  Mozilla's Definition
+
+                    The World Wide Web - commonly referred to as WWW, W3, or the Web - is an interconnected system of public webpages accessible through the Internet. The Web is not the same as the Internet: the Web is one of many applications built on top of the Internet.
+
+                    The system we know today as "the Web" consists of several components:
+                    - The HTTP protocol governs data transfer between a server and a client.
+                    - To access a Web component, a client supplies a unique universal identifier, called a URL (uniform resource location) or URI (uniform resource identifier).
+                    - HTML (hypertext markup language) is the most common format for publishing web documents.
+
+                    https://developer.mozilla.org/en-US/docs/Glossary/World_Wide_Web
+
+                    ## <i class="fas fa-window-maximize"></i>  History
+
+                    Tim Berners-Lee proposed the architecture of what became known as the World Wide Web. He created the first web server, web browser, and webpage at the CERN in 1990.
+                    In 1991, he announced his creation, marking the moment the Web was first made public.
+
+                    <img src="images/web_tim.jpg" style="width: 100%"/>
+
+                    Today, the Web is constently evolving under the guidance of the World Wide Web Consortium (W3C).
+
+                    https://worldwideweb.cern.ch/
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-window-maximize"></i> World Wide Web
+
+                        <img alt="The Web" src="images/HTTP_layers.png" style="width: 60%;" />
+
+                        <div class="detail">
+
+                          Read more [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview).
+
+                        </div>
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-window-maximize"></i>  Standards
+
+                        <div class="centered">
+
+                        #### W3C
+
+                        *"The origins"*
+
+                        <img alt="The Web" src="images/web_standards.png" style="width: 70%;" />
+
+                        <div class="detail">
+
+                          <div class="vspace"></div>
+
+                          Read more [here](https://www.w3.org/standards/)
+
+                        </div>
+
+                        </div>
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-window-maximize"></i>  Standards
+
+                        <div class="centered">
+
+                        #### WHATWG
+
+                        (Web Hypertext Application Technology Working Group)
+
+                        *Apple, Google, Mozilla, Microsoft*
+
+                        <img alt="The Web" src="images/whatwg.png" style="width: 50%;" />
+
+                        <div class="detail">
+
+                          <div class="vspace"></div>
+
+                        https://whatwg.org/
+
+                        </div>
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-window-maximize"></i>  Mozilla's Web APIs
+                        <img alt="The Web" src="images/web_api.png" style="width: 80%;" />
+                    </textarea>
+          </section>
+        </section>
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fas fa-link"></i> Uniform Resource Locator</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+                      ## <i class="fas fa-link"></i> What's an URL?
+
+                      Universal identification system for web resources, and methods for obtaining them.
+
+                      ```
+                      https://username:password@example.com:443/index.html?param=value#fragment
+                      ```
+
+                      | Part | Value | Description |
+                      |------|-------|-------------|
+                      | Scheme | `https://` | Protocol to use for the request. |
+                      | Credentials | `username:password@` | Credentials used for the request (Basic Auth). |
+                      | Domain | `example.com` | Domain name where request is to be sent. |
+                      | Port | `:443` | Port of the requested service on the destination server. |
+                      | Path | `/index.html` | Path to the resource. |
+                      | Query | `?param=value` | Parameters associated to the resource. |
+                      | Fragment | `#fragment` | Path to a secondary resource. |
+
+                    </textarea>
+          </section>
+        </section>
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fas fa-comments"></i> Hypertext Transfer Protocol</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                    ## <i class="fas fa-comments"></i>  Definition
+
+                    Client-server protocol allowing the fetching of resources on the web.
+
+                    A document is usually reconstructed from multiple sub-documents, fetched independently (e.g. text, style, images, videos, etc).
+
+                    <img alt="Fetching a page" src="images/Fetching_a_page.png" width="550" />
+
+                    <div class="detail">
+
+                    Read more [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview).
+
+                    </div>
+
+                    Notes:
+
+                    HTTP is a protocol which allows the fetching of resources, such as HTML documents. It is the foundation of any data exchange on the Web and it is a client-server (text) protocol, which means requests are initiated by the recipient, usually the Web browser. A complete document is reconstructed from the different sub-documents fetched, for instance text, layout description, images, videos, scripts, and more.
+
+                  </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+
+                        ## <i class="fas fa-comments"></i> HTTP Requests
+
+                        ```bash
+                        GET /test.html?param=value HTTP/1.1
+                        Host: httpstat.us
+                        User-Agent: curl/7.58.0
+                        Accept: */*
+                        ```
+
+                        **Requests** usually have:
+                        - a method (`GET`)
+                        - a resource (`/text.html?param=value`)
+                        - some headers (e.g. `User-Agent: curl/7.58.0`)
+                        - an optional body (depends on the methods)
+
+                        The most common **Methods** are:
+                        - `GET`: Returns the resource.
+                        - `POST`: Create resource.
+                        - `HEAD`: Returns the headers of resource.
+                        - `PUT`: Create or update resource.
+                        - `DELETE`: Deletes resource
+
+                        Notes:
+
+                        HEAD is used to retrieve the headers of a resource without retrieving the resource itself. It is used for example to check if a resource has been modified since the last time it was retrieved, without having to download the whole resource again.
+
+                        PUT is used to create a resource if it does not exist, or to update it if it does. It is not always clear what the difference is with POST, which is also used to create resources. The difference is that PUT is idempotent, which means that if you send the same request multiple times, the result will always be the same. This is not the case with POST, which can have side effects on the server, such as creating a new resource each time it is called.
+
+                        DELETE is not used when browsing. However it is used when exposing resources over what is called REST (representational state transfer), which uses HTTP methods to create, read, update and delete resources (CRUD).
+
+                        There exist yet more methods, such as PATCH, TRACE, OPTIONS, CONNECT, etc. but they are not commonly used.
+
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-hand-paper"></i> Hands on!
+
+                        The Unix world is at the origin of many popular text protocols, such as FTP, POP3, SMTP or IMAP.
+
+                        HTTP follows the same philosophy, which allows to easily observe what transits on the network.
+
+                        Use telnet to open a TCP connection and perform a simple get request.
+
+                        ```
+                        telnet www.google.com 80
+                        GET / HTTP/1.1
+                        Host: www.google.com
+                        ```
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-comments"></i> HTTP Responses
+
+                        ```bash
+                        HTTP/1.1 200 OK
+                        Content-Length: 6
+                        Content-Type: text/plain; charset=utf-8
+                        Server: Microsoft-IIS/10.0
+                        Access-Control-Allow-Origin: *
+                        Date: Mon, 16 Sep 2019 20:07:29 GMT
+                        200 OK
+                        ```
+
+                        **Responses** usually have:
+                        - a status code (`200 OK`)
+                        - some headers (e.g. `Content-Length: 6`)
+                        - an optional body (text, HTML, json)
+
+                        The most common **Status Codes** are:
+                        - `200 OK`: The request has succeeded.
+                        - `301 Moved Permanently`: The resource has a new location.
+                        - `404 Not Found`: The server has not found the resource.
+                        - `500 Internal Server Error`: The server has encountered an error while processing the request.
+                        - `418 I'm a teapot`: The server refuses to brew coffee because it's a teapot. Remnant of a 1998 April Fool's joke that refuses to die.
+
+                        Notes:
+
+                        The HTTP responses belong to five classes:
+                        - 1xx informational response – the request was received, continuing process
+                        - 2xx successful – the request was successfully received, understood, and accepted
+                        - 3xx redirection – further action needs to be taken in order to complete the request
+                        - 4xx client error – the request contains bad syntax or cannot be fulfilled
+                        - 5xx server error – the server failed to fulfil an apparently valid request
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                        ## <i class="fas fa-hand-paper"></i> HTTPS
+
+                        HTTPS is the secure version of HTTP. It uses TLS to encrypt the communication between the client and the server.
+
+                        Using `telnet` would thus not work, but `curl` handles the encryption/decryption for us. You can also check the DevTools in your browser (usually CTRL+SHIFT+I).
+
+                        ```bash
+                        curl -v https://httpstat.us/200?param=value
+                        ```
+
+                        <img alt="Fetching a page" src="images/http_devtools.png" width="550" />
+
+                        Notes:
+
+                        HTTPS encrypts the communication between the client and the server, which makes it impossible to read the content of the requests and responses. It encrypts the entire HTTP message, including the headers, the request or response body, and the requested resource itself. Note however that DNS is not an encrypted protocol, so the domain name of the server is still visible in the first phase of name resolution.
+                    </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+
+                        ## <i class="fas fa-user-secret"></i> Why encryption?
+
+                        Credentials and tokens can be captured by eavesdropping.
+
+                        What happens when you run the following command while listening with [Wireshark](https://www.wireshark.org/)?
+
+                        What does the Authorization header contain?
+
+                        ```bash
+                        curl http://user:pass@www.heig-vd.ch
+                        ```
+
+                        ![](images/wireshark.png)
+
+                    </textarea>
+          </section>
+
+          <section
+            data-markdown
+            data-visibility="hidden"
+            style="font-size: 0.6em"
+          >
+            <textarea data-template>
+                        ## <i class="fas fa-hand-paper"></i> Hands on!
+
+                        Get to know your methods and status codes!
+
+                        ### What is status code `418`?
+
+                    </textarea>
+          </section>
+
+          <section
+            data-markdown
+            data-visibility="hidden"
+            style="font-size: 0.6em"
+          >
+            <textarea data-template>
+                        ## <i class="fa-solid fa-face-smile-wink"></i> `418 - I'm a teapot`
+
+                        https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418
+
+                        The HTTP 418 I'm a teapot client error response code indicates that the server refuses to brew coffee because it is a teapot. This error is a reference to Hyper Text Coffee Pot Control Protocol which was an April Fools' joke in 1998.
+                    </textarea>
+          </section>
+
+          <section
+            data-markdown
+            data-visibility="hidden"
+            style="font-size: 0.6em; text-align: center"
+          >
+            <textarea data-template>
+                        <img src="images/http_zine.png" style="width: 30%" />
+
+                        https://wizardzines.com/zines/http/
+                    </textarea>
+          </section>
+        </section>
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fas fa-terminal"></i> Hello, World!</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em; text-align: center">
+            <textarea data-template>
+                        ## <i class="fas fa-network-wired"></i> Web Application Architecture
+
+                        <img src="images/web-application.svg" style="width: 60%" />
+            </textarea>
+          </section>
+
+          <section data-markdown>
+            <textarea data-template>
+                        ## <i class="fas fa-hand-paper"></i> Hello World Lab
+
+                        - Browser Dev Tools (Console, Network, etc.)
+                        - NVM
+                        - Node.js
+                        - HTML/CSS/JS
+                        - Visual Studio Code
+                        - Github Classroom
+                        - ESLint
+                        - Prettier
+                    </textarea>
+          </section>
+        </section>
+
+        <section>
+          <h2><i class="fas fa-hand-paper"></i> Questions</h2>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+
+    <script src="./script.js" type="module"></script>
+  </body>
+</html>
