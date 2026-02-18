@@ -1814,7 +1814,8 @@
                         - Defining a grid container by setting its display property : `display:grid`
                         - Defining the columns and row sizes with `grid-template-columns` and `grid-template-rows`
                         - Place the child elements into the grid with `grid-column` (shorthand for `grid-column-start / grid-column-end`) and `grid-row` (shorthand for `grid-row-start / grid-row-end`)
-                        - As we will see later, it is also possible to define the whole grid layout with [grid-template-areas](https://css-tricks.com/snippets/css/complete-guide-grid/#aa-grid-template-areas) at the container level and then use [grid-area](https://css-tricks.com/snippets/css/complete-guide-grid/#aa-grid-area) at the child element level to assign it to a given area
+                        - It is also possible to define the whole grid layout with
+                      [grid-template-areas](https://css-tricks.com/snippets/css/complete-guide-grid/#aa-grid-template-areas) at the container level and then use [grid-area](https://css-tricks.com/snippets/css/complete-guide-grid/#aa-grid-area) at the child element level to assign it to a given area
                     </textarea>
                 </section>
                 <section data-markdown style="font-size: 0.65em;">
@@ -1842,6 +1843,53 @@
                             <img src="images/item-a.png"/>
                         </div>
                     </textarea>
+                </section>
+                <section data-markdown style="font-size: 0.55em;">
+                      <textarea data-template>
+                        ## <i class="fas fa-paint-brush"></i> Grid - Template Areas
+
+                        It is also possible to define `grid-template-areas` and use `grid-area` to place the child elements in the grid.
+                        <div style="display: flex">
+
+                        ```html
+                        <div class="wrapper">
+                          <div class="header">Header</div>
+                          <div class="sidebar">Sidebar</div>
+                          <div class="content">Content</div>
+                          <div class="footer">Footer</div>
+                        </div>
+                        ```
+                        ```css
+                        .wrapper {
+                          display: grid;
+                          grid-template-columns: 1fr 1fr 1fr;
+                          grid-template-rows: 70px 70px 70px;
+                          grid-template-areas:
+                            "hd hd hd"
+                            "sd main main"
+                            ". ft ft";
+                        }
+                        ```
+                        ```css
+                        .header {
+                          grid-area: hd;
+                        }
+                        .footer {
+                          grid-area: ft;
+                        }
+                        .content {
+                          grid-area: main;
+                        }
+                        .sidebar {
+                          grid-area: sd;
+                        }
+                        ```
+                        </div>
+
+                        The result is the following layout:
+
+                        <img src="images/grid-template-areas-placement.png" style="width:70%"/>
+                      </textarea>
                 </section>
                 <section data-markdown style="font-size: 0.55em;">
                     <textarea data-template>
