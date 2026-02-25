@@ -1820,28 +1820,46 @@
                 </section>
                 <section data-markdown style="font-size: 0.65em;">
                     <textarea data-template>
-                        ## <i class="fas fa-paint-brush"></i> Grid Layout example
-                        ```css
-                        .container {
-                          /* we can name the column grid lines */
-                          grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
-                          grid-template-rows: [row1-start] 25% [row1-end] 100px [third-line] auto [last-line];
-                        }
-                        ```
-                        ```css
-                        .item-a {
-                          grid-column-start: 2;
-                          grid-column-end: five;
-                          grid-row-start: row1-start;
-                          grid-row-end: 3;
-                        }
-                        ```
+                      ## <i class="fas fa-paint-brush"></i> Grid Layout example
 
-                        <div style="display: flex">
-                            <img src="images/template-columns-rows-names.png" />
-                            <img src="images/template-columns-rows-numbers.png" />
-                            <img src="images/item-a.png"/>
-                        </div>
+                      ```css
+                        .container {
+                          /* we can define the columns and rows*/
+                          grid-template-columns: 40px 50px auto 50px 40px;
+                          grid-template-rows: 25% 100px auto;
+                        }
+                      ```
+                      ```css
+                      .container {
+                        /* alternatively we can name the column grid lines */
+                        grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
+                        grid-template-rows: [row1-start] 25% [row1-end] 100px [third-line] auto [last-line];
+                      }
+                      ```
+                      <div style="display: flex">
+
+                      ```css
+                      .item-a {
+                        grid-column-start: 2;
+                        grid-column-end: 5;
+                        grid-row-start: 1;
+                        grid-row-end: 3;
+                      }
+                      ```
+                      ```css
+                      .item-a {
+                        grid-column-start: 2;
+                        grid-column-end: five;
+                        grid-row-start: row1-start;
+                        grid-row-end: 3;
+                      }
+                      ```
+                      </div>
+                      <div style="display: flex">
+                          <img src="images/template-columns-rows-names.png" />
+                          <img src="images/template-columns-rows-numbers.png" />
+                          <img src="images/item-a.png"/>
+                      </div>
                     </textarea>
                 </section>
                 <section data-markdown style="font-size: 0.55em;">
