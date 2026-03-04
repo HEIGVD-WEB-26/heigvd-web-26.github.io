@@ -45,33 +45,35 @@
 
           <section data-markdown>
             <textarea data-template>
-                            ## <i class="fas fa-tasks"></i> Overview of Today's Class
-                            - Quiz (HTML/CSS)
-                            - What is JavaScript
-                            - Foundations of JavaScript
-                                - Values, Types, and Operators
-                                - Program Structure
-                                - Functions
-                                - Etc.
-                            - Regular Expressions
-                        </textarea>
+              ## <i class="fas fa-tasks"></i> Overview of Today's Class
+              - Quiz (HTML/CSS)
+              - What is JavaScript
+              - Foundations of JavaScript
+                  - Values, Types, and Operators
+                  - Program Structure
+                  - Functions
+                  - Etc.
+              - Regular Expressions
+              - Manipulating DOM objects
+              - Drawing on the HTML Canvas
+            </textarea>
           </section>
           <section data-markdown style="font-size: 0.6em">
             <textarea data-template>
-                    ## <i class="fa-solid fa-graduation-cap"></i> Educational Objectives
-                    On completion of this part, students will be able to:
+              ## <i class="fa-solid fa-graduation-cap"></i> Educational Objectives
+              On completion of this part, students will be able to:
 
-                    - Cite all the environments where JavaScript can be executed.
-                    - Write JavaScript code in all the environments where it can be executed.
-                    - Explain the difference between interpreted and compiled languages.
-                    - Read and write basic JavaScript code.
-                    - Read regular expressions.
-                    - Explain the difference between `var`, `let`, and `const`.
-                    - Explain the difference between `==` and `===`.
-                    - Explain the difference between `null` and `undefined`.
-
-
-                </textarea>
+              - Cite all the environments where JavaScript can be executed.
+              - Write JavaScript code in all the environments where it can be executed.
+              - Explain the difference between interpreted and compiled languages.
+              - Read and write basic JavaScript code.
+              - Read regular expressions.
+              - Explain the difference between `var`, `let`, and `const`.
+              - Explain the difference between `==` and `===`.
+              - Explain the difference between `null` and `undefined`.
+              - Manipulate the DOM using JavaScript
+              - Draw on the HTML Canvas using JavaScript
+            </textarea>
           </section>
         </section>
 
@@ -1618,9 +1620,6 @@
               match result.
               `/Jack(?=Sparrow)/` will match `Jack` only if it is followed by `Sparrow`. It will match `Jack` in `Jack
               Sparrow`, but not in `Jack Smith`.
-
-
-
             </textarea>
           </section>
 
@@ -1720,9 +1719,388 @@
               let re = /[A-Z]{1,2}\.?[0-9]{1,6}/g;
               let plates = [...text.matchAll(re)];
               ```
-
               </div>
+            </textarea>
+          </section>
+        </section>
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Manipulating DOM objects</h2>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ##  <i class="fas fa-sitemap"></i> What is the DOM?
 
+              - DOM stands for **Document Object Model**
+
+              - The DOM is a programming interface for HTML and XML
+
+              - The DOM represents the structure of a document in memory
+
+              - The DOM is an object-oriented representation of the web page
+
+              - The DOM lets other programming languages manipulate the document
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-sitemap"></i> The DOM's content tree
+
+              ```html
+              <html>
+              <head>
+                <title>My Document</title>
+              </head>
+              <body>
+                <h1>Header</h1>
+                <p>Paragraph</p>
+              </body>
+              </html>
+              ```
+
+              When a browser such as Chrome or Firefox parses an HTML document, it builds a **content tree** and then uses it to **display** the document.
+
+              <img src="images/html_content_tree.jpg" />
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Using_the_W3C_DOM_Level_1_Core
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fas fa-hand-paper"></i> Accessing the Document
+
+              In JavaScript, the `Document` interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree.
+
+              Access the `document` object and its properties from the DevTools of your browser.
+
+              ```js
+              document;
+              document.location; // Getter returns location object (info about current URL).
+              document.location = "https://heig-vd.ch/"; // Setter to update displayed URL.
+              document.designMode = "on"; // Lets user interactively modify page content.
+              document.referrer; // URL of page that linked to this page.
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Document
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i id="my-icon" class="fas fa-hand-paper"></i> Accessing the Elements of the DOM
+
+              The `Element` interface represents the HTML elements loaded in the DOM tree.
+
+              ```js
+              console.log(document.getElementById("id"));
+              console.log(document.getElementsByClassName("slide"));
+              console.log(document.getElementsByTagName("h1"));
+              ```
+
+              CSS Selectors can also be used to query elements.
+
+              ```js
+              console.log(document.querySelector("ul > li")); // selects the first matching element
+              console.log(document.querySelectorAll("ul > li")); // selects all matching elements
+              ```
+
+              Elements can then be modified in JavaScript.
+
+              ```js
+              document.getElementsByClassName("slide")
+                  .forEach(el => el.style = "background-color: blue");
+
+              let element = document.getElementById("my-icon");
+              element.innerHTML = "<p>Hello, World!</p>";
+              element.setAttribute("href", "https://www.heig-vd.ch/");
+              element.className; // Value of `class` attribute
+              element.classList; // List of classes
+              element.children;  // List of child elements
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Element
+
+              Notes:
+              If there is more than one class, `className` will return the list of classes as a string separated by spaces. `classList` is a more convenient way to manipulate the list of classes as it provides methods such as `add`, `remove`, `toggle`, etc.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-hand-paper"></i> Listening to DOM Events
+
+              DOM Events are sent to notify code of interesting things that have taken place. Each event is represented by an object that inherits from the `Event` object, and may have additional custom fields and/or functions used to get additional information about what happened.
+
+              ```js
+              document.onkeydown = function(event) {console.log(event);}
+              document.addEventListener('keydown', event => console.log(event))
+              ```
+
+              Important DOM events include `load`, `click`, `mouseenter`, etc.
+
+              ```js
+              element.addEventListener('mouseenter', event => doSomething());
+              ```
+
+              Event handlers can also be registered from the HTML.
+
+              ```html
+              <a href="http://www.heig-vd.ch" onclick="myEventHandler();">
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/Events
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fas fa-hand-paper"></i> Event propagation
+
+              When an event is triggered on an element, it first runs the handlers on it, then on its parent, then all the way up on other ancestors. This is called **event bubbling**.
+
+              This propagation can be stopped programmatically with the `stopPropagation` method of the event object.
+
+              ```html
+              <div id="parent">
+                <p>Parent</p>
+                <div id="child">
+                  <p>Child</p>
+                </div>
+              </div>
+              ```
+
+              ```js
+              document.getElementById("parent").addEventListener("click", () => {
+                console.log("parent clicked");
+              });
+
+              function clickChild(event) {
+                const child = document.getElementById("child");
+
+                // this will prevent the parent div from receiving the event and logging "parent clicked"
+                event.stopPropagation();
+
+                console.log("child clicked");
+                console.log("event propagation halted.");
+              }
+
+              const elem = document.getElementById("child").addEventListener("click", clickChild)
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model#event_propagation
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> DOM Manipulation Libraries
+
+              Libraries such as [jQuery](https://jquery.com/) and [Zepto](https://jquery.com/) are intended at simplifying DOM manipulation by extending the DOM and providing helpers.
+
+              ```html
+              <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+              ```
+
+              ```js
+              $(document).ready(function(){
+                  $("p").click(function(){
+                      $(this).hide();
+                  });
+              });
+              ```
+
+              JQuery uses an **imperative style** that requires to specify the changes in the order they should happen. Modern frameworks (such as React, Angular or Vue) use a **declarative style** (what rather than how).
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Depending or not depending?
+
+              The Peter Parker principle:
+
+              <img src="https://media.giphy.com/media/10KIsXhwdoerHW/giphy.gif" alt="Remember..." />
+
+              ### Must Read
+              - [Thou shalt not depend on me (NDSS 2017)](https://arxiv.org/abs/1811.00918)
+              - [Small world with high risks (USENIX Security 2019)](https://www.usenix.org/conference/usenixsecurity19/presentation/zimmerman)
+
+              Notes:
+
+              As an appetizer for these reads: the situation is bad.
+
+              Each package indirectly depends on tens and tens of other packages on average, making more than a third of packages dependent on vulnerable code. This is due to old packages, poor dependency management, and poor awareness.
+
+            </textarea>
+          </section>
+        </section>
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Drawing in the HTML Canvas</h2>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Initializing a Canvas
+
+              The Canvas API provides a means for drawing graphics via JavaScript and the `canvas` element.
+
+              ```html
+              <canvas id="canvas" width="800" height="600" />
+              ```
+
+              ```js
+              let canvas = document.getElementById("canvas");
+              const ctx = canvas.getContext('2d'); // returns CanvasRenderingContext2D
+
+              // setting the context properties
+              ctx.strokeStyle = 'blue'; // line color
+              //draw a 100x100 px square starting at the origin
+              ctx.strokeRect(0, 0, 100, 100);
+              ```
+
+              By default, the origin of the grid on the canvas is positioned in the _top left_ corner at coordinate (0,0).
+              All elements are placed relative to this origin.
+
+              <img src="./images/canvas_default_grid.png" style="width:20%">
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Drawing on the Canvas
+
+              The canvas only supports two primitive shapes: rectangles and paths (lists of points connected by segments of lines that can be of different shapes).
+              All other shapes must be created by combining one or more paths.
+
+              Filling a rectangle:
+
+              ```js
+              ctx.fillStyle = 'green'; // fill color
+              ctx.fillRect(10, 10, 150, 100); // fillRect(x, y, width, height)
+              ```
+
+              Free drawing using a path of straight lines:
+
+              ```js
+              // draw a triangle
+              ctx.beginPath();
+              ctx.moveTo(50, 150); //move the pen
+              ctx.lineTo(150, 60);
+              ctx.lineTo(250, 150);
+              ctx.closePath(); //connect current position with first
+              ctx.stroke(); //draw the shape by stroking its outline
+              ```
+
+              Drawing an arc:
+
+              ```js
+              ctx.beginPath();
+              // draw half a circle
+              ctx.arc(50, 50, 10, 0, Math.PI); // arc(x, y, radius, startAngle, endAngle, counterclockwise = false)
+              ctx.stroke();
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Drawing on the Canvas
+              Clearing a portion of the canvas:
+
+              ```js
+              //clear a square of 100x100px starting at the origin
+              ctx.clearRect(0, 0, 100, 100);
+              ```
+
+              It is also possible to render text:
+
+              ```js
+              ctx.fillText("test", 30, 10); // fillText(text, x, y)
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_text
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.55em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Transformations in the Canvas
+
+              Transformations enable more powerful ways to translate the origin to a different position, rotate the grid and even scale it.
+
+              Canvas states are stored on a stack:
+              - When the `save()` method is called, the current drawing state is pushed onto the stack.
+              - When the `restore()` method is called, the last saved state is popped off the stack and all saved settings are restored.
+
+              When you perform transformations on the grid to draw an object you often want to restore a prior state to draw the next object.
+
+              ```js
+              ctx.fillStyle = 'rgb(0, 0, 255, 0.4)';
+              ctx.save();
+              angle = 0;
+              while (angle < Math.PI/2) {
+                  ctx.translate(200, 200); //translate canvas origin so that the rotation is done around center of rectangle (and not (0,0))
+                  ctx.rotate(Math.PI / 10); //rotate the canvas around the current origin
+                  ctx.translate(-200, -200); //translate back canvas origin
+                  ctx.fillRect(170, 170, 60, 60); //draw at (x - width/2, y - height/2) so that rectangle is centered around (200,200)
+                  angle += Math.PI / 10;
+              }
+              ctx.restore();
+              ```
+              Result: <img src="images/canvas_transform_render.jpg" />
+              https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Transformations
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## Rendering Loop and Game Loop
+
+              The [setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout) method sets a timer which executes a function or specified piece of code once the timer expires.
+
+              The [setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval) method, offered on the Window and Worker interfaces, repeatedly calls a function or executes a code snippet, with a fixed time delay between each call.
+
+              The [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame) method tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint.
+
+              https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Timeouts_and_intervals
+
+              Notes:
+              `setInterval` [example](https://developer.mozilla.org/en-US/docs/Web/API/Window/setInterval#example_2_alternating_two_colors)
+
+              `requestAnimationFrame` [example](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame#examples)
+
+              For an example of how it can be used in a game, check this [tutorial for a simple game](https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Finishing_up)
+              </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## `requestAnimationFrame` example
+
+              Calls the passed function before the next repaint, (optionally) with the current timestamp.
+
+              This allows having smooth animations and is a much better alternative than `setTimeout` or `setInterval`;
+
+              In the example below, the animation speed will be identical regardless of the refresh rate because the elapsed time (`elapsed`) will be smaller on higher refresh rates and vice versa.
+              ```js
+              const element = document.getElementById("some-element-you-want-to-animate");
+              let start;
+
+              function step(timestamp) {
+                if (start === undefined) {
+                start = timestamp;
+                }
+                const elapsed = timestamp - start;
+
+                // Math.min() is used here to make sure the element stops at exactly 200px
+                const shift = Math.min(0.1 * elapsed, 200);
+                element.style.transform = `translateX(${shift}px)`;
+                if (shift < 200) {
+                  requestAnimationFrame(step);
+                }
+              }
+              requestAnimationFrame(step);
+              ```
+
+              Notes:
+              [Source](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame#examples)
             </textarea>
           </section>
         </section>
