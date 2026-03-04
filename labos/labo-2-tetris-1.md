@@ -8,7 +8,18 @@ css: style.css
 # Informations Générales
 - **Date du rendu** : Communiqué dans GitHub Classroom
 - **Groupes** : À réaliser seul ou à deux
-- **Plagiat** : en cas de copie manifeste, vous y serez confrontés, vous obtiendrez la note de 1, et l'incident sera reporté au responsable de la filière, avec un risque d'échec critique immédiat au cours. Ne trichez pas. *(Notez que les IAs génératives se trouvent aujourd'hui dans une zone qui est encore juridiquement floue pour ce qui est du plagiat, mais des arguments se valent à en considérer l'utilisation comme tel. Quoi qu'il en soit, nous vous proposons une autre vision sur la question : votre ambition est d'apprendre et d'acquérir des compétences, et votre utilisation éventuelle de cet outil doit refléter ceci. Tout comme Stackoverflow peut être à la fois un outil d'enrichissement et une banque de copy-paste, faites un choix intentionnel et réfléchi, vos propres intérêts en tête, de l'outil que vous ferez de l'IA générative)*
+- **Utilisation de l'IA** : Nous souhaitons partager notre vision sur la question de l'utilisation des IAs dans le 
+  cadre de ce cours : votre ambition est d'apprendre et d'acquérir des compétences, et votre utilisation éventuelle 
+ de cet outil doit refléter ceci. Tout comme Stackoverflow peut être à la fois un outil d'enrichissement et une 
+  banque de copy-paste, faites un choix intentionnel et réfléchi, avec vos propres intérêts en tête, de l'utilisation 
+  que vous ferez de l'IA générative).<br/>
+  Si vous utilisez une IA, nous vous demandons de détailler dans votre rendu l'utilisation que vous en avez faite.
+  *Pour rappel, vous trouverez [ici](https://intra.heig-vd.ch/academique/documents_ia/IA_principes.pdf) la directive 
+  de l'école concernant l'utilisation de l'IA*.
+- **Plagiat** : en cas de copie manifeste, vous y serez confrontés, vous obtiendrez la note de 1, et l'incident sera 
+  reporté au responsable de la filière, avec un risque d'échec critique immédiat au cours. Ne trichez pas, ça n'en 
+  vaut pas la peine. Vous êtes capables de réaliser ces travaux et nous sommes là pour vous aider à y parvenir.
+  
 
 # Tetris Multijoueur en ligne
 
@@ -20,11 +31,15 @@ Ceci est donc le premier labo dédié à ce jeu, qui consiste en l'implémentati
 
 ## Pièces tombantes
 
-Une pièce peut être dans deux états : "tombante", ou "placée". Une pièce est tombante lorsqu'elle peut encore être déplacée, puis "placée" lorsqu'elle a touché un obstacle et devient fixée à la grille. Pendant qu'elle tombe, elle est représentée par une classe `FallingShape`, et une fois placée, elle est ajoutée à la `PlacedShapesGrid`. Nous commençons par décrire la classe `FallingShape`.
+Une pièce peut être dans deux états : *"tombante"*, ou *"placée"*. Une pièce est tombante lorsqu'elle peut encore être 
+déplacée, puis "placée" lorsqu'elle a touché un obstacle et devient fixée à la grille. Lorsqu'elle est "tombante", 
+une pièce est représentée par la classe `FallingShape`, et une fois placée, elle est ajoutée à la `PlacedShapesGrid`.
 
-Une pièce tombante est représentée par une classe définie dans `fallingShape.js`. Elle est caractérisée par son type, sa rotation, l'id du joueur auquel elle appartient, et une position `(row, col)`.
+Une pièce tombante est représentée par la classe `FallingShape` définie dans `fallingShape.js`. Elle est 
+caractérisée par son type, sa rotation, l'id du joueur auquel elle appartient, et une position `(row, col)`.
 
-La rotation de la pièce est un nombre compris entre 0 et 3 inclus, 0 correspondant à la rotation initiale de la pièce, et les suivants correspondant aux rotations suivantes, dans le sens des aiguilles d'une montre. Toute référence à une rotation dans le code sera donc un nombre compris entre 0 et 3 inclus.
+La rotation de la pièce est un nombre compris entre 0 et 3 inclus, 0 correspondant à la rotation initiale de la 
+pièce, et les suivants correspondant aux rotations suivantes, dans le sens des aiguilles d'une montre. Toute référence à une rotation dans le code sera donc un nombre compris entre 0 et 3 inclus.
 
 Le type d'une pièce est sa forme, c'est-à-dire s'il s'agit d'un T, un L, une barre, etc. Afin de représenter une pièce d'une forme donnée, on utilise un tableau contenant les coordonnées de chaque bloc constituant la pièce, par rapport au bloc situé à l'origine de la pièce, qui aura donc comme coordonnées `(0, 0)`. La pièce, quand affichée, sera donc placée de telle sorte que son bloc `(0, 0)` se trouvera sur sa position `(row, col)`.
 
@@ -38,7 +53,13 @@ Notez que la paire `(x, y)` représentant la coordonnée d'un bloc donné corres
 
 Pour représenter les rotations d'une pièce, et parce que Tetris n'effectue pas toutes les rotations autour de l'origine, nous choisissons de représenter chaque rotation d'une pièce par un ensemble de coordonnées décrivant la position des blocs de cette pièce après rotation.
 
-Ces ensembles de coordonnées sont stockés dans le tableau `shapeTypes` dans `constants.js`. Ce tableau a un élément par type de pièce, et chaque élément est un tableau contenant les représentations de toutes les rotations de cette pièce. Chaque rotation est ensuite représentée par un tableau des coordonnées des blocs de la pièce pour cette rotation. Pour un type de pièce donné, le premier tableau de coordonnées correspond à la rotation initiale de la pièce, et les suivants correspondent aux rotations suivantes, dans le sens des aiguilles d'une montre. Rendez-vous dans `constants.js` et assurez-vous d'avoir bien compris la structure de ce tableau et la méthode de représentation d'une pièce et ses rotations.
+Ces ensembles de coordonnées sont stockés dans le tableau `shapeTypes` dans `constants.js`. Ce tableau a un élément 
+par type de pièce, et chaque élément est un tableau contenant les représentations de toutes les rotations de cette pièce. 
+Chaque rotation est ensuite représentée par un tableau des coordonnées des blocs de la pièce pour cette rotation. 
+Pour un type de pièce donné, le premier tableau de coordonnées correspond à la rotation initiale de la pièce, et 
+les suivants correspondent aux rotations suivantes, dans le sens des aiguilles d'une montre. 
+Ouvrez `constants.js` et assurez vous d'avoir bien compris la structure de ce tableau et la méthode de 
+représentation d'une pièce et de ses rotations.
 
 Dans la classe `FallingShape`, l'attribut `shapeType` est donc à un nombre entier correspondant à l'indice dans `shapeTypes` de `constants.js` de l'élément contenant les coordonnées de ce type de pièce.
 
@@ -75,7 +96,8 @@ Les méthodes de `Game` sont documentées dans le code, et nous vous invitons à
 
 ## Game step
 
-Nous détaillons ici de manière précise ce qui se passe lors d'un step du jeu, afin d'assurer la clarté de ce qu'il vous est demandé d'implémenter, notamment du fait de l'aspect multijoueur de cette version du jeu.
+Nous détaillons ici de manière précise ce qui se passe lors d'un step (cran) du jeu, afin d'assurer la clarté de ce 
+qu'il vous est demandé d'implémenter, notamment du fait de l'aspect multijoueur de cette version du jeu.
 
 Tetris est un jeu qui avance par steps. À intervalles réguliers, les pièces en train de tomber sont déplacées d'une case vers le bas. Si une (ou plusieurs) pièce ne peut pas tomber car elle a atteint le bas de la matrice, ou parce qu'une pièce placée l'en empêche, elle est alors elle-même placée.
 
@@ -89,6 +111,26 @@ Pour assurer le déterminisme du jeu, nous imposons l'ordre suivant de traitemen
 - Toute pièce qui ne pouvait pas être déplacée d'une case vers le bas doit être placée. Si elle complète une ligne, celle-ci doit être supprimée et les lignes au-dessus déplacées d'une case vers le bas (répéter si plusieurs lignes), puis
 - Toute pièce tombante maintenant superposée à une pièce placée doit être supprimée.
 - Enfin, tout joueur n'ayant plus de pièce tombante doit en recevoir une nouvelle, placée en haut de la matrice, au centre.
+
+L'exemple ci-dessous illustre le traitement attendu lors d'un step :
+```
+row
+0
+1  222
+2   2 
+3  111
+4   1 
+-----
+```
+
+Les joueurs 1 et 2 ont chacun une pièce tombante (pas encore placée). Lors du step, La shape 1 ne peut pas descendre,
+mais la shape 2 peut. On la fait donc descendre (elle ne sera placée qu'au step suivant), puis on place (fixe) la 
+shape 1.
+
+La shape 2 est maintenant bloquée et doit être remplacée par une nouvelle shape en haut du board.
+
+Ce comportement est testé par `Should ask grid to place shape when touching the ground upon step, and clear 
+full rows.` dans `test/game.js`.
 
 Notez que nous ne comptons pas, pour l'instant, le score des joueurs.
 
@@ -105,7 +147,18 @@ Comme vous pouvez le voir dans `package.json`, nous offrons trois commandes :
 # Travail à réaliser
 Dans un premier temps, parcourez tous les fichiers du projet, et assurez-vous de bien comprendre sa structure, les classes qui la composent, et comment elles sont supposées interagir.
 
-Votre tâche est de compléter toutes les sections de code marquées par `TODO` dans ce projet. Le résultat ne permettra pas l'interaction de l'utilisateur, mais vous pourrez tester visuellement votre solution en utilisant une instance de `Game` possédant déjà des pièces tombantes et placées au lieu d'une instance vierge.
+Votre tâche est de compléter toutes les sections de code marquées par `TODO` dans ce projet. Le résultat de cette 
+étape ne permettra pas d'interaction avec l'utilisateur, mais vous pourrez tester visuellement votre solution en utilisant une 
+instance de `Game` possédant déjà des pièces tombantes et placées au lieu d'une instance vierge.
 
 # Tests
 Le repository contient déjà un certain nombre de tests que nous utiliserons pour noter votre travail, mais nous nous réservons le droit d'en ajouter d'autres et d'évaluer votre rendu manuellement. Aussi, nous vous recommandons de ne pas vous reposer uniquement sur les tests donnés. Vous êtes notamment libres d'ajouter de nouveaux tests si vous le souhaitez ; nous vous demanderons toutefois de le faire dans de nouveaux fichiers. Nous vérifierons en effet que les tests fournis n'ont pas été modifiés, afin de garantir que vous les passez pour les bonnes raisons ;)
+
+# Critères de correction
+Votre travail sera évalué selon les critères suivants :
+
+- Tests automatisés
+- Rendu graphique (Canvas)
+- Game Loop & Timing
+- Architecture & Qualité du code
+- Logique de jeu

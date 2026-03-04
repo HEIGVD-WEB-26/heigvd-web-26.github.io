@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>TETRIS - Labo 1</title>
   <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -60,6 +63,8 @@ id="toc-installation-et-lancement">Installation et lancement</a></li>
 <li><a href="#travail-à-réaliser" id="toc-travail-à-réaliser">Travail à
 réaliser</a></li>
 <li><a href="#tests" id="toc-tests">Tests</a></li>
+<li><a href="#critères-de-correction"
+id="toc-critères-de-correction">Critères de correction</a></li>
 </ul>
 </nav>
 <!-- # Changelog -->
@@ -68,19 +73,24 @@ réaliser</a></li>
 <li><strong>Date du rendu</strong> : Communiqué dans GitHub
 Classroom</li>
 <li><strong>Groupes</strong> : À réaliser seul ou à deux</li>
+<li><strong>Utilisation de l’IA</strong> : Nous souhaitons partager
+notre vision sur la question de l’utilisation des IAs dans le cadre de
+ce cours : votre ambition est d’apprendre et d’acquérir des compétences,
+et votre utilisation éventuelle de cet outil doit refléter ceci. Tout
+comme Stackoverflow peut être à la fois un outil d’enrichissement et une
+banque de copy-paste, faites un choix intentionnel et réfléchi, avec vos
+propres intérêts en tête, de l’utilisation que vous ferez de l’IA
+générative).<br/> Si vous utilisez une IA, nous vous demandons de
+détailler dans votre rendu l’utilisation que vous en avez faite.
+<em>Pour rappel, vous trouverez <a
+href="https://intra.heig-vd.ch/academique/documents_ia/IA_principes.pdf">ici</a>
+la directive de l’école concernant l’utilisation de l’IA</em>.</li>
 <li><strong>Plagiat</strong> : en cas de copie manifeste, vous y serez
 confrontés, vous obtiendrez la note de 1, et l’incident sera reporté au
 responsable de la filière, avec un risque d’échec critique immédiat au
-cours. Ne trichez pas. <em>(Notez que les IAs génératives se trouvent
-aujourd’hui dans une zone qui est encore juridiquement floue pour ce qui
-est du plagiat, mais des arguments se valent à en considérer
-l’utilisation comme tel. Quoi qu’il en soit, nous vous proposons une
-autre vision sur la question : votre ambition est d’apprendre et
-d’acquérir des compétences, et votre utilisation éventuelle de cet outil
-doit refléter ceci. Tout comme Stackoverflow peut être à la fois un
-outil d’enrichissement et une banque de copy-paste, faites un choix
-intentionnel et réfléchi, vos propres intérêts en tête, de l’outil que
-vous ferez de l’IA générative)</em></li>
+cours. Ne trichez pas, ça n’en vaut pas la peine. Vous êtes capables de
+réaliser ces travaux et nous sommes là pour vous aider à y
+parvenir.</li>
 </ul>
 <h1 id="tetris-multijoueur-en-ligne">Tetris Multijoueur en ligne</h1>
 <p>Trois des labos de ce cours serviront à construire, par étape, un
@@ -98,17 +108,16 @@ clavier, ni fonctionnalité multijoueur, qui seront les sujets des labos
 pour l’instant, coté client, et non serveur.</p>
 <h1 id="description-technique">Description technique</h1>
 <h2 id="pièces-tombantes">Pièces tombantes</h2>
-<p>Une pièce peut être dans deux états : “tombante”, ou “placée”. Une
-pièce est tombante lorsqu’elle peut encore être déplacée, puis “placée”
-lorsqu’elle a touché un obstacle et devient fixée à la grille. Pendant
-qu’elle tombe, elle est représentée par une classe
-<code>FallingShape</code>, et une fois placée, elle est ajoutée à la
-<code>PlacedShapesGrid</code>. Nous commençons par décrire la classe
-<code>FallingShape</code>.</p>
-<p>Une pièce tombante est représentée par une classe définie dans
-<code>fallingShape.js</code>. Elle est caractérisée par son type, sa
-rotation, l’id du joueur auquel elle appartient, et une position
-<code>(row, col)</code>.</p>
+<p>Une pièce peut être dans deux états : <em>“tombante”</em>, ou
+<em>“placée”</em>. Une pièce est tombante lorsqu’elle peut encore être
+déplacée, puis “placée” lorsqu’elle a touché un obstacle et devient
+fixée à la grille. Lorsqu’elle est “tombante”, une pièce est représentée
+par la classe <code>FallingShape</code>, et une fois placée, elle est
+ajoutée à la <code>PlacedShapesGrid</code>.</p>
+<p>Une pièce tombante est représentée par la classe
+<code>FallingShape</code> définie dans <code>fallingShape.js</code>.
+Elle est caractérisée par son type, sa rotation, l’id du joueur auquel
+elle appartient, et une position <code>(row, col)</code>.</p>
 <p>La rotation de la pièce est un nombre compris entre 0 et 3 inclus, 0
 correspondant à la rotation initiale de la pièce, et les suivants
 correspondant aux rotations suivantes, dans le sens des aiguilles d’une
@@ -142,10 +151,9 @@ rotation est ensuite représentée par un tableau des coordonnées des
 blocs de la pièce pour cette rotation. Pour un type de pièce donné, le
 premier tableau de coordonnées correspond à la rotation initiale de la
 pièce, et les suivants correspondent aux rotations suivantes, dans le
-sens des aiguilles d’une montre. Rendez-vous dans
-<code>constants.js</code> et assurez-vous d’avoir bien compris la
-structure de ce tableau et la méthode de représentation d’une pièce et
-ses rotations.</p>
+sens des aiguilles d’une montre. Ouvrez <code>constants.js</code> et
+assurez vous d’avoir bien compris la structure de ce tableau et la
+méthode de représentation d’une pièce et de ses rotations.</p>
 <p>Dans la classe <code>FallingShape</code>, l’attribut
 <code>shapeType</code> est donc à un nombre entier correspondant à
 l’indice dans <code>shapeTypes</code> de <code>constants.js</code> de
@@ -217,7 +225,7 @@ nous vous invitons à les parcourir afin de bien comprendre leur
 fonctionnement.</p>
 <h2 id="game-step">Game step</h2>
 <p>Nous détaillons ici de manière précise ce qui se passe lors d’un step
-du jeu, afin d’assurer la clarté de ce qu’il vous est demandé
+(cran) du jeu, afin d’assurer la clarté de ce qu’il vous est demandé
 d’implémenter, notamment du fait de l’aspect multijoueur de cette
 version du jeu.</p>
 <p>Tetris est un jeu qui avance par steps. À intervalles réguliers, les
@@ -250,6 +258,24 @@ supprimée et les lignes au-dessus déplacées d’une case vers le bas
 <li>Enfin, tout joueur n’ayant plus de pièce tombante doit en recevoir
 une nouvelle, placée en haut de la matrice, au centre.</li>
 </ul>
+<p>L’exemple ci-dessous illustre le traitement attendu lors d’un step
+:</p>
+<pre><code>row
+0
+1  222
+2   2 
+3  111
+4   1 
+-----</code></pre>
+<p>Les joueurs 1 et 2 ont chacun une pièce tombante (pas encore placée).
+Lors du step, La shape 1 ne peut pas descendre, mais la shape 2 peut. On
+la fait donc descendre (elle ne sera placée qu’au step suivant), puis on
+place (fixe) la shape 1.</p>
+<p>La shape 2 est maintenant bloquée et doit être remplacée par une
+nouvelle shape en haut du board.</p>
+<p>Ce comportement est testé par
+<code>Should ask grid to place shape when touching the ground upon step, and clear  full rows.</code>
+dans <code>test/game.js</code>.</p>
 <p>Notez que nous ne comptons pas, pour l’instant, le score des
 joueurs.</p>
 <h1 id="installation-et-lancement">Installation et lancement</h1>
@@ -269,10 +295,11 @@ relance le serveur à chaque modification d’un fichier.</li>
 assurez-vous de bien comprendre sa structure, les classes qui la
 composent, et comment elles sont supposées interagir.</p>
 <p>Votre tâche est de compléter toutes les sections de code marquées par
-<code>TODO</code> dans ce projet. Le résultat ne permettra pas
-l’interaction de l’utilisateur, mais vous pourrez tester visuellement
-votre solution en utilisant une instance de <code>Game</code> possédant
-déjà des pièces tombantes et placées au lieu d’une instance vierge.</p>
+<code>TODO</code> dans ce projet. Le résultat de cette étape ne
+permettra pas d’interaction avec l’utilisateur, mais vous pourrez tester
+visuellement votre solution en utilisant une instance de
+<code>Game</code> possédant déjà des pièces tombantes et placées au lieu
+d’une instance vierge.</p>
 <h1 id="tests">Tests</h1>
 <p>Le repository contient déjà un certain nombre de tests que nous
 utiliserons pour noter votre travail, mais nous nous réservons le droit
@@ -283,6 +310,15 @@ le souhaitez ; nous vous demanderons toutefois de le faire dans de
 nouveaux fichiers. Nous vérifierons en effet que les tests fournis n’ont
 pas été modifiés, afin de garantir que vous les passez pour les bonnes
 raisons ;)</p>
+<h1 id="critères-de-correction">Critères de correction</h1>
+<p>Votre travail sera évalué selon les critères suivants :</p>
+<ul>
+<li>Tests automatisés</li>
+<li>Rendu graphique (Canvas)</li>
+<li>Game Loop &amp; Timing</li>
+<li>Architecture &amp; Qualité du code</li>
+<li>Logique de jeu</li>
+</ul>
 </main>
 </body>
 </html>
