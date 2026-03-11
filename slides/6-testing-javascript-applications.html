@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Testing javascript applications</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.css"
+      id="theme"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css"
+    />
+
+    <link rel="stylesheet" href="./fontawesome-6.2.0/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <script src="print.js"></script>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <section data-background="#333333">
+            <h2>Web</h2>
+            <h1>Testing JavaScript Applications</h1>
+
+            <aside class="notes">
+              Slides by Bertil Chapuis, Olivier Lemer, Olivier Tischhauser &
+              Vincent Guidoux
+            </aside>
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+                ## <i class="fas fa-tasks"></i> Overview of Today's Class
+                - Testing Javascript Applications
+                  - Unit tests
+                  - Integration tests
+                  - System tests
+            </textarea>
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+                    ## <i class="fa-solid fa-graduation-cap"></i> Educational Objectives
+                    On completion of this part, students will be able to:
+
+                    - Describe the pros and cons of different types of tests
+                    - Write unit tests for a JavaScript application
+                    - Read and understand unit tests
+
+
+                </textarea>
+          </section>
+        </section>
+
+
+
+        <!-- <section>
+                    <section data-background="#333333">
+                        <h2><i class="fab fa-js"></i> Corrections</h2>
+                    </section>
+                    <section data-markdown style="font-size: 0.75em;">
+                        <textarea data-template>
+                            <img src="images/tetris-1-illustration.png" style="height: 100%" />
+                        </textarea>
+                    </section>
+                </section> -->
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Testing JavaScript Applications</h2>
+          </section>
+          <section data-markdown style="font-size: 0.8em; text-align: center">
+            <textarea data-template>
+                  <img src="images/good_code.png" style="width: 30%;" />
+
+                  https://xkcd.com/844/
+              </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                ##  <i class="fas fa-question-circle"></i> How to write good code?
+
+                *If you haven't tested it, assume it is broken!*
+
+                But from where should I start?
+
+                Recall the cornerstones of computational thinking:
+                - Decomposition
+                - Data Representation / Pattern recognition
+                - Generalization / Abstraction
+                - Algorithms
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            *The whole is greater than the sum of its parts.*
+                            **Aristotle**
+                            <img src="images/car_disassembly.jpg"  style="width:600px; margin-top: 40px " />
+                        </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ##  <i class="fas fa-check-square"></i> Test automation
+
+                            In software testing, test automation is the use of a software separate from the software being tested to control the execution of tests and the comparison of actual outcomes with predicted outcomes.
+
+                            https://en.wikipedia.org/wiki/Test_automation
+
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em; text-align: center">
+            <textarea data-template>
+                            ##  <i class="fas fa-file-code"></i> Grab the code
+
+                            https://github.com/HEIGVD-WEB-26/test-automation
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em; text-align: center">
+            <textarea data-template>
+                            ##  <i class="fas fa-check-square"></i> Types of tests
+
+                            <img src="images/tests.png"  style="width:60%;" />
+
+
+                            Notes:
+
+                            - **Unit tests**: Test a **separable unit of software** for correctness, independently of the larger software System. That unit is usually the smallest testable part of an application, and has a single and clear responsibility.
+                            - **Integration tests**: Individual units of software that pass unit tests are **assembled together into components**. Integration tests ensure that the components made of different parts work correctly together. The units are considered correct, and the goal is to test that the interaction between them is correct for what we want the component to do.
+                            - **System tests**: All the component that pass the integration tests are **assembled together into the system**. System tests verify the **end-to-end functionality** of the system. They are usually **hard to automate** and very expensive to implement and execute.
+
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ##  <i class="fas fa-cog"></i> Unit tests
+
+                            - Test a **separable unit of software** for correctness, independently of the larger software System
+                            - Employed as a **low-level** specification to ensure that a function or module performs as expected
+                            - Usually fast to implement and execute
+                            - **Example:** *testing that the subscriber's email is valid*
+
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ##  <i class="fas fa-cogs"></i> Integration Tests
+
+                            - Individual units of software that pass unit tests are **assembled together into components**
+                            - Integration tests ensure that the components made of different parts work well together
+                            - Sometimes slow to implement and execute
+                            - Might require to mock some dependencies, e.g. a messaging queue to some other part of the system
+                            - **Example:** *test that the email was persisted in the subscriber table of the database*
+
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ##  <i class="fas fa-car"></i> System Tests
+
+                            - All the component that pass the integration tests are **assembled together into the system**
+                            - System tests verify the **end-to-end functionality** of the system
+                            - Usually **hard to automate** and very expensive to implement and execute
+                            - Mocking some parts of application is sometimes needed, for example a third party system
+                            - **Example:** test that the user can subscribe to the mailing list by accessing the server from the chrome browser
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ##  <i class="fas fa-clipboard"></i> Key takeaways
+
+                            - If you haven't tested it, assume it is broken!
+                            - Decomposition is the best friend of testable code
+                            - When testing, write:
+                               - A lot of unit tests
+                               - Some integration tests
+                               - Few selected system tests
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em; text-align: center">
+            <textarea data-template>
+                            <img src="images/sre.jpg" />
+
+                            https://landing.google.com/sre/books/
+
+                            **Chapter 17:** Testing for Reliability
+                        </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fas fa-question-circle"></i> Questions
+                        </textarea>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+    <script src="./script.js" type="module"></script>
+  </body>
+</html>

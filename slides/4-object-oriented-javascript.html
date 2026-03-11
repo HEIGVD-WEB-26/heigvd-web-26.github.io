@@ -630,6 +630,68 @@
               ```
             </textarea>
           </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Reassigning `this` - `apply()`
+              The `apply(this, args)` method of a `Function` instance allows to override the `this` object with one
+              provided as argument, and to call the function with a list of arguments provided as an `args` array.
+
+              The helper function can be called with `apply` to redefine `this` to the "correct" one :
+              ```js
+              var color = 'blue';
+              let apple = {
+                  color: 'red',
+                  description: function() {
+                      function helper() {
+                          return `This fruit is ${this.color}!`;
+                      }
+                      return helper.apply(this); //no arguments to pass to helper
+                  }
+              }
+
+              // This fruit is red! (and no longer blue)
+              console.log(apple.description());
+              ```
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Reassigning `this` - `call()`
+              The `call(this, arg1, arg2, ...)` method of a `Function` instance is identical to `apply`, except that the arguments are given directly, instead of in the form of an array.
+
+              ```js
+              let apple = {
+                  color: 'red',
+                  description: function(weight) {
+                      return `This fruit is ${this.color} and weighs ${weight} grams!`;
+                  }
+              }
+
+              let description = apple.description;
+              console.log(description.call(apple, 150)); // This fruit is red and weighs 150 grams!
+              ```
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Reassigning `this` - `bind()`
+              The `bind(this)` method of `Function` returns a new function whose `this` object is overridden with the provided one.
+
+              ```js
+              let apple = {
+                  color: 'red',
+                  description: function(weight) {
+                      return `This fruit is ${this.color} and weighs ${weight} grams!`;
+                  }
+              }
+
+              let description = apple.description;
+              let boundDescription = description.bind(apple);
+              console.log(boundDescription(150)); // This fruit is red and weighs 150 grams!
+              ```
+            </textarea>
+          </section>
         </section>
         <section>
           <section data-background="#333333">
@@ -761,7 +823,7 @@
 
             There exist other functions that help manipulate prototypes and objects.
 
-            - `Object.create(proto)`: Creates a new object with the prototype property set to `proto`
+            - `Object.create(proto)`: Creates a new object with its prototype set to `proto`
             - `Object.setPrototypeOf(obj, proto)`: Sets the prototype of `obj` to `proto`
             - `Object.assign(dst, src)`: Extends `dst` with all [enumerable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/propertyIsEnumerable), [own](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn) properties of `src` <span class="detail">(hence excluding `__proto__`)</span>
 
@@ -1134,7 +1196,7 @@
 
                             Because arrays are objects, getting `myArray[42]` is equivalent to accessing a property named `"42"` on the object `myArray`.
 
-                            That's why the `for ... in` loop, which iterates over an object's properties, can be used to iterate over the indices of an array.
+                            That's why the `'for...in'` loop, which iterates over an object's properties, can be used to iterate over the indices of an array.
 
                             ```js
                             let fruits = ['Apple', 'Banana', 'Pear'];
@@ -1185,7 +1247,7 @@
                 - Prototypes form a chain that is traversed when looking up properties.
                 - The prototype chain ends when an object's prototype is `null` (e.g. `Object.prototype`).
               - Functions can be called as constructors if used with the `new` keyword.
-                - Their special `prototype` property stores what will be the prototype of the objects it constructs.
+                - Their special `prototype` property will be the prototype of the objects it constructs.
             </textarea>
           </section>
 
@@ -1330,7 +1392,7 @@
                 constructor(color) {
                   this.#color = color;
                 }
-                // getter and setter of a public `color` property
+                // getter and setter of a private `color` property
                 get color() {
                   return this.#color;
                 }
@@ -1522,6 +1584,8 @@
               a single value/expression from a module.
               It also allows more flexible naming on import.
 
+              Non-exported values are not visible outside the module.
+
               Notes:
               There can be only one default export per module.
 
@@ -1593,13 +1657,20 @@
                         </textarea>
           </section>
         </section>
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fas fa-question-circle"></i> Training Exercices</h2>
+            <h3>Eval</h3>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Prototype and Web dev training
+              Access the training exercices on
+              [Eval](https://eval.iict-heig-vd.in/users/evaluations/cmml5zzvh00sdf8vdpmf46t5u)
+            </textarea>
+          </section>
+        </section>
 
-
-
-        <!--
-                Drawing in the HTML Canvas
-                Introduction of next week's assignment
-                -->
       </div>
     </div>
 
