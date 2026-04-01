@@ -987,6 +987,41 @@
           </section>
           <section data-markdown style="font-size: 0.65em">
             <textarea data-template>
+              ## <i class="fab fa-js"></i> Generators as Class Methods
+
+              When used as a class method the asterisk is placed **before the method name** (there is no `function` keyword):
+
+              ```js
+              class Range {
+                constructor(from, to) {
+                  this.from = from;
+                  this.to   = to;
+                }
+
+                *[Symbol.iterator]() {          // generator as [Symbol.iterator]
+                  for (let i = this.from; i <= this.to; i++) {
+                    yield i;
+                  }
+                }
+              }
+
+              const r = new Range(1, 5);
+
+              for (const n of r) {
+                console.log(n);           // 1  2  3  4  5
+              }
+
+              console.log([...r]);        // [1, 2, 3, 4, 5]
+              const [first, second] = r;
+              console.log(first, second); // 1  2
+              ```
+
+              Notes:
+              Because Range implements [Symbol.iterator], its instances are iterable and can be used everywhere an iterable is expected.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
               ## <i class="fas fa-hand-paper"></i> Exercise — Iterators & Generators
 
               **Part 1 — Custom Iterable class**
