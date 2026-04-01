@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Arrays, Iterators and Generators</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.css"
+      id="theme"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css"
+    />
+
+    <link rel="stylesheet" href="./fontawesome-6.2.0/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <script src="print.js"></script>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <section data-background="#333333">
+            <h2>Web</h2>
+            <h1>Arrays, Iterators and Generators</h1>
+
+            <aside class="notes">
+              Slides by Bertil Chapuis, Olivier Lemer, Olivier Tischhauser &
+              Vincent Guidoux
+            </aside>
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+                ## <i class="fas fa-tasks"></i> Overview of Today's Class
+                - Array methods
+                - Iterators, Iterables and Generators
+                - Practical applications
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-graduation-cap"></i> Educational Objectives
+              On completion of this part, students will be able to:
+
+              - Use the Array object's methods.
+              - Solve problems using the Array object's methods.
+              - Use the functional methods of the Array object.
+              - Solve problems using the functional methods of the Array object.
+              - Use the Iterator and Generator objects.
+              - Use the Map and Set objects.
+            </textarea>
+          </section>
+        </section>
+
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Array Methods</h2>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array Methods — Overview
+
+              The `Array` prototype provides many built-in methods. We group them by category:
+
+              **Adding / Removing elements** (mutates the array)
+              - `push()`, `pop()`, `shift()`, `unshift()`, `splice()`
+
+              **Ordering / Sorting** (mutates the array)
+              - `sort()`, `reverse()`
+
+              **Searching**
+              - `includes()`, `indexOf()`, `find()`, `findIndex()`
+
+              **Combining / Transforming** (return a new array or value)
+              - `slice()`, `concat()`, `join()`, `flat()`, `flatMap()`
+
+              https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array Methods — Adding / Removing
+
+              `push()` adds one or more elements to the **end** and returns the new length.
+
+              ```js
+              const letters = ['a', 'b', 'c'];
+              const len = letters.push('d', 'e');
+              console.log(len);     // 5
+              console.log(letters); // ['a', 'b', 'c', 'd', 'e']
+              ```
+
+              `pop()` removes and returns the **last** element.
+
+              ```js
+              const letters = ['a', 'b', 'c'];
+              const last = letters.pop();
+              console.log(last);    // 'c'
+              console.log(letters); // ['a', 'b']
+              ```
+
+              `unshift()` adds elements to the **beginning** and returns the new length.
+
+              ```js
+              const letters = ['b', 'c'];
+              letters.unshift('a');
+              console.log(letters); // ['a', 'b', 'c']
+              ```
+
+              `shift()` removes and returns the **first** element.
+
+              ```js
+              const letters = ['a', 'b', 'c'];
+              const first = letters.shift();
+              console.log(first);   // 'a'
+              console.log(letters); // ['b', 'c']
+              ```
+
+              Notes:
+              push/pop operate on the end (O(1)); shift/unshift operate on the beginning (O(n) because all indices must shift).
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array Methods — `splice()`
+
+              `splice(start, deleteCount, ...items)` **removes**, **replaces**, or **inserts** elements *in place*. It
+              returns the removed elements.
+
+              ```js
+              const fruits = ['apple', 'banana', 'cherry', 'date'];
+
+              // Remove 1 element at index 1
+              const removed = fruits.splice(1, 1);
+              console.log(removed); // ['banana']
+              console.log(fruits);  // ['apple', 'cherry', 'date']
+
+              // Replace 1 element at index 1
+              fruits.splice(1, 1, 'blueberry');
+              console.log(fruits);  // ['apple', 'blueberry', 'date']
+
+              // Insert without removing (deleteCount = 0)
+              fruits.splice(2, 0, 'cranberry');
+              console.log(fruits);  // ['apple', 'blueberry', 'cranberry', 'date']
+              ```
+
+              Beware : `splice()` mutates the original array. Use `slice()` if you want a copy.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array methods - ordering / sorting
+
+              `reverse()` reverses the order of the elements of an array (in place) and returns it.
+
+                ```js
+                const letters = ['a', 'b', 'c'];
+                const res = letters.reverse();
+
+                console.log(res); // ['c', 'b', 'a']
+                console.log(letters); // ['c', 'b', 'a']
+
+                // Not the expected output ...
+                [10, 9, 2, 1, 100].sort(); // [1, 10, 100, 2, 9]
+                ```
+
+              `sort()` sorts the elements of an array (in place).
+
+                ```js
+                const letters = ['c', 'a', 'b'];
+                const res = letters.sort();
+
+                console.log(res); // ['a', 'b', 'c']
+                console.log(letters); // ['a', 'b', 'c']
+                ```
+                It is possible to pass a comparator function to the sort method that will determine the order.
+
+                ```js
+                const people = [{ name: 'John' }, { name: 'Jane' }];
+                const res2 = people.sort((a, b) => a.name.localeCompare(b.name));
+                console.log(res2); // [{ name: 'Jane' }, { name: 'John' }]
+                ```
+                Source : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+
+              Notes:
+              The comparator (a, b) must return:
+              - a negative number if a comes before b
+              - a positive number if a comes after b
+              - 0 if they are equal
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.55em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array Methods — Custom Sort Comparator
+
+              A static `compare` method on a class can be passed directly to `sort()`:
+
+              ```js
+              class Person {
+                constructor(name, age) {
+                  this.name = name;
+                  this.age  = age;
+                }
+                toString() { return `${this.name} (${this.age})`; }
+
+                // Sort by age first, then alphabetically by name
+                static compare(a, b) {
+                  if (a.age !== b.age) return a.age - b.age;
+                  return a.name.localeCompare(b.name);
+                }
+              }
+
+              const people = [
+                new Person('Alice',   30),
+                new Person('Bob',     25),
+                new Person('Charlie', 25),
+              ];
+
+              people.sort(Person.compare);
+              console.log(people.join(', '));
+              // Bob (25), Charlie (25), Alice (30)
+              ```
+
+              Notes:
+              localeCompare returns a negative, zero, or positive value — exactly what sort() expects.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array Methods — Searching
+
+              `includes(value)` returns `true` if the array contains the value (uses `===`).
+
+              ```js
+              ['a', 'b', 'c'].includes('b');  // true
+              [1, 2, 3].includes('2');         // false  (strict comparison)
+              ```
+
+              `indexOf(value)` returns the **first index** of the value, or `-1` if not found.
+
+              ```js
+              ['a', 'b', 'c', 'b'].indexOf('b');     // 1
+              ['a', 'b', 'c'].indexOf('z');           // -1
+              ```
+
+              Notes:
+              includes / indexOf are for primitive values; find / findIndex are better for objects or complex predicates.
+
+              The `includes` method uses the [SameValueZero](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#samevaluezero) algorithm for comparison, which is similar to the strict equality operator (`===`) but treats `NaN` as equal to itself and considers `-0` and `+0` as the same value.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array Methods — `slice()`
+
+              `slice(start, end)` extracts a section of an array into a **new array** (shallow copy). The original is not modified.
+
+              ```js
+              const letters = ['a', 'b', 'c', 'd', 'e'];
+
+              letters.slice(1, 3);  // ['b', 'c']      (end index excluded)
+              letters.slice(2);     // ['c', 'd', 'e']
+              letters.slice(-2);    // ['d', 'e']       (negative = from end)
+              letters.slice();      // ['a', 'b', 'c', 'd', 'e']  (full copy)
+
+              console.log(letters); // ['a', 'b', 'c', 'd', 'e']  (unchanged)
+              ```
+
+              Remember:
+              - `slice()` : **non-destructive**, returns a copy
+              - `splice()` : **destructive**, modifies in place
+            </textarea>
+          </section>
+
+
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array methods - searching
+
+              `includes()` determines whether an array contains a specified element.
+
+              ```js
+              const letters = ['a', 'b', 'c'];
+              const res = letters.includes('b');
+
+              console.log(res); // true
+
+              const nums = [1, 2, 3];
+              const res2 = nums.includes('2');
+
+              console.log(res2); // false
+
+              console.log(nums['2']); // 3
+              console.log(nums[2]); // 3 (implicit conversion)
+              ```
+
+              Notes:
+
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Arrays methods
+              Recall the Array object. Its prototype has many methods. Some of the useful ones are:
+
+              `concat()` merges arrays into a **new array** without modifying the originals.
+
+              ```js
+              const a = [1, 2];
+              const b = [3, 4];
+              a.concat(b, [5, 6]); // [1, 2, 3, 4, 5, 6]
+              // Equivalent with spread: [...a, ...b, 5, 6
+              ```
+
+              `join(separator)` returns a **string** of all elements joined by a separator.
+
+              ```js
+              const letters = ['a', 'b', 'c'];
+              const res1 = letters.join(' - '); // 'a - b - c'
+
+              const objs = [{ name: 'John' }, { name: 'Jane' }];
+              const res2 = objs.join(', '); // '[object Object], [object Object]', why ?
+              ```
+
+              `flat(depth)` returns a new array with sub-arrays flattened (default depth: 1).
+
+              ```js
+              const nums = [1, 2, [3, 4, [5, 6]]];
+              const flat1 = nums.flat(); // [1, 2, 3, 4, [5, 6]]
+              const flat2 = nums.flat(2); // [1, 2, 3, 4, 5, 6]
+
+              console.log(nums); // [1, 2, [3, 4, [5, 6]]] unchanged
+              ```
+
+              Flattening an array with depth `n` means replacing any sub-array it contains with the elements contained by that subarray, `n` times.
+
+              Notes:
+              flat() with Infinity is handy when the nesting depth is unknown.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Array methods - example
+              Here's an example of using the `join()` method to concatenate the string representations of the people in an array:
+
+              ```js
+              // Define a class with a custom toString() method
+              class Person {
+                constructor(name, age) {
+                  this.name = name;
+                  this.age = age;
+                }
+
+                toString() {
+                  return `${this.name} (${this.age})`;
+                }
+              }
+
+              // Create instances of the Person class
+              const person1 = new Person('Alice', 30);
+              const person2 = new Person('Bob', 25);
+              const person3 = new Person('Charlie', 35);
+
+              // Create an array containing instances of the Person class
+              const people = [person1, person2, person3];
+
+              // Use join() to concatenate the string representations of the people
+              const result = people.join(', ');
+
+              console.log(result); // Output: Alice (30), Bob (25), Charlie (35)
+              ```
+            </textarea>
+          </section>
+        </section>
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Array's Functional Methods</h2>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Searching with predicates
+
+              The Array prototype also has some functional methods, which take one or more functions as arguments.
+
+              A **predicate** is a function that takes one or several arguments and returns a `boolean`.
+
+              `find(predicate)` returns the **first element** matching the predicate (or `undefined`).
+
+              `findIndex(predicate)` returns the **index** of the first match (or `-1`).
+
+              ```js
+              const nums = [4, 9, 16, 25];
+              nums.find(n => n > 10);       // 16
+              nums.findIndex(n => n > 10);  // 2
+              nums.find(n => n > 100);      // undefined
+              ```
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Iterating and Filtering
+              `forEach(fn)` executes `fn` once per element. It always returns `undefined` — use it for **side effects** only.
+
+              ```js
+                ['a', 'b', 'c'].forEach((elem, index) => {
+                  console.log(index, elem);
+                });
+                // 0 'a'   1 'b'   2 'c'
+              ```
+
+              `filter(predicate)` returns a **new array** containing only the elements for which the predicate returns `true`.
+
+              ```js
+              const words = ['Yverdon', 'is', 'a', 'beautiful', 'city'];
+              const longWords = words.filter(w => w.length > 4);
+              console.log(longWords); // ['Yverdon', 'beautiful']
+              console.log(words);     // unchanged
+              ```
+
+              Notes:
+              A predicate is a function that takes arguments and returns a boolean.
+              forEach cannot be stopped mid-way (unlike for..of with break). Use find() or some() if you need early exit.
+
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Applying functions with  `map()` and `flatMap()`
+
+              `map(fn)` creates a **new array** with the results of calling the provided `fn` function on every element.
+
+              ```js
+              var a = ["apple", "banana", "pear"];
+              const b = a.map(a => a.length)
+
+              console.log(b); // [5, 6, 4]
+              console.log(a); // ["apple", "banana", "pear"]
+              ```
+
+              `flatMap(fn)` maps each element using a mapping function, and then flattens the resulting array by one
+              level.
+
+              ```js
+              var a = ['Yverdon is', 'a', 'beautiful city'];
+              a.flatMap(s => s.split(" "));
+              // First executes map: [['Yverdon', 'is'], 'a', ['beautiful', 'city']]
+              // Then flattens: ['Yverdon', 'is', 'a', 'beautiful', 'city'].
+              ```
+
+              The `flatMap` method is equivalent to calling `map` and then `flat` once : `map(fn).flat(1)` — useful
+              when `fn` returns arrays
+
+              https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Reducing elements to a single value
+              `reduce(fn, initialValue)` reduces the array into a **single value** by calling `fn(accumulator,
+              current)` for each element. It behaves as follows:
+
+              - The reducer is called with the provided initial value and the first value of the array.
+              - The reducer is called with the result of the previous reducer call and the next value of the array...
+              - ... until the last value of the array. The last result of the reducer is returned.
+
+              ```js
+              const array1 = [1, 2, 3, 4];
+
+              // ((((0 + 1) + 2) + 3) + 4)
+              const initialValue = 0;
+              const sumWithInitial = array1.reduce(
+                (accumulator, currentValue) => accumulator + currentValue,
+                initialValue);
+
+              console.log(sumWithInitial);
+              // Expected output: 10
+              ```
+
+              `reduceRight()` does the same, but from right to left.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Finding elements and testing conditions
+
+              `every(predicate)` tests whether all elements in the array pass the provided predicate
+
+              ```js
+              var a = [1, 2, 3];
+              a.every(a => a > 0) // true
+
+              [].every(x => x > 0) // true ! (vacuous truth)
+              ```
+
+              `some(predicate)` tests whether at least one element in the array passes the provided predicate
+
+              ```js
+              var a = [1, 2, 3];
+              console.log(a.some(a => a > 2)) // true
+
+              [].some(x => x > 0) // false ! (there does not exist an element fulfilling that condition)
+              ```
+
+              `find()` and `findIndex()` return the value (or its index, respectively) of the first element in
+              the array that satisfies the provided predicate.
+
+              ```js
+              var a = [1, 2, 3];
+              console.log(a.find(a => a > 2)) // 3
+              console.log(a.findIndex(a => a > 2)) // 2
+              console.log(a.find(a => a > 3)) // undefined
+              ```
+
+              Here is an example of using `map`, `filter` methods together:
+              ```js
+              [1,2,3].map(a => a**2).filter(a => a > 4) // [9]
+              ```
+
+              https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+              Notes:
+              https://en.wikipedia.org/wiki/Vacuous_truth
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Chaining methods
+
+              Because most of the Array methods return the resulting array, they can be chained together.
+
+              What is the value of `result` ?
+
+              ```js
+              const array = [1,2,3];
+
+              const result = array
+                  .map(a => a**2)
+                  .filter(a => a >= 4)
+                  .reduce((a, b) => a + b, 0);
+              ```
+
+              Notes:
+
+              <div class="spoiler">
+
+              Le résultat final ici est 13, car le map transforme [1,2,3] en [1,4,9], le filter garde [4,9] et le reduce les additionne.
+
+              ```js
+              const array = [1,2,3];
+              const result = array
+                  .map(a => a**2) // [1,4,9]
+                  .filter(a => a >= 4) // [4,9]
+                  .reduce((a, b) => a + b, 0); // ((0 + 4) + 9) = 13
+              ```
+
+              </div>
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-hand-paper"></i> Exercise — Functional Methods
+
+              Given a list of products:
+
+              ```js
+              const products = [
+                { name: 'Laptop',   price: 1200, inStock: true  },
+                { name: 'Mouse',    price:   25, inStock: true  },
+                { name: 'Monitor',  price:  450, inStock: false },
+                { name: 'Keyboard', price:   75, inStock: true  },
+                { name: 'Webcam',   price:   90, inStock: false },
+              ];
+              ```
+
+              In a **single chain**, compute the **total cost** of all products that are **in stock** and cost **more than 50 CHF**.
+
+              Then, in a separate chain, build a comma-separated string of the **names** of those same products, sorted **alphabetically**.
+
+              Notes:
+
+              <div class="spoiler">
+
+              ```js
+              // Total cost: Laptop (1200) + Keyboard (75) = 1275
+              const total = products
+                .filter(p => p.inStock && p.price > 50)
+                .reduce((sum, p) => sum + p.price, 0);
+              console.log(total); // 1275
+
+              // Sorted names
+              const names = products
+                .filter(p => p.inStock && p.price > 50)
+                .map(p => p.name)
+                .sort((a, b) => a.localeCompare(b))
+                .join(', ');
+              console.log(names); // 'Keyboard, Laptop'
+              ```
+
+              </div>
+            </textarea>
+          </section>
+        </section>
+
+          <!-- <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                            ## <i class="fas fa-hand-paper"></i>Exercise Inverted Index
+
+                            Given a list of documents, create an inverted index. An inverted index is a dictionary where each word is associated with a list of the document identifiers in which that word appears.
+
+                            ```js
+                            let documents = [
+                                "Hello Everyone",
+                                "Hello, World!",
+                                "The sky is blue",
+                                "The sky is dark"
+                            ];
+                            let stopWords = ["the", "is"];
+                            let invertedIndex = "...";
+                            ```
+
+                            Use the `replace`, `split`, `filter`, `map`, `flatMap`, and `reduce` methods to create the inverted index so that `console.log(invertedIndex)` prints:
+
+                            ```js
+                            {
+                                "hello": [ 0, 1 ],
+                                "everyone": [ 0 ],
+                                "world": [ 1 ],
+                                "sky": [ 2, 3 ],
+                                "blue": [ 2 ],
+                                "dark": [ 3 ]
+                            }
+                            ```
+                        </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                            ## <i class="fas fa-hand-paper"></i>Solution: Inverted Index
+
+                            ```js
+                            let documents = [
+                                "Hello Everyone",
+                                "Hello, World!",
+                                "The sky is blue",
+                                "The sky is dark"
+                            ];
+                            let stopWords = ["the", "is"];
+                            let invertedIndex = documents
+                                .map(
+                                  (doc, index) => doc
+                                    .replace(/[.,!]/g, "")
+                                    .split(" ")
+                                    .filter(word => !stopWords.includes(word.toLowerCase()))
+                                    .map(word => [word.toLowerCase(), index])
+                                    ) // [[['hello', 0], ['everyone', 0]], [['hello', 1], ['world', 1]], ...]
+                                .flat() // [['hello', 0], ['everyone', 0], ['hello', 1], ['world', 1], ...]
+                                .reduce((acc, [word, index]) => {
+                                    if (acc[word]) {
+                                        acc[word].push(index);
+                                    } else {
+                                        acc[word] = [index];
+                                    }
+                                    return acc;
+                                }, {});
+                            console.log(invertedIndex);
+                            ```
+                        </textarea>
+          </section> -->
+        </section>
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Iterators and Generators</h2>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Motivation
+
+              How can we generate an **infinite** sequence of values (e.g., IDs, Fibonacci numbers) without computing them all upfront?
+
+              How can we make our own objects work with a `for...of` loop?
+
+              JavaScript defines two *protocols* that provide a solution to these problems :
+
+              |  |  |
+              |----------|---------|
+              | **Iterator** protocol | Defines how to produce a sequence of values, one at a time |
+              | **Iterable** protocol | Defines how an object exposes itself for iteration (e.g. `for...of`) |
+
+              A protocol is a convention that objects follow to expose some functionality.
+
+              Think of them as "interfaces" or "contracts".
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+            ## <i class="fab fa-js"></i> Iterators
+
+              **Iterators** are objects that conform to the *iterator protocol*.
+
+              An **iterator** is any object that provides a `next()` method returning an object with two properties :
+              - `value`: the next value in the iterator, and
+              - `done`: whether the last value has already been provided.
+
+              An iterator would allow us to lazily generate any sequence of values :
+
+              ```js
+              // A manual iterator that counts from 1 to 3
+              const counter = {
+                current: 1,
+                next() {
+                  if (this.current <= 3) {
+                    return { value: this.current++, done: false };
+                  } else {
+                    return { value: undefined, done: true };
+                  }
+                }
+              };
+
+              console.log(counter.next()); // { value: 1, done: false }
+              console.log(counter.next()); // { value: 2, done: false }
+              console.log(counter.next()); // { value: 3, done: false }
+              console.log(counter.next()); // { value: undefined, done: true }
+              ```
+
+              The `counter` object is an **iterator** but **not yet iterable**, we can't iterate over its values
+              with `for...of`.
+
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Iterables
+
+              An **iterable** is an object with a `[Symbol.iterator]()` method that **returns an iterator**.
+
+              The `for...of` loop, spread `...`, and destructuring all require an *iterable*.
+
+              ```js
+              const range = {
+                from: 1,
+                to:   5,
+                [Symbol.iterator]() {       // makes this object iterable
+                  let current = this.from;
+                  const last  = this.to;
+                  return {                  // returns an iterator
+                    next() {
+                      if (current <= last)
+                        return { value: current++, done: false };
+                      return { value: undefined, done: true };
+                    }
+                  };
+                }
+              };
+
+              for (const n of range) {
+                console.log(n);  // 1  2  3  4  5
+              }
+
+              console.log([...range]); // [1, 2, 3, 4, 5]
+              ```
+
+              Notes:
+              `for...of` requires its second operand to be an iterable. It calls [Symbol.iterator]() once to get the
+              iterator, then calls next() until done: true.
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Iterator vs Iterable — Summary
+
+              | | Iterator | Iterable |
+              |---|---|---|
+              | **Required method** | `next()` | `[Symbol.iterator]()` |
+              | **Returns** | `{ value, done }` | an *iterator* |
+              | **Used by** | manual `.next()` calls | `for...of`, spread `...`, destructuring |
+
+              An object can be **both** at the same time, e.g. **generators** that we will see next.
+
+              ```js
+              // Arrays are iterables, they conform to the iterable protocol
+              const arr = ['x', 'y', 'z'];
+              const iter = arr[Symbol.iterator](); // get iterator from iterable
+
+              console.log(iter.next()); // { value: 'x', done: false }
+              console.log(iter.next()); // { value: 'y', done: false }
+              console.log(iter.next()); // { value: 'z', done: false }
+              console.log(iter.next()); // { value: undefined, done: true }
+              ```
+
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.55em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Generators - Convenient iterables/iterators
+
+              JavaScript offers a more convenient way to create iterables/iterators: **Generators**.
+
+              They allow writing iterators as if they were functions that "return multiple times" with the `yield` keyword:
+
+              ```js
+              function* countToThree() {
+                yield 1;   // pauses here, returns 1, resumes on next .next() call
+                yield 2;   // pauses here, returns 2, resumes on next .next() call
+                yield 3;   // pauses here, returns 3, resumes on next .next() call
+                // Implicit: return { value: undefined, done: true }
+              }
+
+              let gen1 = countToThree(); // calling the function returns a Generator object
+
+              console.log(gen1.next()); // { value: 1, done: false }
+              console.log(gen1.next()); // { value: 2, done: false }
+              console.log(gen1.next()); // { value: 3, done: false }
+              console.log(gen1.next()); // { value: undefined, done: true }
+              ```
+
+              - `function*` declares a **generator function**, which will return a generator (`Generator` object) when
+              called.
+              - Calling it returns a **generator object** (does *not* run the body yet)
+              - A generator object is **both** an *iterator* and an *iterable*.
+              - `yield expr` suspends execution and emits `expr` as the next value
+              - Execution resumes from the `yield` point on the next `.next()` call
+              - `yield*` is followed by another *generator* or *iterable* object and delegates the generation to them until they are empty.
+
+              Notes:
+
+              Generator function declarations returns a `GeneratorFunction` object, which when called return a `Generator`;
+
+              Each time a generator function is called, it returns a new `Generator` object, which conforms to both the `iterable` (has a `Symbol.iterator` method) and `iterator` (defines a `next()` method) protocols.
+
+              This allows us to simplify the example by directly using the Generator in the for of loop :
+               ```js
+              function* idGenerator() {
+                let nextId = 0;
+                while (nextId < 10) {
+                    yield nextId++;
+                }
+              };
+              // Notice the call () that will return the Generator
+              for (let id of idGenerator()) {
+                console.log(id); // 0 1 2 ... 9
+              }
+              ```
+
+              When the iterator's `next()` method is called, the generator function's body is executed until the first `yield` expression, which specifies the value to be returned from the iterator or, with `yield*`, delegates to another generator function.
+
+              A `return` statement in a generator, when executed, will make the generator finish (i.e. the `done` property of the object returned by it will be set to true). If a value is returned, it will be set as the `value` property of the object returned by the generator.
+
+              [Generator function*](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*#description)
+
+              [Generator object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator)
+
+              [yield*](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/yield*#description)
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.68em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Generators are Both Iterators and Iterables
+
+              A generator object has both `next()` **and** `[Symbol.iterator]()`, so it works directly with `for...of`, spread, and destructuring.
+
+              ```js
+              function* naturals() {
+                let n = 0;
+                while (true) yield n++;
+              }
+
+              // Take the first 8 values using spread + Array.from
+              const nats = naturals();
+              const first8 = Array.from({ length: 8 }, () => nats.next().value);
+              console.log(first8); // [0, 1, 2, 3, 4, 5, 6, 7]
+
+              // Or with for...of and a manual break
+              let count = 0;
+              for (const n of naturals()) {
+                console.log(n);
+                if (++count === 8) break;
+              }
+              // 0 1 2 3 4 5 6 7
+              ```
+
+              Notes:
+              An infinite generator never returns done: true — you must break or only take a limited number of values.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.55em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Iterator vs Generator — Side-by-Side
+
+              Generators have a more concise syntax. Both `idGenerator()` below produce the sequence `0..9`:
+
+              **Manual iterable/iterator (verbose)**
+              ```js
+              function idGenerator() {
+                return {
+                  [Symbol.iterator] : function() {
+                    return {
+                      nextId: 0,
+                      next() {
+                        if (this.nextId < 10) {
+                          return { value: this.nextId++, done: false };
+                        }
+                        return { done: true };
+                      }
+                    };
+                  }
+                }
+              }
+              ```
+
+              **Generator (concise)**
+              ```js
+              function* idGenerator() {
+                for (let id = 0; id < 10; id++) {
+                  yield id;
+                }
+              }
+              ```
+
+              Both can be used in a `for...of` loop:
+              ```js
+              for (const id of idGenerator()) {
+                console.log(id); // 0 1 2 … 9
+              }
+              ```
+
+              Notes:
+              Note that the generator function is not the generator itself :
+
+              - `function* () { ... }` is neither iterable nor an iterator. It is a generator function declaration.
+              - Calling the generator function returns the generator, which is an iterator (and iterable).
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Delegating with `yield*`
+
+              A generator can use `yield*` to delegate to another **generator or iterable** until the latter is
+              exhausted.
+
+              The delegating generator can then resume execution.
+
+              ```js
+              function* alphabetThenDigits() {
+                yield* ['a', 'b', 'c'];   // delegate to an array
+                yield* digits();          // delegate to another generator
+              }
+
+              function* digits() {
+                yield 1; yield 2; yield 3;
+              }
+
+              console.log([...alphabetThenDigits()]);
+              // ['a', 'b', 'c', 1, 2, 3]
+              ```
+
+              Notes:
+              yield* works with any iterable — arrays, strings, Sets, other generators.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-hand-paper"></i> Exercise — Iterators & Generators
+
+              **Part 1 — Custom Iterable class**
+
+              Implement a `Countdown` class whose instances are iterable and yield values from `start` down to `0`:
+
+              ```js
+              for (const n of new Countdown(5)) {
+                console.log(n); // 5  4  3  2  1  0
+              }
+              ```
+
+              **Part 2 — Infinite generator**
+
+              Write a generator `fibonacci()` that yields all fibonacci numbers (1, 1, 2, 3, …) indefinitely. Use it to
+              print the first 8 fibonacci numbers.
+
+              Notes:
+
+              <div class="spoiler">
+
+              ```js
+              // Part 1
+              class Countdown {
+                constructor(start) { this.start = start; }
+                *[Symbol.iterator]() {
+                  for (let i = this.start; i >= 0; i--) yield i;
+                }
+              }
+
+              // Part 2
+              function* fibonacci() {
+                let [a, b] = [1, 1];
+                while (true) {       // ← infinite sequence!
+                  yield a;
+                  [a, b] = [b, a + b];
+                }
+              }
+
+              // Take the first 8 values using spread + Array.from
+              const fib = fibonacci();
+              const first8 = Array.from({ length: 8 }, () => fib.next().value);
+              console.log(first8); // [1, 1, 2, 3, 5, 8, 13, 21]
+
+              // Or with for...of and a manual break
+              let count = 0;
+              for (const n of fibonacci()) {
+                console.log(n);
+                if (++count === 8) break;
+              }
+              // 1 1 2 3 5 8 13 21
+              ```
+
+              </div>
+            </textarea>
+          </section>
+        </section>
+        <section>
+          <section data-background="#333333">
+            <h2><i class="fab fa-js"></i> Iterators and Generators</h2>
+            <h3>Practical applications</h3>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Revisiting the spread syntax `'...'`
+
+              The spread syntax `...` works on **any iterable** — arrays, strings, Sets, Maps, generators, and custom
+              iterables.
+
+              ```js
+              // Spread an array
+              const a = [1, 2, 3];
+              const b = [...a, 4, 5]; // [1, 2, 3, 4, 5]
+
+              // Spread a string (strings are iterable)
+              const chars = [..."Hello"]; // ['H', 'e', 'l', 'l', 'o']
+
+              // Spread a Set (removes duplicates from an array)
+              const unique = [...new Set([1, 2, 2, 3, 3, 3])]; // [1, 2, 3]
+
+              // Spread a custom generator
+              function* range(n) { for (let i = 0; i < n; i++) yield i; }
+              console.log([...range(5)]); // [0, 1, 2, 3, 4]
+              ```
+
+              Internally, spread calls [Symbol.iterator]() — as defined by the iterable protocol.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Built-in Iterable — `Map`
+
+              A `Map` stores **key-value pairs** and preserves insertion order. Keys can be of **any type**.
+
+              ```js
+              const capitals = new Map();
+              capitals.set('Switzerland', 'Bern');
+              capitals.set('France', 'Paris');
+              capitals.set('Germany', 'Berlin');
+
+              capitals.get('France'); // 'Paris'
+              capitals.has('Italy'); // false
+              capitals.size; // 3
+
+              capitals.delete('Germany'); // delete entry
+
+              // Iterate — each entry is a [key, value] pair
+              for (const [country, city] of capitals) {
+                console.log(`${country} → ${city}`);
+              }
+              // Switzerland → Bern
+              // France → Paris
+
+              // Keys and values separately
+              console.log([...capitals.keys()]);   // ['Switzerland', 'France']
+              console.log([...capitals.values()]); // ['Bern', 'Paris']
+              ```
+
+              Use a `Map` when keys are not strings, or when insertion order matters.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Built-in Iterable — `Set`
+
+              A `Set` stores **unique values** of any type, in insertion order.
+
+              ```js
+              const tags = new Set(['js', 'web', 'js', 'css', 'web']);
+              console.log(tags.size);      // 3  (duplicates removed automatically)
+              console.log(tags.has('js')); // true
+
+              tags.add('html');
+              tags.delete('css');
+
+              for (const tag of tags) {
+                console.log(tag); // 'js', 'web', 'html'
+              }
+
+              // Common pattern: deduplicate an array
+              const nums = [1, 2, 2, 3, 3, 3];
+              const unique = [...new Set(nums)];
+              console.log(unique); // [1, 2, 3]
+              ```
+
+              Use a `Set` when you need a collection of unique values without key-value pairs.
+
+              Notes:
+              Like Map, Set has .forEach(value => ...) and .values(), .keys() (same as .values()), .entries().
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fab fa-js"></i> Useful Built-in Iterables
+
+              The iterable for Map iterates over its entries, which are arrays `[key, value]`. Hence we can
+              iterate over the entries using the `for..of` syntax using destructuring.
+
+              There is also a `forEach` method that takes a callback function `(value, key) => ...`.
+
+              Note however note the **reversed order** compared to `Array.forEach((key, value) ...`
+
+              ```js
+              const scores = new Map([
+                ['Alice', 95],
+                ['Bob',   87],
+                ['Carol', 92],
+              ]);
+
+              // forEach callback: (value, key) — value comes first!
+              scores.forEach((score, name) => {
+                console.log(`${name}: ${score}`);
+              });
+              // Alice: 95   Bob: 87   Carol: 92
+
+              // for...of with destructuring: [key, value] — more natural order
+              for (const [name, score] of scores) {
+                console.log(`${name}: ${score}`);
+              }
+              ```
+
+              [Map.foreach()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/forEach)
+
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.62em">
+            <textarea data-template>
+              ## <i class="fas fa-hand-paper"></i> Exercise — Map, Set & Spread
+
+              Given the following array of server log entries (each is a `[userId, action]` pair):
+
+              ```js
+              const logs = [
+                ['u1', 'login'],  ['u2', 'login'],    ['u1', 'view'],
+                ['u3', 'login'],  ['u2', 'purchase'],  ['u1', 'logout'],
+                ['u2', 'logout'], ['u1', 'login'],     ['u3', 'view'],
+              ];
+              ```
+
+              1. Use a `Set` to find all **distinct user IDs**.
+              2. Use a `Map` to count **how many actions each user performed**.
+              3. Use spread + `sort` to list users sorted by action count (**descending**).
+
+              Notes:
+
+              <div class="spoiler">
+
+              ```js
+              // 1. Distinct users
+              const users = new Set(logs.map(([userId]) => userId));
+              console.log([...users]); // ['u1', 'u2', 'u3']
+
+              // 2. Action count per user
+              const actionCount = new Map();
+              for (const [userId] of logs) {
+                actionCount.set(userId, (actionCount.get(userId) || 0) + 1);
+              }
+              // Map { 'u1' => 4, 'u2' => 3, 'u3' => 2 }
+
+              // 3. Sorted by count descending
+              const sorted = [...actionCount.entries()]
+                .sort(([, a], [, b]) => b - a)
+                .map(([user, count]) => `${user}: ${count}`);
+              console.log(sorted); // ['u1: 4', 'u2: 3', 'u3: 2']
+              ```
+
+              </div>
+            </textarea>
+          </section>
+
+          <!-- <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Hands on !
+
+                            Rendez-vous sur [la plateforme de test en ligne](https://eval.iict-heig-vd.in/jam-sessions/clnu80zhw00opqu0pbz62lm9t). Le VPN est nécessaire pour y accéder.
+
+                            Quelques méthodes sur String qui pourraient être utiles :
+                            ```js
+                            // Sépare une chaine par un séparateur
+                            "Hello World".split(" "); // ["Hello", "World"]
+                            // Remplace une regexp par une chaine de caractères
+                            "Hello World".replace(/[aeiou]/g, "*"); // "H*ll* W*rld"
+                            ```
+
+                            Quelques méthodes sur Array qui pourraient être utiles :
+                            ```js
+                            // Aplatit un tableau d'une profondeur donnée
+                            arr.flat()
+                            // Vérifie si un tableau contient un élément
+                            arr.includes()
+                            ```
+                        </textarea>
+          </section> -->
+<!--
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Exercice : Flattening generator
+
+                            Implémenter un générateur `flatten` qui aplatit ("flattens") un array. Il ne doit pas d'abord flatten puis itérer dessus. En d'autres termes, la méthode `flat` de array ne doit être utilisée.
+
+                            ```js
+                            const arr = [1, [2, [3, 4], 5], 6];
+                            const flattened = [...flatten(arr)];
+                            console.log(flattened); // [1, 2, 3, 4, 5, 6]
+                            ```
+
+                            Notes:
+
+                            <div class="spoiler">
+
+                            ```js
+                            function* flatten(arr) {
+                                for (const elem of arr) {
+                                    if (Array.isArray(elem)) {
+                                        yield* flatten(elem);
+                                    } else {
+                                        yield elem;
+                                    }
+                                }
+                            }
+                            ```
+
+                            </div>
+
+                        </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Solution : Flattening generator
+
+                            Implémenter un générateur `flatten` qui aplatit ("flattens") un array. Il ne doit pas d'abord flatten puis itérer dessus. En d'autres termes, la méthode `flat` de array ne doit être utilisée.
+
+                            ```js
+                            const arr = [1, [2, [3, 4], 5], 6];
+                            const flattened = [...flatten(arr)];
+                            console.log(flattened); // [1, 2, 3, 4, 5, 6]
+                            ```
+
+                            ```js
+                            function* flatten(arr) {
+                                for (const elem of arr) {
+                                    if (Array.isArray(elem)) {
+                                        yield* flatten(elem);
+                                    } else {
+                                        yield elem;
+                                    }
+                                }
+                            }
+                            ```
+                        </textarea>
+          </section> -->
+          <!-- <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Exercice : Sum of squares
+
+                            Écrire une fonction qui, en une chaine d'appels de méthodes, retourne la somme des carrés des éléments du tableau donné en argument.
+
+                            ```js
+                            const arr = [1, 2, 3, 4, 5];
+                            const sum = sumOfSquares(arr);
+                            console.log(sum); // 55 (1^2 + 2^2 + 3^2 + 4^2 + 5^2)
+                            ```
+
+                            Même question si l'input est une matrice (tableau de tableaux).
+
+                            Notes:
+
+                            <div class="spoiler">
+
+                            Array
+                            ```js
+                            function sumOfSquares(arr) {
+                                return arr
+                                    .map(num => num ** 2)
+                                    .reduce((acc, num) => acc + num, 0);
+                            }
+                            ```
+
+                            Matrice
+                            ```js
+                            function sumOfSquares(matrix) {
+                                return matrix.flat()
+                                    .reduce((sum, num) => sum + num ** 2, 0);
+                            }
+                            ```
+
+                            </div>
+
+                        </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Solution : Sum of squares
+
+                            Array
+                            ```js
+                            function sumOfSquares(arr) {
+                                return arr
+                                    .map(num => num ** 2)
+                                    .reduce((acc, num) => acc + num, 0);
+                            }
+                            ```
+
+                            Matrice
+                            ```js
+                            function sumOfSquares(matrix) {
+                                return matrix.flat()
+                                    .reduce((sum, num) => sum + num ** 2, 0);
+                            }
+                            ```
+
+                        </textarea>
+          </section> -->
+
+          <!-- <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Exercice : Counting words
+
+                            Écrire une fonction qui prend une string en argument et, en une seule instruction, retourne un objet contenant, pour chaque mot de la string, son nombre d'apparition.
+
+                            ```js
+                            const text = "the quick brown fox jumps over the lazy dog";
+                            const wordCount = countWords(text);
+                            console.log(wordCount);
+                            // Output:
+                            // {
+                            // "the": 2,
+                            // "quick": 1,
+                            // "brown": 1,
+                            // "fox": 1,
+                            // "jumps": 1,
+                            // "over": 1,
+                            // "lazy": 1,
+                            // "dog": 1
+                            // }
+                            ```
+
+
+                        </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+                            ## <i class="fab fa-js"></i> Solution : Counting words
+                            ```js
+                            const countWords = () => {
+                                return text.split(" ")
+                                    .map(word => word.toLowerCase())
+                                    .filter(word => /^[a-z]+$/.test(word))
+                                    .reduce((count, word) => {
+                                        count[word] = (count[word] || 0) + 1;
+                                        return count;
+                                    }, {});
+                            }
+                            const text = "the quick brown fox jumps over the lazy dog";
+                            const wordCount = countWords(text);
+                            console.log(wordCount);
+                            // Output:
+                            // {
+                            // "the": 2,
+                            // "quick": 1,
+                            // "brown": 1,
+                            // "fox": 1,
+                            // "jumps": 1,
+                            // "over": 1,
+                            // "lazy": 1,
+                            // "dog": 1
+                            // }
+                            ```
+
+                            </div>
+
+                        </textarea>
+          </section> -->
+        </section>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+    <script src="./script.js" type="module"></script>
+  </body>
+</html>
