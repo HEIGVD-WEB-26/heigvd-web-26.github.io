@@ -57,7 +57,6 @@
         <section>
           <section data-background="#333333">
             <h2><i class="fas fa-question-circle"></i> Quiz</h2>
-            <h3>Forms and Validation</h3>
           </section>
           <section data-markdown style="font-size: 0.65em">
             <textarea data-template>
@@ -89,6 +88,427 @@
 
             </textarea>
           </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 2
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              const words = ['hello', 'world', 'hi', 'javascript'];
+              const result = words
+                .filter(w => w.length > 3)
+                .map(w => w.toUpperCase());
+              ```
+
+              - a) `['HELLO', 'WORLD', 'HI', 'JAVASCRIPT']`
+              - b) `['HELLO', 'WORLD', 'JAVASCRIPT']`
+              - c) `['hello', 'world', 'javascript']`
+              - d) `['HELLO', 'WORLD', 'HI']`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : b)**
+
+              `filter` garde les mots de longueur > 3 : `['hello', 'world', 'javascript']`. Ensuite `map` les transforme en majuscules : `['HELLO', 'WORLD', 'JAVASCRIPT']`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 3
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              const result = [].reduce((acc, n) => acc + n);
+              ```
+
+              - a) `0`
+              - b) `undefined`
+              - c) `NaN`
+              - d) Une `TypeError` est lancée
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : d)**
+
+              Appeler `reduce` sur un tableau vide **sans valeur initiale** lance une `TypeError` : *"Reduce of empty array with no initial value"*. C'est pourquoi il est recommandé de toujours fournir une valeur initiale.
+
+              </div>
+            </textarea>
+          </section>
+          <!-- Q5 — reduce to build object -->
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 4
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              const fruits = ['apple', 'banana', 'apple', 'cherry', 'banana', 'apple'];
+              const result = fruits.reduce((acc, fruit) => {
+                acc[fruit] = (acc[fruit] || 0) + 1;
+                return acc;
+              }, {});
+              ```
+
+              - a) `{ apple: 3, banana: 2, cherry: 1 }`
+              - b) `{ apple: 1, banana: 1, cherry: 1 }`
+              - c) `['apple', 'banana', 'cherry']`
+              - d) `3`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : a)**
+
+              `reduce` est utilisé ici pour compter les occurrences de chaque fruit. L'accumulateur initial est un objet vide `{}`. Pour chaque fruit, on incrémente sa valeur (ou on l'initialise à 1 si elle n'existe pas encore grâce à `|| 0`).
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 5
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              const data = [[1, 2], [3], [4, 5, 6]];
+              const result = data.flatMap(arr => arr.filter(n => n % 2 !== 0));
+              ```
+
+              - a) `[[1], [3], [5]]`
+              - b) `[1, 3, 5]`
+              - c) `[1, 2, 3, 4, 5, 6]`
+              - d) `[[1], [3], [4, 5, 6]]`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : b)**
+
+              `flatMap` applique la fonction de mapping (ici `arr => arr.filter(...)`) puis aplatit le résultat d'un niveau. Le map donne `[[1], [3], [5]]`, et le flat donne `[1, 3, 5]`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 6
+
+              Quelles sont les valeurs de `a` et `b` ?
+
+              ```js
+              const nums = [2, 4, 6, 8, 9];
+
+              const a = nums.every(n => n % 2 === 0);
+              const b = nums.some(n => n % 2 === 0);
+              ```
+
+              - a) `a = true`,  `b = true`
+              - b) `a = false`, `b = false`
+              - c) `a = false`, `b = true`
+              - d) `a = true`,  `b = false`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : c)**
+
+              `every` vérifie que **tous** les éléments sont pairs. Or `9` est impair, donc `every` retourne `false`. `some` vérifie qu'**au moins un** élément est pair, ce qui est le cas (par ex. `2`), donc `some` retourne `true`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 7
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              const letters = ['a', 'b', 'c', 'd'];
+              const result = letters.reduce((acc, letter, i) => {
+                return i === 0 ? letter : `${acc}-${letter}`;
+              });
+              ```
+
+              - a) `'a-b-c-d'`
+              - b) `'undefined-a-b-c-d'`
+              - c) `'-a-b-c-d'`
+              - d) Une erreur est lancée
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : a)**
+
+              Sans valeur initiale, `reduce` utilise le premier élément (`'a'`) comme accumulateur, et itère à partir du deuxième (index `1`). Comme `i` ne vaut jamais `0` dans les itérations suivantes, le résultat est `'a-b-c-d'`. (Le test `i === 0` ne sert à rien ici car il n'est jamais vrai.)
+
+              Note : cela revient à `letters.join('-')`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 8
+
+              Quelle est la sortie du code suivant ?
+
+              ```js
+              const counter = {
+                current: 1,
+                next() {
+                  if (this.current <= 3) {
+                    return { value: this.current++, done: false };
+                  }
+                  return { value: undefined, done: true };
+                }
+              };
+
+              console.log(counter.next().value);
+              console.log(counter.next().value);
+              console.log(counter.next().done);
+              ```
+
+              - a) `1`, `2`, `false`
+              - b) `1`, `2`, `true`
+              - c) `1`, `1`, `false`
+              - d) `undefined`, `undefined`, `true`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : a)**
+
+              Le premier appel retourne `{ value: 1, done: false }` (et `current` passe à 2). Le deuxième appel retourne `{ value: 2, done: false }` (et `current` passe à 3). Le troisième appel retourne `{ value: 3, done: false }` car `3 <= 3`, donc `done` vaut `false`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 9
+
+              Quel code faut-il ajouter à `myObj` pour que la boucle `for...of` affiche `1 2 3` ?
+
+              ```js
+              const myObj = {
+                values: [1, 2, 3],
+                // ???
+              };
+
+              for (const v of myObj) {
+                console.log(v);
+              }
+              ```
+
+              - a) `next() { return this.values.pop(); }`
+              - b) `[Symbol.iterator]() { return this.values[Symbol.iterator](); }`
+              - c) `[Symbol.iterator]() { return this.values; }`
+              - d) `iterator() { return this.values; }`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : b)**
+
+              Pour qu'un objet soit itérable, il doit implémenter `[Symbol.iterator]()` qui retourne un **iterator**. Les tableaux sont déjà itérables : `this.values[Symbol.iterator]()` retourne l'itérateur du tableau.
+
+              La réponse c) ne fonctionne pas car `this.values` est un tableau (iterable), pas un iterator — `for...of` appelle `[Symbol.iterator]()` sur l'objet retourné, ce qui fonctionnerait en fait... mais c'est indirect. Cependant, un Array est aussi un itérable et a sa propre méthode `[Symbol.iterator]`, donc c) marcherait aussi ! Mais b) est plus correct sémantiquement car on retourne directement l'itérateur.
+
+              En fait, les deux réponses b) et c) fonctionnent car un tableau est à la fois un itérable et un itérateur (via `[Symbol.iterator]()`). Mais b) est la réponse la plus directe.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 10
+
+              Quelle est la sortie du code suivant ?
+
+              ```js
+              function* gen() {
+                yield 'a';
+                yield 'b';
+                return 'c';
+              }
+
+              const result = [...gen()];
+              console.log(result);
+              ```
+
+              - a) `['a', 'b', 'c']`
+              - b) `['a', 'b']`
+              - c) `['a', 'b', undefined]`
+              - d) Une erreur est lancée
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : b)**
+
+              Le spread `...` itère le générateur via `for...of`, qui s'arrête quand `done: true`. Le `return 'c'` produit `{ value: 'c', done: true }`, mais comme `done` est `true`, la valeur `'c'` **n'est pas incluse** dans le résultat du spread. Seuls les `yield` sont collectés.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 11
+
+              Quelle est la sortie du code suivant ?
+
+              ```js
+              function* greet() {
+                console.log('Start');
+                yield 'Hello';
+                console.log('Middle');
+                yield 'World';
+                console.log('End');
+              }
+
+              const g = greet();
+              console.log('Before');
+              console.log(g.next().value);
+              ```
+
+              - a) `'Before'`, `'Start'`, `'Hello'`
+              - b) `'Start'`, `'Before'`, `'Hello'`
+              - c) `'Before'`, `'Start'`, `'Hello'`, `'Middle'`
+              - d) `'Start'`, `'Hello'`, `'Before'`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : a)**
+
+              Appeler `greet()` ne lance **pas** le corps de la fonction. Il crée simplement le générateur. Le corps n'est exécuté que lors du premier appel à `.next()`. Donc `'Before'` est affiché d'abord, puis `.next()` exécute le corps jusqu'au premier `yield`, affichant `'Start'`, et retournant `'Hello'`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 12
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              function* inner() {
+                yield 3;
+                yield 4;
+              }
+
+              function* outer() {
+                yield 1;
+                yield 2;
+                yield* inner();
+                yield 5;
+              }
+
+              const result = [...outer()];
+              ```
+
+              - a) `[1, 2, 5]`
+              - b) `[1, 2, [3, 4], 5]`
+              - c) `[1, 2, 3, 4, 5]`
+              - d) `[1, 2, inner, 5]`
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : c)**
+
+              `yield*` **délègue** l'itération au générateur `inner()`. Les valeurs de `inner()` (3 et 4) sont émises comme si elles faisaient partie de `outer()`. Le résultat est donc `[1, 2, 3, 4, 5]`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 13
+
+              Quelle est la valeur de `result` ?
+
+              ```js
+              function* letters() {
+                yield* 'Hi';
+                yield '!';
+              }
+
+              const result = [...letters()];
+              ```
+
+              - a) `['Hi', '!']`
+              - b) `['H', 'i', '!']`
+              - c) `['H', 'i!']`
+              - d) Une erreur est lancée car `yield*` ne fonctionne pas avec des strings
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : b)**
+
+              `yield*` fonctionne avec **tout itérable**, et les strings sont itérables (caractère par caractère). Donc `yield* 'Hi'` émet `'H'` puis `'i'`. Ensuite `yield '!'` émet `'!'`. Le résultat est `['H', 'i', '!']`.
+
+              </div>
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fas fa-question-circle"></i> Question 14
+
+              Quelles sont les valeurs de `a` et `b` ?
+
+              ```js
+              function* nums() {
+                yield 1; yield 2; yield 3;
+              }
+
+              const gen = nums();
+              const a = [...gen];
+              const b = [...gen];
+              ```
+
+              - a) `a = [1, 2, 3]`, `b = [1, 2, 3]`
+              - b) `a = [1, 2, 3]`, `b = []`
+              - c) `a = []`, `b = [1, 2, 3]`
+              - d) Une erreur est lancée
+
+              Notes:
+
+              <div class="spoiler">
+
+              **Réponse : b)**
+
+              Un générateur ne peut être itéré **qu'une seule fois**. Après le premier spread, le générateur est épuisé (`done: true`). Le second spread ne produit aucune valeur, donc `b` est un tableau vide `[]`. Pour ré-itérer, il faudrait créer un nouveau générateur : `const gen2 = nums()`.
+
+              </div>
+            </textarea>
+          </section>
+
+
+
           <section
             data-markdown
             style="font-size: 0.8em"
