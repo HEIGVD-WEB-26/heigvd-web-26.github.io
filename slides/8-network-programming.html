@@ -427,6 +427,93 @@
                 <img src="images/http_polling.svg" alt="polling" style="width:500px;" />
             </textarea>
           </section>
+          <section data-markdown style="font-size: 0.5em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> Polling - HTTP Request / Response
+
+                **Sending a message** (POST):
+
+                ```http
+                POST /polling/alice/messages HTTP/1.1
+                Host: localhost:3000
+                Content-Type: application/x-www-form-urlencoded
+
+                message=Hello+everyone!
+                ```
+
+                ```http
+                HTTP/1.1 200 OK
+                Content-Type: application/json
+
+                {"user":"alice","content":"Hello everyone!"}
+                ```
+
+                ----
+
+                **Polling for new messages** (GET):
+
+                ```http
+                GET /polling/alice/messages HTTP/1.1
+                Host: localhost:3000
+                ```
+
+                ```http
+                HTTP/1.1 200 OK
+                Content-Type: application/json
+
+                [{"user":"bob","content":"Hi Alice!"},{"user":"alice","content":"Hello everyone!"}]
+                ```
+
+                If no new messages, the server responds with an empty array `[]`.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.45em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> Polling - Client & Server Code
+
+                **Client** (browser) — polls every 10 seconds with `setInterval`:
+
+                ```js
+                // Send a message via POST
+                message.onsubmit = event => {
+                  event.preventDefault();
+                  let data = new URLSearchParams(new FormData(message));
+                  fetch('messages', { method: 'POST', body: data });
+                }
+
+                // Poll for new messages every 10 seconds
+                async function polling() {
+                  let response = await fetch('messages');
+                  let json = await response.json();
+                  let html = json.map(m => `<p><b>${m.user}</b>: <i>${m.content}</i>`).join("");
+                  messages.innerHTML = html + messages.innerHTML;
+                }
+                setInterval(polling, 10000);
+                ```
+
+                **Server** (Express) — stores messages in per-user inboxes, returns and clears them on GET:
+
+                ```js
+                const inboxes = new Map();
+
+                router.post('/:user/messages', (req, res) => {
+                  const { user } = req.params;
+                  const message = { user, content: req.body.message };
+                  if (!inboxes.has(user)) inboxes.set(user, []);
+                  for (let inbox of inboxes.values()) { inbox.push(message); }
+                  res.json(message);
+                });
+
+                router.get('/:user/messages', (req, res) => {
+                  let user = req.params.user;
+                  if (!inboxes.has(user)) inboxes.set(user, []);
+                  let messages = inboxes.get(user);
+                  inboxes.set(user, []);
+                  res.json(messages.reverse());
+                });
+                ```
+            </textarea>
+          </section>
           <section data-markdown style="font-size: 0.6em">
             <textarea data-template>
                 ## <i class="fab fa-js"></i> Long-Polling
@@ -436,6 +523,93 @@
                 - **Limitations:** lots of requests if there are lots of events, since the connection is closed after each message.
 
                 <img src="images/http_long_polling.svg" alt="long polling" style="width:500px;" />
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.5em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> Long-Polling - HTTP Request / Response
+
+                **Sending a message** (POST) — same as polling:
+
+                ```http
+                POST /longpolling/alice/messages HTTP/1.1
+                Host: localhost:3000
+                Content-Type: application/x-www-form-urlencoded
+
+                message=Hello+everyone!
+                ```
+
+                ```http
+                HTTP/1.1 200 OK
+                Content-Type: application/json
+
+                {"user":"alice","content":"Hello everyone!"}
+                ```
+
+                ----
+
+                **Waiting for a new message** (GET) — the server **holds the connection open** until a message arrives:
+
+                ```http
+                GET /longpolling/bob/messages HTTP/1.1
+                Host: localhost:3000
+                ```
+
+                *...server keeps the connection open, waiting...*
+
+                ```http
+                HTTP/1.1 200 OK
+                Content-Type: application/json
+
+                {"user":"alice","content":"Hello everyone!"}
+                ```
+
+                The client immediately sends a **new GET request** after receiving a response.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.45em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> Long-Polling - Client & Server Code
+
+                **Client** (browser) — recursive `async` function, re-sends GET as soon as a response arrives:
+
+                ```js
+                // Send a message via POST
+                message.onsubmit = event => {
+                  event.preventDefault();
+                  let data = new URLSearchParams(new FormData(message));
+                  fetch('messages', { method: 'POST', body: data });
+                }
+
+                // Recursive long-polling: re-send GET as soon as response arrives
+                async function longpolling() {
+                  let response = await fetch('messages');
+                  let message = await response.json();
+                  let html = `<p><b>${message.user}</b>: <i>${message.content}</i>`;
+                  messages.innerHTML = html + messages.innerHTML;
+                  await longpolling(); // immediately re-open connection
+                }
+                longpolling();
+                ```
+
+                **Server** (Express + EventEmitter) — holds the response until an event is emitted:
+
+                ```js
+                const chat = new EventEmitter();
+
+                router.post('/:user/messages', (req, res) => {
+                  const message = { user: req.params.user, content: req.body.message };
+                  chat.emit('message', message); // notify all waiting clients
+                  res.json(message);
+                });
+
+                router.get('/:user/messages', (req, res) => {
+                  // Don't call res.json() — register a callback that will do it on the next event
+                  const listener = (message) => res.json(message);
+                  chat.on('message', listener);
+                  res.on('close', () => chat.removeListener('message', listener));
+                });
+                ```
             </textarea>
           </section>
           <section data-markdown style="font-size: 0.6em">
@@ -449,6 +623,135 @@
                 <img src="images/http_sse.svg" alt="sse" style="width:500px;" />
 
                 https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.5em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> SSE - HTTP Request / Response
+
+                **Sending a message** (POST) — same as polling:
+
+                ```http
+                POST /sse/alice/messages HTTP/1.1
+                Host: localhost:3000
+                Content-Type: application/x-www-form-urlencoded
+
+                message=Hello+everyone!
+                ```
+
+                ```http
+                HTTP/1.1 200 OK
+                Content-Type: application/json
+
+                {"user":"alice","content":"Hello everyone!"}
+                ```
+
+                ----
+
+                **Subscribing to the event stream** (GET):
+
+                ```http
+                GET /sse/bob/messages HTTP/1.1
+                Host: localhost:3000
+                Accept: text/event-stream
+                ```
+
+                ```http
+                HTTP/1.1 200 OK
+                Content-Type: text/event-stream
+                Transfer-Encoding: chunked
+                Connection: keep-alive
+
+                event: message
+                data: {"user":"alice","content":"Hello everyone!"}
+
+                event: message
+                data: {"user":"bob","content":"Hi Alice!"}
+
+                ```
+
+                The connection **stays open** and the server pushes new events as they arrive.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.5em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> SSE - Event Stream Format
+
+                The SSE protocol defines a simple **text-based** format. Each event is composed of fields, one per line, followed by a **blank line** to separate events.
+
+                Available fields:
+                - **`event:`** — the event type (e.g., "message", "notification", etc.)
+                - **`data:`** — the event payload (can span multiple lines with repeated `data:` fields). The end of
+                  the event is signaled by a blank line.
+                - **`id:`** — an optional event ID (used for reconnection: the browser sends `Last-Event-ID` header)
+                - **`retry:`** — reconnection delay in milliseconds
+
+                Example stream from the chat application:
+
+                ```
+                event: message
+                data: {"user":"alice","content":"Hello everyone!"}
+
+                event: message
+                data: {"user":"bob","content":"Hi Alice!"}
+
+                ```
+
+                In the server code, each event is written as a string:
+
+                ```js
+                // event name, followed by data JSON payload and a blank line = end of event
+                res.write(`event: message\ndata: ${JSON.stringify(message)}\n\n`);
+
+                ```
+
+                The browser's `EventSource` API automatically parses this format and fires corresponding events.
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.45em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> SSE - Client & Server Code
+
+                **Client** (browser) — uses the `EventSource` API to subscribe to the stream:
+
+                ```js
+                // Send a message via POST
+                message.onsubmit = event => {
+                  event.preventDefault();
+                  let data = new URLSearchParams(new FormData(message));
+                  fetch('messages', { method: 'POST', body: data });
+                }
+
+                // Subscribe to the event stream
+                let eventSource = new EventSource('messages');
+                eventSource.addEventListener('message', event => {
+                  let message = JSON.parse(event.data);
+                  let html = `<p><b>${message.user}</b>: <i>${message.content}</i>`;
+                  messages.innerHTML = html + messages.innerHTML;
+                });
+                ```
+
+                **Server** (Express) — sets SSE headers and writes events as they occur:
+
+                ```js
+                const chat = new EventEmitter();
+
+                router.post('/:user/messages', (req, res) => {
+                  const message = { user: req.params.user, content: req.body.message };
+                  chat.emit('message', message);
+                  res.json(message);
+                });
+
+                router.get('/:user/messages', (req, res) => {
+                  res.status(200);
+                  res.set('Content-Type', 'text/event-stream');
+                  res.set('Transfer-Encoding', 'chunked');
+                  const listener = (message) =>
+                    res.write(`event: message\ndata: ${JSON.stringify(message)}\n\n`);
+                  chat.on('message', listener);
+                  res.on('close', () => chat.removeListener('message', listener));
+                });
+                ```
             </textarea>
           </section>
 
@@ -478,6 +781,89 @@
 
                 Similarly to HTTPS for HTTP, there is a secure equivalent of websocket: WSS, whose url starts with `wss://`.
 
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.5em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> Websocket - HTTP Upgrade
+
+                The WebSocket connection starts with an HTTP **Upgrade** request:
+
+                ```http
+                GET /websocket/alice/messages HTTP/1.1
+                Host: localhost:3000
+                Upgrade: websocket
+                Connection: Upgrade
+                ...
+                ```
+
+                The server accepts the upgrade with a **101 Switching Protocols** response:
+
+                ```http
+                HTTP/1.1 101 Switching Protocols
+                Upgrade: websocket
+                Connection: Upgrade
+                ...
+                ```
+
+                After this handshake, the connection is **no longer HTTP**.
+                Both sides can now send and receive **WebSocket frames** (binary or text) at any time over the same TCP connection.
+
+                Messages are exchanged as **frames**, not as HTTP request/responses:
+
+                ```
+                Client -> Server (text frame):  Hello everyone!
+                Server -> Client (text frame):  {"user":"alice","content":"Hello everyone!"}
+                ```
+            </textarea>
+          </section>
+          <section data-markdown style="font-size: 0.45em">
+            <textarea data-template>
+                ## <i class="fab fa-js"></i> Websocket - Client & Server Code
+
+                **Client** (browser) — uses the `WebSocket` API for bidirectional communication:
+
+                ```js
+                const socket = new WebSocket('ws://localhost:3000/websocket/alice/messages');
+
+                socket.onopen = function (e) {
+                  // Send a message through the websocket
+                  message.onsubmit = event => {
+                    event.preventDefault();
+                    socket.send(content.value);
+                  }
+                  // Receive messages from the websocket
+                  socket.onmessage = function (message) {
+                    let data = JSON.parse(message.data);
+                    let html = `<p><b>${data.user}</b>: <i>${data.content}</i>`;
+                    messages.innerHTML = html + messages.innerHTML;
+                  };
+                };
+                ```
+
+                **Server** (Express + express-ws) — handles WebSocket connections directly:
+
+                ```js
+                const chat = new EventEmitter();
+                expressWs(router);
+
+                router.ws('/:user/messages', (ws, req) => {
+                  const { user } = req.params;
+
+                  // Receive a message from a client
+                  ws.on('message', (content) => {
+                    chat.emit('message', { user, content });
+                  });
+
+                  // Broadcast messages to all connected clients
+                  const listener = (message) => ws.send(JSON.stringify(message));
+                  chat.on('message', listener);
+                  ws.on('close', () => chat.removeListener('message', listener));
+                });
+                ```
+
+                Note: the server uses `express-ws`, a library that adds `.ws()` route support to Express.
+                No POST route is needed — messages are sent and received directly through the WebSocket.
             </textarea>
           </section>
         </section>
