@@ -5,11 +5,9 @@ css: style.css
 
 ## Changelog
 
-| Date  | Changement                                                   |
-|-------|--------------------------------------------------------------|
-| 08.05 | Réorganisation et remaniement du contenu pour plus de clarté |
-| 28.05 | Mise à jour du barème pour les labos libres                  |
-| 10.06 | Mise à jour des temps de présentation                        |
+| Date  | Changement                                  |
+|-------|---------------------------------------------|
+| 29.04 | Version initiale                            |
 
 # Description
 
