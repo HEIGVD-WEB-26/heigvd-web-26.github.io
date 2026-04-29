@@ -43,11 +43,11 @@
           </section>
           <section data-markdown>
             <textarea data-template>
-                            ## <i class="fas fa-tasks"></i> Overview of Today's Class
-                            - React
-                            - Material UI
-                            - React Router
-                        </textarea>
+              ## <i class="fas fa-tasks"></i> Overview of Today's Class
+              - React
+              - React Router
+              - Material UI
+            </textarea>
           </section>
         </section>
 
@@ -132,56 +132,97 @@
                         </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.75em">
+          <section data-markdown style="font-size: 0.65em">
             <textarea data-template>
-                            ## <i class="fa-brands fa-react"></i> React Component
+              ## <i class="fa-brands fa-react"></i> React Component
 
-                            React components are reusable, self-contained pieces of UI that only need to be updated when its props or internal state change.
+              React components are reusable, self-contained pieces of UI that only need to be updated when its props or internal state change.
 
-                            Functional components are the simplest way to define a component. They are just JavaScript functions that return a React element.
+              Suppose we want to greet several people. In plain JSX, we would repeat ourselves:
 
-                            ```jsx
-                            function Welcome(props) {
-                                return <h1>Hello, {props.name}</h1>;
-                            }
-                            ```
+              ```jsx
+              <h1>Hello, Sara</h1>
+              <h1>Hello, Cahal</h1>
+              <h1>Hello, Edite</h1>
+              ```
 
-                            Class components are more complex and provide more features, but they are also more difficult to understand. They are therefore [not recommended](https://react.dev/reference/react/Component) to be used in new code.
+              A (functional) **React component** lets us factor this out as a *custom HTML-like tag we define
+              ourselves*. The simplest form is just a JavaScript function that returns a React element (JSX):
 
-                            ```jsx
-                            class Welcome extends React.Component {
-                                render() {
-                                    return <h1>Hello, {this.props.name}</h1>;
-                                }
-                            }
-                            ```
+              ```jsx
+              function Welcome({ name }) {
+                  return <h1>Hello, {name}</h1>;
+              }
 
-                            Here, `props` is an object that contains **read-only properties** passed to the component.
+              // used like a tag
+              <Welcome name="Sara" />
+              ```
 
-                        </textarea>
+              By convention, **lowercase** tags are built-in HTML elements; **capitalized** tags are your own components.
+
+              What a component returns is a **React element**, a plain JavaScript object describing what to render.
+
+            </textarea>
           </section>
 
           <section data-markdown style="font-size: 0.75em">
             <textarea data-template>
-                            ## <i class="fa-brands fa-react"></i> Props
+              ## <i class="fa-brands fa-react"></i> Props (properties)
 
-                            Just like HTML attributes, React props are used to parameterize React components.
+              Each greeting needs a different name. We **parameterize** the component, just like a function parameter:
 
-                            In our previous example
+              ```jsx
+              function Welcome({ name }) {
+                  return <h1>Hello, {name}</h1>;
+              }
 
-                            ```jsx
-                            function Welcome(props) {
-                                return <h1>Hello, {props.name}</h1>;
-                            }
-                            ```
+              <Welcome name="Sara" />
+              <Welcome name="Cahal" />
+              ```
 
-                            The `props` argument contains one property per attribute passed to the component, here just one, `name`
+              The attributes you pass on the tag become keys on a single `props` object received by the component. Above we use **object destructuring** to pull out `name` directly.
 
-                            ```js
-                            const component = <Welcome name="Sara" />;
-                            ```
+              The non-destructured form is:
 
-                        </textarea>
+              ```jsx
+              function Welcome(props) {
+                  return <h1>Hello, {props.name}</h1>;
+              }
+              ```
+
+              Props are **read-only** — a component must never modify its own props.
+
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fa-brands fa-react"></i> Under the hood: JSX &rarr; React elements
+
+              JSX is **syntactic sugar** for calls to `React.createElement`, which return plain JS objects called **React elements**.
+
+              ```jsx
+              <Welcome name="Sara" />
+              // compiles to
+              React.createElement(Welcome, { name: "Sara" })
+              ```
+
+              The second argument *is* `props`. This is also why capitalization matters: `createElement` treats lowercase strings (`"h1"`) as HTML tags and capitalized identifiers (`Welcome`) as your component function.
+
+              **Conceptually**, a component was historically a class with `props`, `state`, and a `render()` method:
+
+              ```jsx
+              class Welcome extends React.Component {
+                  render() {
+                      return <h1>Hello, {this.props.name}</h1>;
+                  }
+              }
+              ```
+
+              Functional components are the modern form. React manages the instance for you, and state/lifecycle are
+              exposed via hooks (covered later). Class components are [no longer recommended](https://react.dev/reference/react/Component) for new code.
+
+            </textarea>
           </section>
 
           <section data-markdown style="font-size: 0.7em">
@@ -460,7 +501,7 @@
               Here, the lifecycle methods are replaced by the `useState` and `useEffect` hooks to achieve a similar result.
               - The `useState` hook is used to initialize the state and to define the function that will update the state.
               - The `useEffect` hook is called after the component is rendered for the first time (similar to `componentDidMount`).
-              - The optional cleanup function function retuned by the setup function is called when the component is removed from the DOM.
+              - The optional cleanup function retuned by the setup function is called when the component is removed from the DOM.
               - More on `useEffect` later.
 
               Notes:
@@ -562,6 +603,39 @@
               React Reconciliation is the process by which React determines the changes made to the virtual DOM and applies those changes efficiently to the actual DOM.
 
               It ensures that the user interface remains synchronized with the underlying data, minimizing unnecessary updates and rendering only the necessary components.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fa-brands fa-react"></i> When does a component re-render?
+
+              A **render** is React calling the component function again to compute new JSX.
+
+              A component re-renders when:
+              1. Its own state changes (`setX(...)`)
+              2. Its **parent** re-renders: this propagates down
+              3. A **context** it reads has a new `value` reference
+
+              **The cascade rule**: by default, when a component re-renders, **all of its descendants re-render 
+              too**, even if their props didn't change. The cascade flows *down*, not up or sideways.
+
+              ```
+              State change in <Main>:
+
+                  <App>            ← stays
+                  ├─ <Nav>         ← stays  (sibling of an ancestor)
+                  └─ <Page>        ← stays  (ancestor)
+                     ├─ <Side>     ← stays  (sibling of Main)
+                     └─ <Main>     ← re-renders  (state changed here)
+                        └─ <List>  ← re-renders  (descendant)
+              ```
+
+              Re-rendering a function is cheap: React diffs the new tree against the old one (*reconciliation*) and only touches the DOM where things actually changed.
+
+              The cascade only becomes a problem when a descendant does **expensive work**. That's what `useMemo`, 
+              `React.memo`, and `useCallback` are for as we will see.
+
             </textarea>
           </section>
 
@@ -941,69 +1015,128 @@
           </section>
           -->
 
-          <section data-markdown style="font-size: 0.8em">
+          <section data-markdown style="font-size: 0.7em">
             <textarea data-template>
-                ## <i class="fa-brands fa-react"></i> Context
+              ## <i class="fa-brands fa-react"></i> Context
 
-                A `Context` lets the parent component make some information available to any component in the tree below it, no matter how deep, without having to explicitly pass props down the component tree.
+              A `Context` lets a parent make a value available to any component in the tree below it, no matter how 
+              deep, without passing props down at every level (*"prop drilling"*).
 
-                It is useful when you have a lot of components that need the same data.
+              **Use it for** widely-needed, slow-changing values:
+              - Current user / authentication
+              - Theme (dark / light)
+              - Locale and translations
 
-                The `React.createContext` function creates a context object:
-                - It takes a default value as argument.
-                - It returns a context object with a `Provider` and `Consumer` components.
+              **Don't use it for** general application state or frequently-changing values: every consumer re-renders when the context value changes. Context is a tool for avoiding prop drilling, **not** a state-management library.
 
-                Notes:
+              `createContext(defaultValue)` returns a context object with:
+              - `.Provider` — wraps a subtree and supplies a value
+              - `.Consumer` — legacy, only useful for class components
 
-                The default value is only used when a component does not have a matching `Provider` component in its parent tree.
+              Notes:
+
+              The default value is used only when a consumer has no matching `Provider` above it in the tree.
 
             </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.8em">
+          <section data-markdown style="font-size: 0.75em">
             <textarea data-template>
-                            ## <i class="fa-brands fa-react"></i> `Provider`, `Consumer`, and `useContext`
+              ## <i class="fa-brands fa-react"></i> `Provider` and `useContext`
 
-                            The `Provider` component provides the context's state to its child components. We say those children are *in the scope* of the context. <br/>
-                            `Provider` components can scope the whole application or any subset of it.
+              The `Provider` component makes a value available to all components in its subtree, its **scope**. It 
+              can wrap the whole app or any subset.
 
-                            The `Consumer` component is used to subscribe to a context and receive its data.<br/>
-                            But a more modern solution is to call the `useContext` hook inside any component living within the scope of that context.
+              ```jsx
+              <MyContext.Provider value={someValue}>
+                  {/* anything in here can read someValue */}
+              </MyContext.Provider>
+              ```
 
-                        </textarea>
+              In any function component within that scope, we can read the value with the `useContext` hook:
+
+              ```jsx
+              const value = useContext(MyContext);
+              ```
+
+              Class components can use `<MyContext.Consumer>` instead, but functional components + `useContext` is the modern approach.
+
+              **Warning**: every consumer re-renders whenever the provider's `value` reference changes. So we
+              should peep `value` stable, as shown next.
+
+            </textarea>
           </section>
 
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fa-brands fa-react"></i> Declaring a context
+
+              Contexts are usually declared in a separate file. A wrapping `Provider` component owns the state and exposes it as the context's value.
+
+              Below is an example of a context (`UserContext`) defined in `./context/UserContext.js`:
+
+              ```js
+              import { createContext, useState, useMemo } from 'react';
+
+              export const UserContext = createContext();
+
+              export const UserProvider = ({ children }) => {
+                  const [user, setUser] = useState({ name: 'John' });
+                  const setName = (name) => setUser({ ...user, name });
+
+                  // Stable reference: only changes when `user` changes
+                  const value = useMemo(() => [user, setName], [user]);
+
+                  return (
+                      <UserContext.Provider value={value}>
+                          {children}
+                      </UserContext.Provider>
+                  );
+              }
+              ```
+
+              - `createContext()` creates and exports the context object.
+              - `UserProvider` wraps `UserContext.Provider` and owns the state.
+              - `useMemo` keeps the `value` array stable.
+
+            </textarea>
+          </section>
+
+          <!--
           <section data-markdown style="font-size: 0.65em">
             <textarea data-template>
-                            ## <i class="fa-brands fa-react"></i> Declaring a context
+              ## <i class="fa-brands fa-react"></i> Why `useMemo` on the provider value?
 
-                            Usually, contexts are declared in a separate file.
+              React compares the provider's `value` by **reference** (`Object.is`). Whenever that reference changes, *every consumer* in the subtree re-renders.
 
-                            Below is an example of a context (`UserContext`) defined in a `./context/UserContext.js` file.
+              **Without `useMemo`** — the array literal is a fresh reference on every render of `UserProvider`:
 
-                            ```js
-                                import React, { useState, useContext } from 'react';
-                                export const UserContext = createContext();
-                                export const UserProvider = ({ children }) => {
-                                    const [user, setUser] = useState({ name: 'John' });
-                                    const setName = name => setUser({ ...user, name });
-                                    return (
-                                        // user and setName will be available to all the children
-                                        <UserContext.Provider value={[user, setName]}>
-                                            {children}
-                                        </UserContext.Provider>
-                                    );
-                                }
-                            ```
+              ```js
+              // new [user, setName] array on every render
+              <UserContext.Provider value={[user, setName]}>
+                  {children}
+              </UserContext.Provider>
+              ```
 
-                            In this example:
-                            - We create and export a context with an initial value using `createContext`.
-                            - We create and export a component that wraps the `Provider` component to provide the state to its children.
+              Anything that re-renders `UserProvider` — even something unrelated — re-renders every component reading the context.
 
-                            The `UserContext.Provider` component takes a `value` prop containing the value of that context for all its children.
+              **With `useMemo`** — the same array reference is reused until `user` actually changes:
 
-                        </textarea>
+              ```js
+              const value = useMemo(() => [user, setName], [user]);
+
+              <UserContext.Provider value={value}>
+                  {children}
+              </UserContext.Provider>
+              ```
+
+              Now consumers only re-render when `user` changes — which is what we wanted.
+
+              The same applies to object values (`value={{ user, setName }}`): wrap them in `useMemo` too.
+
+            </textarea>
           </section>
+          -->
 
           <section data-markdown style="font-size: 0.8em">
             <textarea data-template>
@@ -1027,7 +1160,8 @@
             <textarea data-template>
                             ## <i class="fa-brands fa-react"></i> Consume the context
 
-                            It is now possible to consume the context in any component with the `useContext` hook.
+                            It is now possible to consume the context in any component, e.g. a `User` component, with
+              the `useContext` hook.
 
                             ```js
                                 import { UserContext } from './context/UserContext';
@@ -1111,6 +1245,319 @@
                             ```
                         </textarea>
           </section> -->
+        </section>
+
+        <section>
+          <section data-background="#333333" style="font-size: 0.8em">
+            <h2><i class="fa-solid fa-route"></i> React Router</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> React Router
+
+              `react-router` provides routing for React applications: declaring routes, navigating between them, and keeping the URL in sync with what is rendered.
+
+              It is platform-agnostic — web, React Native, server-side rendering with Node.js.
+
+              Since **v7** (Nov 2024), `react-router` is a **single package** that covers all platforms. Older code may still import from `react-router-dom`, which now simply re-exports `react-router` for backwards compatibility.
+
+              ```bash
+              npm install react-router
+              ```
+
+              Notes:
+              In this course we always import from `react-router`. If you find a tutorial that uses `react-router-dom`, the API is the same — just the import path differs.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Single Page Applications
+
+              In a Single Page Application (SPA), the server only delivers a single HTML page. The URL changes as the user navigates, but the page is **never reloaded**.
+
+              `react-router` uses the **HTML5 History API** to update the URL and listen for back/forward navigation, then re-renders the right components for the current location.
+
+              This gives an app-like experience while keeping bookmarkable, shareable URLs.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Main building blocks
+
+              - `BrowserRouter` — wraps the app and connects to the History API
+              - `Routes` — picks the matching `Route` for the current URL
+              - `Route` — declares a `path` and the `element` to render
+              - `Link` / `NavLink` — declarative navigation
+              - `useParams`, `useNavigate` — hooks to read URL params and navigate from code
+              - `Outlet` — placeholder where nested routes are rendered
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Router
+
+              `BrowserRouter` is the top-level component that wraps your application.
+
+              It keeps track of the current URL and re-renders when it changes.
+
+              ```jsx
+              import { BrowserRouter } from 'react-router';
+
+              function App() {
+                return (
+                  <BrowserRouter>
+                    {/* the rest of the app */}
+                  </BrowserRouter>
+                );
+              }
+              ```
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.75em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Routes and Route
+
+              A `Route` declares which **element** to render for a given **path**. All routes must be wrapped in a `Routes` block, which selects the best match for the current URL.
+
+              ```jsx
+              import { BrowserRouter, Routes, Route } from 'react-router';
+              import HomePage from './components/HomePage';
+              import UserProfile from './components/UserProfile';
+
+              function App() {
+                return (
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/users/:username" element={<UserProfile />} />
+                    </Routes>
+                  </BrowserRouter>
+                );
+              }
+              ```
+
+              Note that a `Route` will not create any `<a>` links ! For that we need a `Link` component, as shown next.
+
+              Notes:
+              In v6+, `Route` takes the rendered JSX through the **`element`** prop, not the older `component={Component}` form. The `:username` segment is a route parameter and will be available via `useParams`.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Link
+
+              `Link` renders an `<a>` tag that navigates **without reloading the page**.
+
+              ```jsx
+              import { Link } from 'react-router';
+
+              function Nav() {
+                return (
+                  <nav>
+                    <Link to="/">Home</Link>
+                    <Link to="/users/johndoe">John Doe's Profile</Link>
+                  </nav>
+                );
+              }
+              ```
+
+              We could thus define the navigation for our application :
+              ```jsx
+              function App() {
+                return (
+                  <BrowserRouter>
+                    <Nav />
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/users/:username" element={<UserProfile />} />
+                    </Routes>
+                  </BrowserRouter>
+                );
+              }
+              ```
+
+
+              Avoid plain `<a href="...">` for in-app navigation: it triggers a full page reload and discards your React state.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.75em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> NavLink — active styling
+
+              `NavLink` is a `Link` that knows whether it points to the **active** route. Useful for navigation menus.
+
+              ```jsx
+              import { NavLink } from 'react-router';
+
+              <NavLink
+                to="/"
+                className={({ isActive }) => isActive ? 'active' : ''}
+              >
+                Home
+              </NavLink>
+              ```
+
+              The `className` and `style` props accept a function receiving `{ isActive, isPending }`, so you can style the link based on the navigation state.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.75em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Index routes & 404 catch-all
+
+              An **index route** matches a parent's path exactly (no extra segment). A `*` route matches anything no other route caught — typical for a 404 page.
+
+              ```jsx
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  {/* rendered when the URL is exactly "/" */}
+                  <Route index element={<HomePage />} />
+                  <Route path="users/:username" element={<UserProfile />} />
+                </Route>
+                {/* anything else */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              ```
+
+              Notes:
+              The order of `Route` children does not matter — `Routes` always picks the most specific match. The `*` route only fires when nothing else does.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Nested routes & `Outlet`
+
+              Routes can be **nested** to share a common layout (sidebar, header, etc.). The parent route renders an `<Outlet>` placeholder where the matching child route is injected.
+
+              ```jsx
+              import { Outlet } from 'react-router';
+
+              function DashboardLayout() {
+                return (
+                  <div>
+                    <Sidebar />
+                    <main><Outlet /></main>
+                  </div>
+                );
+              }
+
+              <Routes>
+                <Route path="/dashboard" element={<DashboardLayout />}>
+                  <Route index element={<Overview />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="users/:id" element={<UserDetail />} />
+                </Route>
+              </Routes>
+              ```
+
+              Visiting `/dashboard/settings` renders `DashboardLayout` with `Settings` inside its `<Outlet>`.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.75em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Reading URL parameters
+
+              Use the `useParams` hook to read the `:placeholders` declared in a route path.
+
+              Given our user profile route:
+              ```jsx
+              <Routes>
+                <Route path="/users/:username" element={<UserProfile />} />
+              </Routes>
+              ```
+              We can thus use `useParams` to read the `:username` placeholder:
+              ```jsx
+              import { useParams } from 'react-router';
+
+              function UserProfile() {
+                const { username } = useParams();
+                return <h1>{username}'s profile</h1>;
+              }
+              ```
+
+              Visiting `/users/sara` will assign `'sara'` to `username`.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.75em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Programmatic navigation
+
+              Use the `useNavigate` hook to navigate from code (after a form submit, an API call, etc.).
+
+              ```jsx
+              import { useNavigate } from 'react-router';
+
+              function LoginButton() {
+                const navigate = useNavigate();
+
+                const handleClick = () => {
+                  // ... do login work ...
+                  navigate('/users/johndoe');           // push a new entry
+                  // navigate(-1);                       // go back
+                  // navigate('/', { replace: true });   // replace, don't push
+                };
+
+                return <button onClick={handleClick}>Log in</button>;
+              }
+              ```
+
+              Notes:
+              In older code (≤ v5) you'll see `useHistory()` and `history.push()`. These were **replaced by `useNavigate`** in v6 and removed.
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.65em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Going further — data routers
+
+              For non-trivial apps, the React Router team recommends the **data router** API: routes are described as a config object, and each route can declare a `loader` (data fetching before render) and an `action` (form handling).
+
+              ```jsx
+              import { createBrowserRouter, RouterProvider } from 'react-router';
+
+              const router = createBrowserRouter([
+                { path: '/', element: <HomePage /> },
+                {
+                  path: '/users/:username',
+                  element: <UserProfile />,
+                  loader: ({ params }) =>
+                    fetch(`/api/users/${params.username}`),
+                },
+                { path: '*', element: <NotFound /> },
+              ]);
+
+              function App() {
+                return <RouterProvider router={router} />;
+              }
+              ```
+
+              Benefits: data is fetched **in parallel** with rendering, built-in pending and error states, and easier code-splitting.
+
+              Notes:
+              You don't need this for the lab — declarative `<Routes>` is enough. But it's the API you'll see in modern tutorials and in production apps. Read more at https://reactrouter.com/start/data
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fa-solid fa-route"></i> Sources
+
+              - https://reactrouter.com — official documentation
+              - https://reactrouter.com/start/declarative — the API used in this lecture
+              - https://reactrouter.com/start/data — data router API
+              - https://www.npmjs.com/package/react-router
+            </textarea>
+          </section>
         </section>
 
         <section>
@@ -1211,22 +1658,27 @@
             </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.7em">
+          <section data-markdown style="font-size: 0.6em">
             <textarea data-template>
               ## <i class="fa-solid fa-boxes-stacked"></i> Grid (Layout)
 
               A responsive layout component (`container`) that arranges its children (`items`) in a specific way.
               You can specify a direction, spacing (row & column), and alignment of the items.
 
-              <img style="margin:0; padding:0;margin-right:2rem;" src="./images/mui/grid.PNG">
+              The grid is divided into 12 columns. Each item can have a with in columns (1 to 12).
+              <img style="margin:0; padding:0;margin-right:2rem;" src="./images/mui/grid2.png">
 
               It is possible to specify the portion of the container that each item takes.
               These portions can be different for each viewport size (called **breakpoints**) [xs, sm, md, lg, xl].
 
-              Column widths are integer values between 1 and 12 as the grid is divided into 12 columns.
+              Items may have multiple widths defined, causing the layout to change at the defined breakpoint.
 
-              In this example, the first item (xs=8) takes 8/12 of the container width when the viewport width is between 0px and 600px.
-              If no other breakpoints are specified, the xs will continue to apply on viewports that are larger than 600px.
+              For example, a component with `size={{ xs: 6, md: 8 }}` occupies the half the viewport width when the
+              viewport is [less than 900 pixels wide (md)
+              ](https://mui.com/material-ui/customization/breakpoints/#default-breakpoints).
+              When the viewport grows beyond that size (`md`), the component occupies 2/3 of the total width — 8
+              columns rather than 6.
+
 
 
               https://mui.com/material-ui/react-grid/
@@ -1431,180 +1883,7 @@
                         </textarea>
           </section>
         </section>
-        <section>
-          <section data-background="#333333" style="font-size: 0.8em">
-            <h2><i class="fa-solid fa-boxes-stacked"></i> React Router</h2>
-          </section>
 
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React Router
-
-                            `react-router` is a library that provides routing functionality for React applications.
-
-                            It allows you to define routes and navigate between them, providing a clean and declarative way to manage the application's URL.
-
-                            `react-router` is platform-agnostic, which means it can be used in any environment that React supports, including the web, React Native, and server-side rendering (SSR) with Node.js.
-
-                            The `react-router-dom` package provides specific components for use in web applications built with React.
-
-                            Starting from v7, `react-router` is the single package that contains all the routing functionality for all platforms.
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom
-
-                            The `react-router-dom package`, which is a part of the React Router library,
-                            is designed to manage routing and navigation in single-page applications (SPAs).
-
-                            This means that it is responsible for handling the application's URL and rendering the appropriate components for the current location,
-                            without causing the page to reload.
-
-                            In order to do this, the `react-router-dom` package uses the HTML5 history API to keep track of the current URL and to manipulate the browser's history stack. This allows the application to maintain a seamless, app-like experience, even though it is only loading a single page from the server.
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - Main components
-
-                            - Router
-                            - Route
-                            - Link
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - Router
-
-                            This is the main component that is used to wrap your React application.
-
-                            It keeps track of the current location and renders the appropriate components for that location.
-
-                            ```javascript
-                            import React from 'react';
-                            import { BrowserRouter as Router } from 'react-router-dom';
-
-                            function App() {
-                              return (
-                                <Router>
-                                  ...
-                                </Router>
-                              );
-                            }
-                            ```
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - Route
-
-                            This component is used to define a route in your application.
-
-                            It takes a `path` prop that specifies the URL path that the route should match,
-                            and a `component` prop that specifies which component to render when the route is active.
-
-                            ```javascript
-                            import React from 'react';
-                            import { BrowserRouter as Router, Route } from 'react-router-dom';
-
-                            import HomePage from './components/HomePage';
-                            import UserProfile from './components/UserProfile';
-
-                            function App() {
-                              return (
-                                <Router>
-                                  <Route path="/" component={HomePage} />
-                                  <Route path="/users/:username" component={UserProfile} />
-                                </Router>
-                              );
-                            }
-                            ```
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-              ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - Link
-
-              This component is used to provide navigation between routes in your application.
-
-              It takes a `to` prop that specifies the target route,
-              and renders a clickable element that the user can click on to navigate to the target route.
-
-              ```javascript
-              function App() {
-                return (
-                  <Router>
-                      <Link to="/">Home</Link>
-                      <Link to="/users/johndoe">John Doe's Profile</Link>
-                      <Route path="/" component={HomePage} />
-                      <Route path="/users/:username" component={UserProfile} />
-                  </Router>
-                );
-              }
-              ```
-            </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - Access params
-
-                            You can access route parameters (such as URL path parameters) using the useParams hook.
-
-                            ```javascript
-                            import React from 'react';
-                            import { useParams } from 'react-router-dom';
-
-                            function UserProfile() {
-                            const { username } = useParams();
-
-                            return (
-                                <div>
-                                    <h1>{username}'s Profile</h1>
-                                    ...
-                                </div>
-                            );
-                            }
-                            ```
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - programmatically navigate
-
-                            You can use the `useHistory` hook to access the history object,
-                            which allows you to programmatically navigate to different routes.
-
-                            ```javascript
-                            import React from 'react';
-                            import { useHistory } from 'react-router-dom';
-
-                            function Button() {
-                                const history = useHistory();
-
-                                function handleClick() {
-                                    // navigate to the new route and push in history stack
-                                    history.push('/users/johndoe');
-                                }
-
-                                return (
-                                    <button onClick={handleClick}>
-                                        Click me to navigate!
-                                    </button>
-                                );
-                            }
-                            ```
-                        </textarea>
-          </section>
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-                            ## <i class="fa-solid fa-boxes-stacked"></i> React-Router-Dom - sources
-
-                            - https://www.npmjs.com/package/react-router
-                            - https://reactrouter.com/en/main
-                        </textarea>
-          </section>
-        </section>
       </div>
     </div>
 
