@@ -71,7 +71,7 @@ l'avancement de votre projet.
 
 L'ordre de passage est donné ci-dessous, avec les horaires que nous souhaitons respecter.
 
-Toutes les équipes doivent assister aux présentations des autres équipes, afin de découvrir les projets des autres et d'apprendre de nouvelles choses.
+Toutes les équipes doivent assister aux pr  ésentations des autres équipes, afin de découvrir les projets des autres et d'apprendre de nouvelles choses.
 
 | Nb personnes | Équipe                                                           | Projet                                       | Heure de passage / Temps |
 |--------------|------------------------------------------------------------------|----------------------------------------------|--------------------------|
