@@ -1030,8 +1030,8 @@
               **Don't use it for** general application state or frequently-changing values: every consumer re-renders when the context value changes. Context is a tool for avoiding prop drilling, **not** a state-management library.
 
               `createContext(defaultValue)` returns a context object with:
-              - `.Provider` — wraps a subtree and supplies a value
-              - `.Consumer` — legacy, only useful for class components
+              - `Provider` — wraps a subtree and supplies a value
+              - `Consumer` — legacy, only useful for class components
 
               Notes:
 
@@ -1062,7 +1062,7 @@
               Class components can use `<MyContext.Consumer>` instead, but functional components + `useContext` is the modern approach.
 
               **Warning**: every consumer re-renders whenever the provider's `value` reference changes. So we
-              should peep `value` stable, as shown next.
+              should keep `value` stable, as shown next.
 
             </textarea>
           </section>
@@ -1084,8 +1084,7 @@
                   const [user, setUser] = useState({ name: 'John' });
                   const setName = (name) => setUser({ ...user, name });
 
-                  // Stable reference: only changes when `user` changes
-                  const value = useMemo(() => [user, setName], [user]);
+                  const value = [user, setName];
 
                   return (
                       <UserContext.Provider value={value}>
@@ -1097,7 +1096,7 @@
 
               - `createContext()` creates and exports the context object.
               - `UserProvider` wraps `UserContext.Provider` and owns the state.
-              - `useMemo` keeps the `value` array stable.
+              - We could use `useMemo` to keeps the `value` array stable.
 
             </textarea>
           </section>
@@ -1158,26 +1157,34 @@
 
           <section data-markdown style="font-size: 0.8em">
             <textarea data-template>
-                            ## <i class="fa-brands fa-react"></i> Consume the context
+              ## <i class="fa-brands fa-react"></i> Consume the context
 
-                            It is now possible to consume the context in any component, e.g. a `User` component, with
-              the `useContext` hook.
+              It is now possible to consume the context in any component, e.g. a `User` component, with
+the `useContext` hook.
 
-                            ```js
-                                import { UserContext } from './context/UserContext';
-                                const User = () => {
-                                    const [user, setName] = useContext(UserContext); // will get the context from the nearest parent
-                                    return (
-                                        <div>
-                                            <div>{user.name}</div>
-                                            <input value={user.name} onChange={e => setName(e.target.value)} />
-                                        </div>
-                                    );
-                                }
-                            ```
-                        </textarea>
+              ```js
+                  import { UserContext } from './context/UserContext';
+                  const User = () => {
+                      const [user, setName] = useContext(UserContext); // will get the context from the nearest parent
+                      return (
+                          <div>
+                            <p>Your current user name : {user.name}</p>
+                            <div>
+                              <label for="user">Change it :</label>
+                              <input
+                                id="user"
+                                value={user.name}
+                                onChange={(e) => setName(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                      );
+                  }
+              ```
+              https://codepen.io/editor/binaerbaum/pen/019dfa71-c675-76bc-ba80-5504f3b5294c
+            </textarea>
           </section>
-          <!-- <section data-markdown style="font-size: 0.7em;">
+          <section data-markdown style="font-size: 0.7em;">
                   <textarea data-template>
                       ## <i class="fa fa-hand-paper"></i> `useReducer` hook and context
 
@@ -1244,7 +1251,7 @@
                                 }
                             ```
                         </textarea>
-          </section> -->
+          </section>
         </section>
 
         <section>
@@ -1288,8 +1295,8 @@
               ## <i class="fa-solid fa-route"></i> Main building blocks
 
               - `BrowserRouter` — wraps the app and connects to the History API
-              - `Routes` — picks the matching `Route` for the current URL
               - `Route` — declares a `path` and the `element` to render
+              - `Routes` — picks the matching `Route` for the current URL
               - `Link` / `NavLink` — declarative navigation
               - `useParams`, `useNavigate` — hooks to read URL params and navigate from code
               - `Outlet` — placeholder where nested routes are rendered
@@ -1372,7 +1379,7 @@
               function App() {
                 return (
                   <BrowserRouter>
-                    <Nav />
+                    <Nav /> <!-- our navigation component -->
                     <Routes>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/users/:username" element={<UserProfile />} />
@@ -1474,7 +1481,7 @@
                 <Route path="/users/:username" element={<UserProfile />} />
               </Routes>
               ```
-              We can thus use `useParams` to read the `:username` placeholder:
+              We can use `useParams` to read the `:username` placeholder:
               ```jsx
               import { useParams } from 'react-router';
 
