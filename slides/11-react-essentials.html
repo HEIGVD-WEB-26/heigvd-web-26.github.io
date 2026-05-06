@@ -53,7 +53,7 @@
 
         <section>
           <section data-background="#333333" style="font-size: 0.8em">
-            <h2><i class="fa-brands fa-react"></i> React</h2>
+            <h2><i class="fa-brands fa-react"></i> React Basics</h2>
           </section>
           <section data-markdown style="font-size: 0.8em">
             <textarea data-template>
@@ -246,7 +246,9 @@
                             Here, the `App` component is composed of three `Welcome` components. It passes a different `name` attribute to each `Welcome` component.
 
                             **Components must return a single root element**. This is why we wrap the `Welcome` components in a `div` element.
-                            The `div` element is not rendered in the final output and can be replaced with a [React fragment](https://react.dev/reference/react/Fragment) (`<Fragment> (<>...</>)`).
+                            The `div` element **is** rendered in the final output and can be replaced with a [React
+              fragment](https://react.dev/reference/react/Fragment) (`<Fragment> (<>...</>)`) if we don't want
+              artificial divs.
 
                         </textarea>
           </section>
@@ -260,7 +262,7 @@
               In the example below, the `WelcomeDialog` component uses the `Dialog` component and passes content to it, which the latter displays in a `<div>`.
 
               ```jsx
-              const Dialog = (props) => <div> {props.children} </div>;
+              const Dialog = (props) => <> {props.children} </>;
 
               const WelcomeDialog = () => {
                   return <Dialog>
@@ -287,10 +289,10 @@
 
                             ```jsx
                             const Dialog = ({title, body}) => {
-                                return <div>
+                                return <>
                                     <header>{title}</header>
                                     <body>{body}</body>
-                                </div>;
+                                </>;
                             }
 
                             const WelcomeDialog = () => {
@@ -401,6 +403,13 @@
             </textarea>
           </section>
 
+        </section>
+
+        <section>
+          <section data-background="#333333" style="font-size: 0.8em">
+            <h2><i class="fa-brands fa-react"></i> Managing state &amp; hooks</h2>
+          </section>
+
           <section data-markdown style="font-size: 0.65em">
             <textarea data-template>
                             ## <i class="fa-brands fa-react"></i>  State and lifecycle
@@ -472,7 +481,7 @@
           </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.6em">
+          <section data-markdown style="font-size: 0.55em">
             <textarea data-template>
               ## <i class="fa-brands fa-react"></i> Functional component state and lifecycle
 
@@ -503,6 +512,8 @@
               - The `useEffect` hook is called after the component is rendered for the first time (similar to `componentDidMount`).
               - The optional cleanup function retuned by the setup function is called when the component is removed from the DOM.
               - More on `useEffect` later.
+
+              https://codepen.io/binaerbaum/pen/vEBgVKv
 
               Notes:
               The second array parameter of `useEffect` can be used to specify when the effect should be called. If it is empty, the effect will only be called once, after the first render. If it contains variables, the effect will be called whenever one of them changes.
@@ -606,39 +617,6 @@
             </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.65em">
-            <textarea data-template>
-              ## <i class="fa-brands fa-react"></i> When does a component re-render?
-
-              A **render** is React calling the component function again to compute new JSX.
-
-              A component re-renders when:
-              1. Its own state changes (`setX(...)`)
-              2. Its **parent** re-renders: this propagates down
-              3. A **context** it reads has a new `value` reference
-
-              **The cascade rule**: by default, when a component re-renders, **all of its descendants re-render 
-              too**, even if their props didn't change. The cascade flows *down*, not up or sideways.
-
-              ```
-              State change in <Main>:
-
-                  <App>            ← stays
-                  ├─ <Nav>         ← stays  (sibling of an ancestor)
-                  └─ <Page>        ← stays  (ancestor)
-                     ├─ <Side>     ← stays  (sibling of Main)
-                     └─ <Main>     ← re-renders  (state changed here)
-                        └─ <List>  ← re-renders  (descendant)
-              ```
-
-              Re-rendering a function is cheap: React diffs the new tree against the old one (*reconciliation*) and only touches the DOM where things actually changed.
-
-              The cascade only becomes a problem when a descendant does **expensive work**. That's what `useMemo`, 
-              `React.memo`, and `useCallback` are for as we will see.
-
-            </textarea>
-          </section>
-
           <section data-markdown style="font-size: 0.55em">
             <textarea data-template>
               ## <i class="fa-brands fa-react"></i> The `useReducer` hook
@@ -699,87 +677,6 @@
           </section>
 
 
-
-          <section data-markdown style="font-size: 0.5em">
-            <textarea data-template>
-              ## <i class="fa-brands fa-react"></i> The `useEffect` hook
-
-              The `useEffect` hook is used to run a side effect when the component renders.
-
-              It takes two arguments: (1) a setup function that runs when the component is first rendered and (2) an array of dependencies.
-
-              The setup function can optionally return a cleanup function that is called when the component is re-rendered because a dependency changed or is removed (unmounts).
-
-              Depending on the dependencies, the `useEffect` hook will run one or several times.
-
-              ```jsx
-              import { useState, useEffect } from "react";
-              import ReactDOM from "react-dom/client";
-
-              function Counter() {
-                const [count, setCount] = useState(0);
-                const [calculation, setCalculation] = useState(0);
-
-                useEffect(() => {
-                    setCalculation(() => count * 2); // could also write setCalculation(count * 2)
-                }, [count]); // <- useEffect will run whenever the count variable changes
-
-                return (
-                    <>
-                        <p>Count: {count}</p>
-                        <button onClick={() => setCount((c) => c + 1)}>+</button>
-                        <p>Calculation: {calculation}</p>
-                    </>
-                );
-              }
-              const root = ReactDOM.createRoot(document.getElementById('root'));
-              root.render(<Counter />);
-              ```
-
-              `useEffect` allows you to run side effects within your component.
-              Common side effects are: Fetching data from an API, subscribing to a stream of data, or manipulating the DOM, etc.
-
-              Notes:
-              React calls your setup and cleanup functions whenever it’s necessary, which may happen multiple times:
-
-              Your setup code runs when your component is added to the page (mounts).
-
-              After every re-render of your component where the dependencies have changed:
-                  First, your cleanup code runs with the old props and state.
-                  Then, your setup code runs with the new props and state.
-
-              Your cleanup code runs one final time after your component is removed from the page (unmounts).
-
-
-            </textarea>
-          </section>
-
-          <section data-markdown style="font-size: 0.8em">
-            <textarea data-template>
-              ## <i class="fa-brands fa-react"></i> More on the `useEffect` hook
-
-              The behavior of the `useEffect` can be controlled by passing a second argument to it.
-              This argument is an array of dependencies.
-
-              ```js
-              useEffect(() => {
-                  // runs on every render
-              });
-              useEffect(() => {
-                  // runs on first render
-              }, []);
-              useEffect(() => {
-                  // runs on first render and when any of dependencies changes
-              }, [dependency1, dependency2]);
-              ```
-
-              The callback will be called
-              - on first render
-              - each time a dependency changes, if a dependency array is provided
-              - on every render if no dependency array is provided
-
-            </textarea>
-          </section>
 
           <section data-markdown style="font-size: 0.75em">
             <textarea data-template>
@@ -866,6 +763,134 @@
             </textarea>
           </section>
 
+        </section>
+
+        <section>
+          <section data-background="#333333" style="font-size: 0.8em">
+            <h2><i class="fa-brands fa-react"></i> Effect hooks</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.5em">
+            <textarea data-template>
+              ## <i class="fa-brands fa-react"></i> The `useEffect` hook
+
+              The `useEffect` hook is used to run a side effect when the component renders.
+
+              It takes two arguments: (1) a setup function that runs when the component is first rendered and (2) an array of dependencies.
+
+              The setup function can optionally return a cleanup function that is called when the component is re-rendered because a dependency changed or is removed (unmounts).
+
+              Depending on the dependencies, the `useEffect` hook will run one or several times.
+
+              ```jsx
+              import { useState, useEffect } from "react";
+              import ReactDOM from "react-dom/client";
+
+              function Counter() {
+                const [count, setCount] = useState(0);
+                const [calculation, setCalculation] = useState(0);
+
+                useEffect(() => {
+                    setCalculation(() => count * 2); // could also write setCalculation(count * 2)
+                }, [count]); // <- useEffect will run whenever the count variable changes
+
+                return (
+                    <>
+                        <p>Count: {count}</p>
+                        <button onClick={() => setCount((c) => c + 1)}>+</button>
+                        <p>Calculation: {calculation}</p>
+                    </>
+                );
+              }
+              const root = ReactDOM.createRoot(document.getElementById('root'));
+              root.render(<Counter />);
+              ```
+
+              `useEffect` allows you to run side effects within your component.
+              Common side effects are: Fetching data from an API, subscribing to a stream of data, or manipulating the DOM, etc.
+
+              Notes:
+              React calls your setup and cleanup functions whenever it’s necessary, which may happen multiple times:
+
+              Your setup code runs when your component is added to the page (mounts).
+
+              After every re-render of your component where the dependencies have changed:
+                  First, your cleanup code runs with the old props and state.
+                  Then, your setup code runs with the new props and state.
+
+              Your cleanup code runs one final time after your component is removed from the page (unmounts).
+
+
+            </textarea>
+          </section>
+
+          <section data-markdown style="font-size: 0.8em">
+            <textarea data-template>
+              ## <i class="fa-brands fa-react"></i> More on the `useEffect` hook
+
+              The behavior of the `useEffect` can be controlled by passing a second argument to it.
+              This argument is an array of dependencies.
+
+              ```js
+              useEffect(() => {
+                  // runs on every render
+              });
+              useEffect(() => {
+                  // runs on first render
+              }, []);
+              useEffect(() => {
+                  // runs on first render and when any of dependencies changes
+              }, [dependency1, dependency2]);
+              ```
+
+              The callback will be called
+              - on first render
+              - each time a dependency changes, if a dependency array is provided
+              - on every render if no dependency array is provided
+
+            </textarea>
+          </section>
+
+        </section>
+
+        <section>
+          <section data-background="#333333" style="font-size: 0.8em">
+            <h2><i class="fa-brands fa-react"></i> Memoisation</h2>
+          </section>
+
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+              ## <i class="fa-brands fa-react"></i> When does a component re-render?
+
+              A **render** is React calling the component function again to compute new JSX.
+
+              A component re-renders when:
+              1. Its own state changes (`setX(...)`)
+              2. Its **parent** re-renders: this propagates down
+              3. A **context** it reads has a new `value` reference
+
+              **The cascade rule**: by default, when a component re-renders, **all of its descendants re-render
+              too**, even if their props didn't change. The cascade flows *down*, not up or sideways.
+
+              ```
+              State change in <Main>:
+
+                  <App>            ← stays
+                  ├─ <Nav>         ← stays  (sibling of an ancestor)
+                  └─ <Page>        ← stays  (ancestor)
+                     ├─ <Side>     ← stays  (sibling of Main)
+                     └─ <Main>     ← re-renders  (state changed here)
+                        └─ <List>  ← re-renders  (descendant)
+              ```
+
+              Re-rendering a function is cheap: React diffs the new tree against the old one (*reconciliation*) and only touches the DOM where things actually changed.
+
+              The cascade only becomes a problem when a descendant does **expensive work**. That's what `useMemo`,
+              `React.memo`, and `useCallback` are for as we will see.
+
+            </textarea>
+          </section>
+
           <section data-markdown style="font-size: 0.65em">
             <textarea data-template>
               ## <i class="fa-brands fa-react"></i> Caching values - `useMemo` hook
@@ -899,39 +924,49 @@
             </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.65em">
+          <section data-markdown style="font-size: 0.6em">
             <textarea data-template>
               ## <i class="fa-brands fa-react"></i> Preventing unnecessary renders - `React.memo()`
               By default, when a component re-renders, React re-renders all of its children recursively, even if their props haven't changed.
 
-              `memo` lets us skip re-rendering a component when its props are unchanged. It returns a memoized version of the component.
+              `memo()` lets us skip re-rendering a component when its props are unchanged. It returns a memoized
+              version of the component.
 
               ```js
               import React, { memo } from 'react';
 
-              const List = memo(({ items }) => {
-                return (
-                  <ul>
-                    {items.map((item) => (
-                      <li key={item.id}>{item.name}</li>
-                    ))}
-                  </ul>
-                );
+              // Memoized child — only re-renders when its props change
+              const Greeting = memo(function Greeting({ name }) {
+                useEffect(() => { console.log('Greeting rendered'); });
+                return <h3>Hello, {name}!</h3>;
               });
 
-              const ParentComponent = ({ items }) => {
+              function App() {
+                const [count, setCount] = useState(0);
+                const [name, setName] = useState('Sara');
+
+                useEffect(() => { console.log('App rendered'); });
+
                 return (
-                  <div>
-                    <h1>Item List</h1>
-                    <List items={items} /> <!-- This will only re-render if items change -->
+                  <div style={{ fontFamily: 'sans-serif', padding: 16 }}>
+                    <p>Parent count: {count}</p>
+                    <button onClick={() => setCount(c => c + 1)}>
+                      Increment count (parent only)
+                    </button>
+                    <button onClick={() => setName(n => n === 'Sara' ? 'Cahal' : 'Sara')}>
+                      Toggle name (passed to child)
+                    </button>
+                    <Greeting name={name} />
                   </div>
                 );
-              };
+              }
+
+              ReactDOM.createRoot(document.getElementById('root')).render(<App />);
               ```
             </textarea>
           </section>
 
-          <section data-markdown style="font-size: 0.65em">
+          <section data-markdown style="font-size: 0.5em">
             <textarea data-template>
               ## <i class="fa-brands fa-react"></i> Caching function definitions - `useCallback` hook
 
@@ -942,22 +977,37 @@
               Using `useCallback`, function definitions can be cached and will not change between renders.
 
               ```js
-              const Counter = () => {
+              const Button = memo(function Button({ onClick }) {
+                useEffect(() => { console.log('Button rendered'); });
+                return <button onClick={onClick}>+1</button>;
+              });
+
+              function App() {
                 const [count, setCount] = useState(0);
-                // without useCallback increment would contain a new function definition (address) on each re-render
-                const increment = useCallback(() => setCount(count + 1), [count]);
-                return <div>
-                  <Button onClick={increment} />
-                  <div>{count}</div>
-                </div>;
+                const [name, setName]   = useState('Sara');
+                // Stable across renders — created once, deps are []
+                const increment = useCallback(() => setCount(c => c + 1), []);
+                useEffect(() => { console.log('App rendered'); });
+
+                return (
+                  <div style={{ fontFamily: 'sans-serif', padding: 16 }}>
+                    <input
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="type to re-render the parent"
+                    />
+                    <p>{name}, count: {count}</p>
+                    <Button onClick={increment} />
+                  </div>
+                );
               }
-
-              // memo allow Button to skip re-rendering unless onClick changes
-              const Button = memo(({onClick}) => (<button onClick={onClick}>Increment</button>));
+              ReactDOM.createRoot(document.getElementById('root')).render(<App />);
               ```
-              By combining `useCallback` and `memo` we prevent the child component from re-rendering unless `count` changes.
+              By combining `useCallback` and `memo` we prevent the child component from re-rendering as `increment`
+              remains stable.
 
-              Because the passed function is cached by the parent and does not change across re-renders unless its dependency changes.
+              Because the passed function is cached by the parent and does not change across re-renders unless its
+              dependency changes (which is none).
 
               Notes:
               `memo` alone would not have been enough to prevent a re-render of the child component (Button) because at each re-render of the parent component it would pass it a new function definition.
@@ -1014,6 +1064,13 @@
             </textarea>
           </section>
           -->
+
+        </section>
+
+        <section>
+          <section data-background="#333333" style="font-size: 0.8em">
+            <h2><i class="fa-brands fa-react"></i> Context</h2>
+          </section>
 
           <section data-markdown style="font-size: 0.7em">
             <textarea data-template>
