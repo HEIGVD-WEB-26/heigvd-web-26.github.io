@@ -95,88 +95,88 @@ votre projet. N'hésitez pas à en proposer d'autres !
 
 ### Rendu graphique & jeux {.unlisted}
 
-- **[PixiJS](https://pixijs.com/)** — moteur 2D WebGL très performant, idéal pour des jeux ou de la dataviz à grande échelle.
-- **[Three.js](https://threejs.org/)** / **[React Three Fiber](https://r3f.docs.pmnd.rs/)** — rendu 3D dans le navigateur (jeux, scènes interactives, visualisations).
-- **[Phaser](https://phaser.io/)** — framework de jeux 2D complet (physique, animations, tilemaps).
-- **[Babylon.js](https://www.babylonjs.com/)** — alternative à Three.js pour la 3D, orientée jeux.
-- **[p5.js](https://p5js.org/)** — créatif/génératif, parfait pour des projets artistiques.
+- [PixiJS](https://pixijs.com/) — moteur 2D WebGL très performant, idéal pour des jeux ou de la dataviz à grande échelle.
+- [Three.js](https://threejs.org/) / [React Three Fiber](https://r3f.docs.pmnd.rs/) — rendu 3D dans le navigateur (jeux, scènes interactives, visualisations).
+- [Phaser](https://phaser.io/) — framework de jeux 2D complet (physique, animations, tilemaps).
+- [Babylon.js](https://www.babylonjs.com/) — alternative à Three.js pour la 3D, orientée jeux.
+- [p5.js](https://p5js.org/) — créatif/génératif, parfait pour des projets artistiques.
 
 ### Communication temps réel {.unlisted}
 
-- **[Socket.IO](https://socket.io/)** — la référence pour la communication bidirectionnelle temps réel.
-- **[WebSocket natif](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)** — l'API standard, sans dépendance.
-- **[PeerJS](https://peerjs.com/)** — communication peer-to-peer via WebRTC (chat vidéo, partage de fichiers).
-- **[Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)** — flux unidirectionnel serveur → client (notifications, suivi de progression).
+- [Socket.IO](https://socket.io/) — la référence pour la communication bidirectionnelle temps réel.
+- [WebSocket natif](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) — l'API standard, sans dépendance.
+- [PeerJS](https://peerjs.com/) — communication peer-to-peer via WebRTC (chat vidéo, partage de fichiers).
+- [Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) — flux unidirectionnel serveur → client (notifications, suivi de progression).
 
 ### Backend Node.js {.unlisted}
 
-- **[Express](https://expressjs.com/)** — le framework HTTP minimaliste classique.
-- **[Fastify](https://fastify.dev/)** — alternative moderne à Express, plus rapide et avec validation intégrée.
-- **[NestJS](https://nestjs.com/)** — framework structuré (style Angular) pour applications plus larges.
-- **[Hono](https://hono.dev/)** — framework ultra-léger qui tourne aussi sur le edge (Cloudflare Workers, Bun, Deno).
+- [Express](https://expressjs.com/) — le framework HTTP minimaliste classique.
+- [Fastify](https://fastify.dev/) — alternative moderne à Express, plus rapide et avec validation intégrée.
+- [NestJS](https://nestjs.com/) — framework structuré (style Angular) pour applications plus larges.
+- [Hono](https://hono.dev/) — framework ultra-léger qui tourne aussi sur le edge (Cloudflare Workers, Bun, Deno).
 
 ### Bases de données & ORM {.unlisted}
 
-- **[Prisma](https://www.prisma.io/)** — ORM TypeScript avec migrations, type safety et excellente DX.
-- **[Drizzle](https://orm.drizzle.team/)** — ORM léger et type-safe, plus proche du SQL.
-- **[TypeORM](https://typeorm.io/)** — ORM pour TypeScript/JavaScript inspiré de Hibernate.
-- **[Mongoose](https://mongoosejs.com/)** — modélisation et validation pour MongoDB.
-- **[better-sqlite3](https://github.com/WiseLibs/better-sqlite3)** — SQLite synchrone en Node.js, parfait pour les projets auto-hébergés.
-- **[Redis (ioredis)](https://github.com/redis/ioredis)** — cache, pub/sub, files d'attente.
+- [Prisma](https://www.prisma.io/) — ORM TypeScript avec migrations, type safety et excellente DX.
+- [Drizzle](https://orm.drizzle.team/) — ORM léger et type-safe, plus proche du SQL.
+- [TypeORM](https://typeorm.io/) — ORM pour TypeScript/JavaScript inspiré de Hibernate.
+- [Mongoose](https://mongoosejs.com/) — modélisation et validation pour MongoDB.
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) — SQLite synchrone en Node.js, parfait pour les projets auto-hébergés.
+- [Redis (ioredis)](https://github.com/redis/ioredis) — cache, pub/sub, files d'attente.
 
 ### Cartographie & géolocalisation {.unlisted}
 
-- **[Leaflet](https://leafletjs.com/)** — cartes interactives légères.
-- **[MapLibre GL](https://maplibre.org/)** — cartes vectorielles WebGL (alternative open-source à Mapbox).
-- **[Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API)** — accéder à la position de l'utilisateur.
+- [Leaflet](https://leafletjs.com/) — cartes interactives légères.
+- [MapLibre GL](https://maplibre.org/) — cartes vectorielles WebGL (alternative open-source à Mapbox).
+- [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) — accéder à la position de l'utilisateur.
 
 ### Visualisation de données {.unlisted}
 
-- **[D3.js](https://d3js.org/)** — visualisations data sur-mesure.
-- **[Chart.js](https://www.chartjs.org/)** / **[Recharts](https://recharts.org/)** — graphiques prêts à l'emploi.
-- **[Plotly.js](https://plotly.com/javascript/)** — graphiques scientifiques interactifs.
-- **[Observable Plot](https://observablehq.com/plot/)** — API concise pour des graphiques rapides.
+- [D3.js](https://d3js.org/) — visualisations data sur-mesure.
+- [Chart.js](https://www.chartjs.org/) / [Recharts](https://recharts.org/) — graphiques prêts à l'emploi.
+- [Plotly.js](https://plotly.com/javascript/) — graphiques scientifiques interactifs.
+- [Observable Plot](https://observablehq.com/plot/) — API concise pour des graphiques rapides.
 
 ### Médias, audio & XR {.unlisted}
 
-- **[Tone.js](https://tonejs.github.io/)** — synthèse et séquençage audio.
-- **[Howler.js](https://howlerjs.com/)** — lecture audio simplifiée.
-- **[Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)** — manipulation audio bas niveau (visualiseurs, effets).
-- **[Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)** — reconnaissance et synthèse vocale.
-- **[WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)** — vidéo/audio en temps réel.
-- **[A-Frame](https://aframe.io/)** / **[WebXR Device API](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API)** — VR/AR dans le navigateur.
+- [Tone.js](https://tonejs.github.io/) — synthèse et séquençage audio.
+- [Howler.js](https://howlerjs.com/) — lecture audio simplifiée.
+- [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) — manipulation audio bas niveau (visualiseurs, effets).
+- [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) — reconnaissance et synthèse vocale.
+- [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) — vidéo/audio en temps réel.
+- [A-Frame](https://aframe.io/) / [WebXR Device API](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API) — VR/AR dans le navigateur.
 
 ### Interaction & périphériques {.unlisted}
 
-- **[Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API)** — support des manettes de console.
-- **[Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events)** — gestes tactiles, stylet, souris unifiés.
-- **[Web Bluetooth](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)** / **[Web USB](https://developer.mozilla.org/en-US/docs/Web/API/WebUSB_API)** — connexion à du matériel.
-- **[Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API)** — communication avec des microcontrôleurs (Arduino…).
+- [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API) — support des manettes de console.
+- [Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events) — gestes tactiles, stylet, souris unifiés.
+- [Web Bluetooth](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API) / [Web USB](https://developer.mozilla.org/en-US/docs/Web/API/WebUSB_API) — connexion à du matériel.
+- [Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API) — communication avec des microcontrôleurs (Arduino…).
 
 ### Authentification {.unlisted}
 
-- **[Auth0](https://auth0.com/)** / **[Clerk](https://clerk.com/)** — solutions d'authentification clés en main.
-- **[Lucia](https://lucia-auth.com/)** — librairie d'auth flexible en TypeScript.
-- **[Passport.js](https://www.passportjs.org/)** — stratégies d'authentification (OAuth, JWT, local…).
-- **[WebAuthn](https://webauthn.io/)** — authentification sans mot de passe (passkeys, biométrie).
+- [Auth0](https://auth0.com/) / [Clerk](https://clerk.com/) — solutions d'authentification clés en main.
+- [Lucia](https://lucia-auth.com/) — librairie d'auth flexible en TypeScript.
+- [Passport.js](https://www.passportjs.org/) — stratégies d'authentification (OAuth, JWT, local…).
+- [WebAuthn](https://webauthn.io/) — authentification sans mot de passe (passkeys, biométrie).
 
 ### UI & frameworks {.unlisted}
 
-- **[React](https://react.dev/)**, **[Vue](https://vuejs.org/)**, **[Svelte](https://svelte.dev/)**, **[SolidJS](https://www.solidjs.com/)** — frameworks frontend.
-- **[Next.js](https://nextjs.org/)**, **[Nuxt](https://nuxt.com/)**, **[SvelteKit](https://kit.svelte.dev/)**, **[Astro](https://astro.build/)** — méta-frameworks SSR.
-- **[TailwindCSS](https://tailwindcss.com/)** + **[shadcn/ui](https://ui.shadcn.com/)** / **[DaisyUI](https://daisyui.com/)** / **[MUI](https://mui.com/)** — design systems rapides.
-- **[Framer Motion](https://www.framer.com/motion/)** / **[GSAP](https://gsap.com/)** — animations.
+- [React](https://react.dev/), [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/), [SolidJS](https://www.solidjs.com/) — frameworks frontend.
+- [Next.js](https://nextjs.org/), [Nuxt](https://nuxt.com/), [SvelteKit](https://kit.svelte.dev/), [Astro](https://astro.build/) — méta-frameworks SSR.
+- [TailwindCSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) / [DaisyUI](https://daisyui.com/) / [MUI](https://mui.com/) — design systems rapides.
+- [Framer Motion](https://www.framer.com/motion/) / [GSAP](https://gsap.com/) — animations.
 
 ### Librairies utilitaires & spécialisées {.unlisted}
 
-- **[chess.js](https://github.com/jhlywa/chess.js)** — logique de jeu d'échecs (validation des coups, FEN, PGN).
-- **[rss-parser](https://github.com/rbren/rss-parser)** — parsing de flux RSS/Atom.
-- **[ical.js](https://github.com/kewisch/ical.js)** — lecture/écriture de fichiers iCalendar.
-- **[Faker.js](https://fakerjs.dev/)** — génération de données fictives (utilisateurs, textes, dates…).
-- **[Zod](https://zod.dev/)** — validation de schémas TypeScript.
-- **[date-fns](https://date-fns.org/)** / **[Day.js](https://day.js.org/)** — manipulation de dates.
-- **[neverthrow](https://github.com/supermacro/neverthrow)** — gestion d'erreurs typée (`Result<T, E>`).
-- **[Zustand](https://zustand-demo.pmnd.rs/)** / **[Pinia](https://pinia.vuejs.org/)** — gestion d'état frontend.
+- [chess.js](https://github.com/jhlywa/chess.js) — logique de jeu d'échecs (validation des coups, FEN, PGN).
+- [rss-parser](https://github.com/rbren/rss-parser) — parsing de flux RSS/Atom.
+- [ical.js](https://github.com/kewisch/ical.js) — lecture/écriture de fichiers iCalendar.
+- [Faker.js](https://fakerjs.dev/) — génération de données fictives (utilisateurs, textes, dates…).
+- [Zod](https://zod.dev/) — validation de schémas TypeScript.
+- [date-fns](https://date-fns.org/) / [Day.js](https://day.js.org/) — manipulation de dates.
+- [neverthrow](https://github.com/supermacro/neverthrow) — gestion d'erreurs typée (`Result<T, E>`).
+- [Zustand](https://zustand-demo.pmnd.rs/) / [Pinia](https://pinia.vuejs.org/) — gestion d'état frontend.
 
 # Timeline
 
