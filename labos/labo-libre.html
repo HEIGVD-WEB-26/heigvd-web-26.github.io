@@ -46,6 +46,12 @@
 <li><a href="#description" id="toc-description">Description</a>
 <ul>
 <li><a href="#theme" id="toc-theme">Theme</a></li>
+<li><a href="#projets-des-années-précédentes"
+id="toc-projets-des-années-précédentes">Projets des années
+précédentes</a></li>
+<li><a href="#idées-de-librairies-et-apis-web-à-explorer"
+id="toc-idées-de-librairies-et-apis-web-à-explorer">Idées de librairies
+et APIs Web à explorer</a></li>
 </ul></li>
 <li><a href="#timeline" id="toc-timeline">Timeline</a></li>
 <li><a href="#présentation-finale"
@@ -71,6 +77,10 @@ entre membres</a></li>
 </nav>
 <h2 id="changelog">Changelog</h2>
 <table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 91%" />
+</colgroup>
 <thead>
 <tr>
 <th>Date</th>
@@ -81,6 +91,11 @@ entre membres</a></li>
 <tr>
 <td>29.04</td>
 <td>Version initiale</td>
+</tr>
+<tr>
+<td>08.05</td>
+<td>Ajout d’exemples de projets et librairies et clarification de la
+donnée</td>
 </tr>
 </tbody>
 </table>
@@ -117,6 +132,399 @@ une librairie vous le permettant.</p>
 JavaScript ou TypeScript. Donc pas de PHP ou Rust malheureusement. Par
 contre, vous êtes libres de choisir les frameworks et librairies que
 vous souhaitez.</p>
+<h2 id="projets-des-années-précédentes">Projets des années
+précédentes</h2>
+<p>À titre d’inspiration, voici quelques projets réalisés par les volées
+précédentes.</p>
+<h3 class="unlisted" id="jeux-multijoueurs-temps-réel">Jeux multijoueurs
+temps réel</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Projet</th>
+<th>Description</th>
+<th>Technologies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pixel War</td>
+<td>Jeu collaboratif inspiré de r/Place : grille de 1000×1000 pixels
+modifiable simultanément, avec cooldown entre chaque clic.</td>
+<td>React, MUI, PixiJS, TypeScript, Socket.IO, Node.js</td>
+</tr>
+<tr>
+<td>Jeu .io (Agar.io-like)</td>
+<td>Chaque joueur contrôle une cellule qui absorbe particules et autres
+cellules plus petites en 2D.</td>
+<td>Vue.js, TailwindCSS, Nuxt + WebSocket, Prisma, PixiJS</td>
+</tr>
+<tr>
+<td>slither.io</td>
+<td>Contrôler un serpent qui grandit en mangeant des particules sans
+toucher les autres.</td>
+<td>Express, Socket.IO, Canvas</td>
+</tr>
+<tr>
+<td>agar.io (variante)</td>
+<td>Logique 100% serveur (sans précalcul client) avec leaderboard et
+statistiques.</td>
+<td>Express, Socket.IO, PixiJS, Chart.js</td>
+</tr>
+<tr>
+<td>Clicker HEIG</td>
+<td>Clicker thématisé HEIG : les clics représentent des heures de
+révision, améliorations (labos, cours…) et chat intégré.</td>
+<td>Node.js, PixiJS, Socket.IO, MongoDB, Faker.js, NoiseJS</td>
+</tr>
+<tr>
+<td>Uno multijoueur</td>
+<td>Uno multijoueur avec logique côté serveur, animations de cartes et
+ambiance sonore.</td>
+<td>React, TypeScript, ts-audio</td>
+</tr>
+<tr>
+<td>Main cerveau (échecs 2v2)</td>
+<td>Variante d’échecs en équipes de 2 : un joueur indique la pièce,
+l’autre choisit le coup.</td>
+<td>Svelte + Tailwind, Socket.IO, PeerJS, chess.js, Auth0, Prisma</td>
+</tr>
+<tr>
+<td>LG-App (Loups-Garous)</td>
+<td>Catalogue de cartes, gestionnaire de partie pour le maître du jeu,
+intégration Google Calendar.</td>
+<td>React, SQLite, Google API, BigCalendar</td>
+</tr>
+</tbody>
+</table>
+<h3 class="unlisted" id="jeux-solo-arcade">Jeux solo / arcade</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Projet</th>
+<th>Description</th>
+<th>Technologies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dinosaur Game++</td>
+<td>Version enrichie du jeu du dinosaure de Chrome (double saut,
+accroupissement, skins, mode jour/nuit).</td>
+<td>React, TypeScript, PixiJS, React-PIXI, Jest</td>
+</tr>
+<tr>
+<td>Pokédex &amp; combats</td>
+<td>Pokédex interactif avec système de combats Pokémon.</td>
+<td>Bootstrap, Prisma, SQL</td>
+</tr>
+<tr>
+<td>Sanicball Web</td>
+<td>Adaptation web 3D du jeu Sanicball avec gestion de manette et
+leaderboard de temps.</td>
+<td>Three.js, Auth0, Gamepad API</td>
+</tr>
+</tbody>
+</table>
+<h3 class="unlisted" id="visualisation-3d-créativité">Visualisation 3D
+&amp; créativité</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Projet</th>
+<th>Description</th>
+<th>Technologies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HEIG Room Finder</td>
+<td>Trouver les salles libres de la HEIG sur un créneau donné, via un
+modèle 3D interactif du bâtiment.</td>
+<td>Three.js, React, ical.js, neverthrow</td>
+</tr>
+<tr>
+<td>AI 3D Gallery</td>
+<td>Galerie d’images en 3D avec génération de poèmes par IA et
+navigation à la manette.</td>
+<td>React, React Three Fiber, AI API, ORM, Gamepad API</td>
+</tr>
+</tbody>
+</table>
+<h3 class="unlisted" id="outils-utilitaires">Outils &amp;
+utilitaires</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Projet</th>
+<th>Description</th>
+<th>Technologies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analyse d’URL</td>
+<td>Analyse passive d’URL (HTTP, Whois, DNS, SSL, VirusTotal) inspirée
+de Cloudflare Radar.</td>
+<td>Vue.js + Axios, Ruby on Rails (API REST), JWT, Rust</td>
+</tr>
+<tr>
+<td>Spawn-It</td>
+<td>Déploiement en un clic de serveurs (Minecraft, QuakeJS, WordPress…)
+sur Docker/AWS/Azure, suivi en direct via SSE.</td>
+<td>Next.js + React, MUI, Express, JWT</td>
+</tr>
+<tr>
+<td>Lecteur RSS auto-hébergé</td>
+<td>Lecteur de flux RSS avec gestion par catégories, marquage lu/non-lu,
+favoris et recherche.</td>
+<td>React, Express.js, rss-parser, Prisma + SQLite, DaisyUI +
+TailwindCSS</td>
+</tr>
+</tbody>
+</table>
+<h3 class="unlisted" id="apps-collaboratives-communautaires">Apps
+collaboratives / communautaires</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 37%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Projet</th>
+<th>Description</th>
+<th>Technologies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diaporama collaboratif</td>
+<td>Soumission de photos via OAuth Google, validation par un admin, puis
+affichage sur grand écran avec mise à jour temps réel.</td>
+<td>Express.js, Long-polling, OAuth Google, Bootstrap</td>
+</tr>
+<tr>
+<td>Bibliothèque de jeux libres</td>
+<td>Catalogue avec stats globales, filtres, favoris et statistiques par
+utilisateur.</td>
+<td>React, SQLite, Passport, Chart.js</td>
+</tr>
+</tbody>
+</table>
+<h2 id="idées-de-librairies-et-apis-web-à-explorer">Idées de librairies
+et APIs Web à explorer</h2>
+<p>Voici une liste non-exhaustive de technologies que vous pouvez
+explorer pour votre projet. N’hésitez pas à en proposer d’autres !</p>
+<h3 class="unlisted" id="rendu-graphique-jeux">Rendu graphique &amp;
+jeux</h3>
+<ul>
+<li><strong><a href="https://pixijs.com/">PixiJS</a></strong> — moteur
+2D WebGL très performant, idéal pour des jeux ou de la dataviz à grande
+échelle.</li>
+<li><strong><a href="https://threejs.org/">Three.js</a></strong> /
+<strong><a href="https://r3f.docs.pmnd.rs/">React Three
+Fiber</a></strong> — rendu 3D dans le navigateur (jeux, scènes
+interactives, visualisations).</li>
+<li><strong><a href="https://phaser.io/">Phaser</a></strong> — framework
+de jeux 2D complet (physique, animations, tilemaps).</li>
+<li><strong><a href="https://www.babylonjs.com/">Babylon.js</a></strong>
+— alternative à Three.js pour la 3D, orientée jeux.</li>
+<li><strong><a href="https://p5js.org/">p5.js</a></strong> —
+créatif/génératif, parfait pour des projets artistiques.</li>
+</ul>
+<h3 class="unlisted" id="communication-temps-réel">Communication temps
+réel</h3>
+<ul>
+<li><strong><a href="https://socket.io/">Socket.IO</a></strong> — la
+référence pour la communication bidirectionnelle temps réel.</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">WebSocket
+natif</a></strong> — l’API standard, sans dépendance.</li>
+<li><strong><a href="https://peerjs.com/">PeerJS</a></strong> —
+communication peer-to-peer via WebRTC (chat vidéo, partage de
+fichiers).</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events">Server-Sent
+Events (SSE)</a></strong> — flux unidirectionnel serveur → client
+(notifications, suivi de progression).</li>
+</ul>
+<h3 class="unlisted" id="backend-node.js">Backend Node.js</h3>
+<ul>
+<li><strong><a href="https://expressjs.com/">Express</a></strong> — le
+framework HTTP minimaliste classique.</li>
+<li><strong><a href="https://fastify.dev/">Fastify</a></strong> —
+alternative moderne à Express, plus rapide et avec validation
+intégrée.</li>
+<li><strong><a href="https://nestjs.com/">NestJS</a></strong> —
+framework structuré (style Angular) pour applications plus larges.</li>
+<li><strong><a href="https://hono.dev/">Hono</a></strong> — framework
+ultra-léger qui tourne aussi sur le edge (Cloudflare Workers, Bun,
+Deno).</li>
+</ul>
+<h3 class="unlisted" id="bases-de-données-orm">Bases de données &amp;
+ORM</h3>
+<ul>
+<li><strong><a href="https://www.prisma.io/">Prisma</a></strong> — ORM
+TypeScript avec migrations, type safety et excellente DX.</li>
+<li><strong><a href="https://orm.drizzle.team/">Drizzle</a></strong> —
+ORM léger et type-safe, plus proche du SQL.</li>
+<li><strong><a href="https://typeorm.io/">TypeORM</a></strong> — ORM
+pour TypeScript/JavaScript inspiré de Hibernate.</li>
+<li><strong><a href="https://mongoosejs.com/">Mongoose</a></strong> —
+modélisation et validation pour MongoDB.</li>
+<li><strong><a
+href="https://github.com/WiseLibs/better-sqlite3">better-sqlite3</a></strong>
+— SQLite synchrone en Node.js, parfait pour les projets
+auto-hébergés.</li>
+<li><strong><a href="https://github.com/redis/ioredis">Redis
+(ioredis)</a></strong> — cache, pub/sub, files d’attente.</li>
+</ul>
+<h3 class="unlisted" id="cartographie-géolocalisation">Cartographie
+&amp; géolocalisation</h3>
+<ul>
+<li><strong><a href="https://leafletjs.com/">Leaflet</a></strong> —
+cartes interactives légères.</li>
+<li><strong><a href="https://maplibre.org/">MapLibre GL</a></strong> —
+cartes vectorielles WebGL (alternative open-source à Mapbox).</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API">Geolocation
+API</a></strong> — accéder à la position de l’utilisateur.</li>
+</ul>
+<h3 class="unlisted" id="visualisation-de-données">Visualisation de
+données</h3>
+<ul>
+<li><strong><a href="https://d3js.org/">D3.js</a></strong> —
+visualisations data sur-mesure.</li>
+<li><strong><a href="https://www.chartjs.org/">Chart.js</a></strong> /
+<strong><a href="https://recharts.org/">Recharts</a></strong> —
+graphiques prêts à l’emploi.</li>
+<li><strong><a
+href="https://plotly.com/javascript/">Plotly.js</a></strong> —
+graphiques scientifiques interactifs.</li>
+<li><strong><a href="https://observablehq.com/plot/">Observable
+Plot</a></strong> — API concise pour des graphiques rapides.</li>
+</ul>
+<h3 class="unlisted" id="médias-audio-xr">Médias, audio &amp; XR</h3>
+<ul>
+<li><strong><a href="https://tonejs.github.io/">Tone.js</a></strong> —
+synthèse et séquençage audio.</li>
+<li><strong><a href="https://howlerjs.com/">Howler.js</a></strong> —
+lecture audio simplifiée.</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web
+Audio API</a></strong> — manipulation audio bas niveau (visualiseurs,
+effets).</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API">Web
+Speech API</a></strong> — reconnaissance et synthèse vocale.</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API">WebRTC</a></strong>
+— vidéo/audio en temps réel.</li>
+<li><strong><a href="https://aframe.io/">A-Frame</a></strong> /
+<strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API">WebXR
+Device API</a></strong> — VR/AR dans le navigateur.</li>
+</ul>
+<h3 class="unlisted" id="interaction-périphériques">Interaction &amp;
+périphériques</h3>
+<ul>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API">Gamepad
+API</a></strong> — support des manettes de console.</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events">Pointer
+Events</a></strong> — gestes tactiles, stylet, souris unifiés.</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API">Web
+Bluetooth</a></strong> / <strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/WebUSB_API">Web
+USB</a></strong> — connexion à du matériel.</li>
+<li><strong><a
+href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API">Web
+Serial API</a></strong> — communication avec des microcontrôleurs
+(Arduino…).</li>
+</ul>
+<h3 class="unlisted" id="authentification">Authentification</h3>
+<ul>
+<li><strong><a href="https://auth0.com/">Auth0</a></strong> / <strong><a
+href="https://clerk.com/">Clerk</a></strong> — solutions
+d’authentification clés en main.</li>
+<li><strong><a href="https://lucia-auth.com/">Lucia</a></strong> —
+librairie d’auth flexible en TypeScript.</li>
+<li><strong><a
+href="https://www.passportjs.org/">Passport.js</a></strong> — stratégies
+d’authentification (OAuth, JWT, local…).</li>
+<li><strong><a href="https://webauthn.io/">WebAuthn</a></strong> —
+authentification sans mot de passe (passkeys, biométrie).</li>
+</ul>
+<h3 class="unlisted" id="ui-frameworks">UI &amp; frameworks</h3>
+<ul>
+<li><strong><a href="https://react.dev/">React</a></strong>, <strong><a
+href="https://vuejs.org/">Vue</a></strong>, <strong><a
+href="https://svelte.dev/">Svelte</a></strong>, <strong><a
+href="https://www.solidjs.com/">SolidJS</a></strong> — frameworks
+frontend.</li>
+<li><strong><a href="https://nextjs.org/">Next.js</a></strong>,
+<strong><a href="https://nuxt.com/">Nuxt</a></strong>, <strong><a
+href="https://kit.svelte.dev/">SvelteKit</a></strong>, <strong><a
+href="https://astro.build/">Astro</a></strong> — méta-frameworks
+SSR.</li>
+<li><strong><a href="https://tailwindcss.com/">TailwindCSS</a></strong>
++ <strong><a href="https://ui.shadcn.com/">shadcn/ui</a></strong> /
+<strong><a href="https://daisyui.com/">DaisyUI</a></strong> / <strong><a
+href="https://mui.com/">MUI</a></strong> — design systems rapides.</li>
+<li><strong><a href="https://www.framer.com/motion/">Framer
+Motion</a></strong> / <strong><a
+href="https://gsap.com/">GSAP</a></strong> — animations.</li>
+</ul>
+<h3 class="unlisted" id="librairies-utilitaires-spécialisées">Librairies
+utilitaires &amp; spécialisées</h3>
+<ul>
+<li><strong><a
+href="https://github.com/jhlywa/chess.js">chess.js</a></strong> —
+logique de jeu d’échecs (validation des coups, FEN, PGN).</li>
+<li><strong><a
+href="https://github.com/rbren/rss-parser">rss-parser</a></strong> —
+parsing de flux RSS/Atom.</li>
+<li><strong><a
+href="https://github.com/kewisch/ical.js">ical.js</a></strong> —
+lecture/écriture de fichiers iCalendar.</li>
+<li><strong><a href="https://fakerjs.dev/">Faker.js</a></strong> —
+génération de données fictives (utilisateurs, textes, dates…).</li>
+<li><strong><a href="https://zod.dev/">Zod</a></strong> — validation de
+schémas TypeScript.</li>
+<li><strong><a href="https://date-fns.org/">date-fns</a></strong> /
+<strong><a href="https://day.js.org/">Day.js</a></strong> — manipulation
+de dates.</li>
+<li><strong><a
+href="https://github.com/supermacro/neverthrow">neverthrow</a></strong>
+— gestion d’erreurs typée (<code>Result&lt;T, E&gt;</code>).</li>
+<li><strong><a href="https://zustand-demo.pmnd.rs/">Zustand</a></strong>
+/ <strong><a href="https://pinia.vuejs.org/">Pinia</a></strong> —
+gestion d’état frontend.</li>
+</ul>
 <h1 id="timeline">Timeline</h1>
 <p>La timeline sera la suivante.</p>
 <ul>
@@ -125,12 +533,13 @@ vous souhaitez.</p>
 que vous allez proposer. A fournir ici <a
 href="https://hessoit-my.sharepoint.com/:x:/g/personal/olivier_tischhau_hes-so_ch/IQDKqkogRJ9NR4VVXnGHMOR0Ae2PK1hXWaebOlTirLsUOX8?e=Qi9R8c">Ici</a>.</p></li>
 <li><p>Nous demandons également de nous fournir un cahier des charges
-par email.</p></li>
+par email. Un <a href="cahier-des-charges-template.md">template de
+cahier des charges</a> est à votre disposition.</p></li>
 <li><p>Le scope du projet doit refléter la taille de l’équipe. Un ordre
-d’idée est d’avoir une fonctionnalité par personne. (par exemple, une
-application en React, affichant des graphiques interactifs, et une carte
-dynamique avec Leaflet pourrait être un projet pour 3
-personnes).</p></li>
+d’idée est d’avoir une fonctionnalité majeure / technologie par
+personne. (par exemple, une application en React, affichant des
+graphiques interactifs, et une carte dynamique avec Leaflet pourrait
+être un projet pour 3 personnes).</p></li>
 <li><p>Nous validerons ensuite votre idée, si celle-ci nous semble
 représenter une charge de travail réaliste et suffisante. N’hésitez pas
 non plus à discuter avec nous de votre idée avant de la soumettre, si
