@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Web Security (v3)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.css" id="theme" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css" />
+  <link rel="stylesheet" href="./fontawesome-6.2.0/css/all.min.css" />
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .companion-link { position: absolute; bottom: 12px; right: 16px; font-size: 0.5em; color: #888; }
+    .companion-link i { margin-right: 4px; }
+    .reveal section ul, .reveal section ol { font-size: 0.75em; }
+    .reveal section pre { font-size: 0.55em; }
+    .reveal section table { font-size: 0.6em; margin: 0 auto; }
+    .reveal section h2 { font-size: 1.4em; }
+  </style>
+  <script src="print.js"></script>
+</head>
+<body>
+  <div class="reveal"><div class="slides">
+
+    <!-- 1 — Title -->
+    <section data-background="#333333">
+      <h2>Web</h2>
+      <h1>Web Security</h1>
+      <p style="font-size: 0.6em; margin-top: 30px;">Companion page: <code>pages/12-security.html</code></p>
+    </section>
+
+    <!-- 2 — Disclaimer -->
+    <section>
+      <h2><i class="fas fa-gavel"></i> It's illegal</h2>
+      <p>Don't pick at a site unless explicitly allowed.</p>
+      <ul>
+        <li>CFAA (US): up to 20 years, applies to non-US citizens</li>
+        <li>Art. 143bis CP (CH): equivalent offense</li>
+        <li>Bug Bounty programs (HackerOne, Bugcrowd) are the legitimate way</li>
+      </ul>
+      <aside class="notes">
+        Even researching a vulnerability on a system you don't own can be illegal. Bug bounty programs give you written authorization. Don't poke at random sites.
+      </aside>
+    </section>
+
+    <!-- 3 — Threat map -->
+    <section>
+      <h2><i class="fas fa-map"></i> Threat map</h2>
+      <table>
+        <tr><th>Browser</th><th>Network</th><th>Server</th></tr>
+        <tr><td>SOP, XSS,<br/>CSRF, phishing</td><td>CORS,<br/>HTTPS / HSTS</td><td>SQLi, SSRF,<br/>info leaks, supply chain,<br/>weak password storage</td></tr>
+      </table>
+      <ul>
+        <li>Each layer is its own attack surface</li>
+        <li>The attacker can send any bytes to your server</li>
+        <li>The security model lives at the boundaries</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §1</span>
+      <aside class="notes">
+        Three layers, top-down. We'll spend most time on browser and server; network mostly means HTTPS + HSTS.
+      </aside>
+    </section>
+
+    <!-- 4 — Same-Origin Policy -->
+    <section>
+      <h2><i class="fas fa-shield-alt"></i> Same-Origin Policy</h2>
+      <table>
+        <tr><th>Page A</th><th>Page B</th><th>Same?</th></tr>
+        <tr><td>http://a.com</td><td>https://a.com</td><td>No (protocol)</td></tr>
+        <tr><td>https://a.com</td><td>https://a.com:8443</td><td>No (port)</td></tr>
+        <tr><td>https://a.com</td><td>https://api.a.com</td><td>No (host)</td></tr>
+        <tr><td>https://a.com</td><td>https://a.com:443</td><td>Yes (443 is default)</td></tr>
+      </table>
+      <ul>
+        <li>Origin = (protocol, host, port)</li>
+        <li>Any one differs → different origin</li>
+        <li>Default ports (80, 443) are implicit</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+      <aside class="notes">
+        Two pages from different origins can't read each other. Most common gotcha: developers forget that http and https are different origins.
+      </aside>
+    </section>
+
+    <!-- 5 — SOP: interference & exceptions -->
+    <section>
+      <h2>SOP — what's blocked, what's allowed</h2>
+      <ul>
+        <li><strong>Blocked:</strong> DOM access via iframe, fetch response body, reading cookies / localStorage</li>
+        <li><strong>Allowed:</strong> embed <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;link&gt;</code>; form <code>action</code></li>
+        <li><strong>Opt-in cross-origin:</strong> <code>postMessage</code> for iframe comms, CORS for fetch</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+      <aside class="notes">
+        Note that "blocked" usually means the browser hides the response from JS — the request still reaches the network. Side-effects on the server still happen. CORS protects the user, not the server.
+      </aside>
+    </section>
+
+    <!-- 6 — postMessage -->
+    <section>
+      <h2><i class="fas fa-comments"></i> Cross-origin via <code>postMessage</code></h2>
+      <pre><code>// Child
+window.addEventListener("message", (event) =&gt; {
+  if (event.origin !== "https://parent.example.com") return;
+  // use event.data
+});</code></pre>
+      <ul>
+        <li>Always verify <code>event.origin</code></li>
+        <li>Always pass a specific <code>targetOrigin</code></li>
+        <li>Never use <code>"*"</code> for sensitive data</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+      <aside class="notes">
+        Forgetting the origin check is the classic postMessage bug — any page that embeds yours can send commands. Pair this with frame-ancestors CSP to control who can embed you.
+      </aside>
+    </section>
+
+    <!-- 7 — CORS what & why -->
+    <section>
+      <h2><i class="fas fa-globe-europe"></i> CORS</h2>
+      <pre><code>// JS at app.com tries to fetch api.com
+fetch("https://api.com/data")
+
+// Server response must include:
+Access-Control-Allow-Origin: https://app.com</code></pre>
+      <ul>
+        <li>Enforced by the <strong>browser</strong>, not the server</li>
+        <li>Opt-in via response headers</li>
+        <li>Without headers → browser hides the response body</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+      <aside class="notes">
+        The request still goes through and may have side effects! CORS is a defense against client-side JS exfiltrating data, not against attacks on your server. For that you need real auth / CSRF tokens / etc.
+      </aside>
+    </section>
+
+    <!-- 8 — CORS preflight -->
+    <section>
+      <h2><i class="fas fa-paper-plane"></i> CORS — preflight</h2>
+      <pre><code>OPTIONS /api/account HTTP/1.1
+Origin: https://app.example.com
+Access-Control-Request-Method: DELETE
+Access-Control-Request-Headers: X-Auth
+
+HTTP/1.1 204 No Content
+Access-Control-Allow-Methods: DELETE, GET
+Access-Control-Allow-Headers: X-Auth</code></pre>
+      <ul>
+        <li>Triggered by non-simple methods (PUT/DELETE), custom headers, JSON content-type</li>
+        <li>Browser asks "may I?" before the real request</li>
+        <li>Server replies with the allow-list, then the real request goes</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+      <aside class="notes">
+        Simple GET/HEAD/POST with form-encoded bodies skip the preflight — the browser sends them and just hides the response. That's why "doesn't change state on GET" is so important.
+      </aside>
+    </section>
+
+    <!-- 9 — CORS credentials -->
+    <section>
+      <h2><i class="fas fa-id-badge"></i> CORS — credentialed requests</h2>
+      <pre><code>fetch("https://api.com/me", { credentials: "include" })
+
+// Server must respond:
+Access-Control-Allow-Origin: https://app.com  ← specific, not *
+Access-Control-Allow-Credentials: true</code></pre>
+      <ul>
+        <li>Cookies and HTTP auth are NOT sent cross-origin by default</li>
+        <li>Need <code>credentials: "include"</code> on the client</li>
+        <li>Need specific origin + Allow-Credentials on the server</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+      <aside class="notes">
+        The wildcard Access-Control-Allow-Origin is invalid with credentials — it must be a specific origin. Common config mistake.
+      </aside>
+    </section>
+
+    <!-- 10 — Cookies anatomy -->
+    <section>
+      <h2><i class="fas fa-cookie-bite"></i> Cookies — anatomy</h2>
+      <pre><code>Set-Cookie: session_id=eyJhb...;
+            Domain=example.com; Path=/;
+            Max-Age=86400;
+            Secure; HttpOnly; SameSite=Lax</code></pre>
+      <ul>
+        <li>Single key-value pair + attributes</li>
+        <li>Browser sends back with every request to the origin</li>
+        <li>Server controls; browser stores and forwards</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+      <aside class="notes">
+        Cookies are how stateful sessions work on a stateless protocol. The attributes are where security lives — every one of them matters.
+      </aside>
+    </section>
+
+    <!-- 11 — Cookie security attributes -->
+    <section>
+      <h2>Cookies — security attributes</h2>
+      <ul>
+        <li><strong>Secure</strong> — only sent over HTTPS (defeats network eavesdropping)</li>
+        <li><strong>HttpOnly</strong> — invisible to JS (mitigates session theft via XSS)</li>
+        <li><strong>SameSite=Lax</strong> — modern browser default; blocks naked CSRF on POST</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+      <aside class="notes">
+        Strict, Lax, None: Strict never sends on cross-site, Lax sends on top-level GET, None sends on everything (requires Secure). Lax has been the default since 2020 in Chrome.
+      </aside>
+    </section>
+
+    <!-- 12 — Cookie name prefixes -->
+    <section>
+      <h2>Cookie name prefixes</h2>
+      <pre><code>Set-Cookie: __Host-session=eyJ...;
+            Secure; HttpOnly; SameSite=Lax;
+            Path=/</code></pre>
+      <ul>
+        <li><code>__Secure-</code> — must be set with <code>Secure</code> attribute</li>
+        <li><code>__Host-</code> — must be Secure + Path=/ + no Domain (host-bound)</li>
+        <li>Use <code>__Host-</code> for session cookies</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+      <aside class="notes">
+        The browser enforces the constraints based on the name prefix — it'll refuse to set a __Host- cookie that doesn't satisfy the rules. Free security.
+      </aside>
+    </section>
+
+    <!-- 13 — Session ID hygiene -->
+    <section>
+      <h2><i class="fas fa-fingerprint"></i> Session IDs</h2>
+      <ul>
+        <li>Generate from a CSPRNG (<code>crypto.randomBytes(32)</code>) — never sequential</li>
+        <li>Rotate on login and on privilege escalation</li>
+        <li>Expire idle sessions <strong>server-side</strong>, not just by cookie Max-Age</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+      <aside class="notes">
+        If I steal your session ID, I am you. Rotation on login defeats fixation attacks. Server-side expiry means an old leaked cookie eventually stops working even if its Max-Age says otherwise.
+      </aside>
+    </section>
+
+    <!-- 14 — CSRF classic -->
+    <section>
+      <h2><i class="fas fa-user-secret"></i> CSRF — classic</h2>
+      <pre><code>&lt;!-- evil.com --&gt;
+&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input name="to"     value="attacker"&gt;
+  &lt;input name="amount" value="1000"&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit()&lt;/script&gt;</code></pre>
+      <ul>
+        <li>Cookies travel regardless of who triggered the request</li>
+        <li>Victim clicks "win iPad" → bank transfer happens</li>
+        <li>Pre-2020 this was an everyday bug</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+      <aside class="notes">
+        The user is logged into bank.com. The form submits to bank.com, browser dutifully sends the session cookie. If the bank trusts session-cookie-alone, the transfer succeeds.
+      </aside>
+    </section>
+
+    <!-- 15 — CSRF modern view -->
+    <section>
+      <h2>CSRF — modern view</h2>
+      <ul>
+        <li><code>SameSite=Lax</code> is now the default (Chrome 2020+)</li>
+        <li>Closes naked CSRF on cross-site POST</li>
+        <li>Top-level GET still ships the cookie → never put state changes on GET</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+      <aside class="notes">
+        The default fix closed most CSRF in one stroke. But you can't rely on every browser having it (old browsers, intranets). And destructive GET endpoints stay exposed under Lax.
+      </aside>
+    </section>
+
+    <!-- 16 — CSRF defenses -->
+    <section>
+      <h2>CSRF — defense in depth</h2>
+      <pre><code>&lt;form action="/transfer" method="POST"&gt;
+  &lt;input name="amount" value="1000"&gt;
+  &lt;input type="hidden" name="csrf"
+         value="eyJ2IjoxLCJldSI6MCwic3QiOjB9"&gt;
+&lt;/form&gt;</code></pre>
+      <ul>
+        <li>Per-session secret token in hidden input</li>
+        <li>Server rejects state-changing requests without it</li>
+        <li><strong>Double-submit cookie</strong>: stateless variant (token in cookie + header)</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+      <aside class="notes">
+        The attacker can't read the token from another origin (SOP). Note: CSRF tokens don't protect against XSS — once attacker JS runs on your origin it can read the token.
+      </aside>
+    </section>
+
+    <!-- 17 — XSS three flavors -->
+    <section>
+      <h2><i class="fas fa-code"></i> XSS — three flavors</h2>
+      <ul>
+        <li><strong>Reflected</strong> — URL contains payload, server echoes it back (1 click = 1 victim)</li>
+        <li><strong>Stored</strong> — payload persisted in DB (every viewer hit)</li>
+        <li><strong>DOM-based</strong> — client JS reads untrusted input, writes it as code</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+      <aside class="notes">
+        XSS is the most common web vulnerability in study after study. Defenses are well-understood but easy to get wrong.
+      </aside>
+    </section>
+
+    <!-- 18 — XSS reflected example -->
+    <section>
+      <h2>XSS — reflected example</h2>
+      <pre><code>// Server:
+res.send(`&lt;h1&gt;Hello, ${req.query.user}&lt;/h1&gt;`)
+
+// URL the attacker sends:
+?user=&lt;img src=x onerror=alert(1)&gt;</code></pre>
+      <ul>
+        <li>User input becomes executable code on the victim's browser</li>
+        <li><code>&lt;img onerror&gt;</code> works even when <code>&lt;script&gt;</code> is filtered</li>
+        <li>Attacker code runs with the victim's origin and session</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+      <aside class="notes">
+        With the user's session, the attacker can do anything the user could — read inbox, transfer money, change password. innerHTML refuses to execute script tags but happily runs onerror handlers — common gotcha.
+      </aside>
+    </section>
+
+    <!-- 19 — XSS three pillars -->
+    <section>
+      <h2><i class="fas fa-shield-virus"></i> XSS — three pillars of defense</h2>
+      <ol>
+        <li><strong>Escape on the way out, per context</strong> — template engine does it</li>
+        <li><strong>CSP with nonces</strong> — <code>script-src 'self' 'nonce-…'</code></li>
+        <li><strong>Trusted Types</strong> — structural fix for DOM-XSS</li>
+      </ol>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+      <aside class="notes">
+        Escaping rules differ per context: element body, attribute value, JS string, URL. Wrong escape is silently insecure. CSP nonces stop injected inline scripts from executing because they don't have the nonce. Trusted Types makes innerHTML refuse raw strings — Chromium-stable.
+      </aside>
+    </section>
+
+    <!-- 20 — Phishing IDN -->
+    <section>
+      <h2><i class="fas fa-fish"></i> Phishing — IDN homograph</h2>
+      <p style="font-size: 1.4em; font-family: arial">https://www.<span style="color:#cf222e">а</span>pple.com/</p>
+      <ul>
+        <li>Cyrillic <code>а</code> (U+0430) ≠ Latin <code>a</code></li>
+        <li>Browser shows punycode (<code>xn--pple-43d.com</code>) when scripts mix</li>
+        <li>Subdomain confusion is also rampant: <code>apple.com-login.evil.com</code></li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §7</span>
+      <aside class="notes">
+        IDN abuse is mostly handled by browsers now, but exact-script lookalikes still slip through. Users skim — they don't read the URL carefully. Visual cues alone can't solve this.
+      </aside>
+    </section>
+
+    <!-- 21 — Phishing what helps -->
+    <section>
+      <h2>Phishing — what actually helps</h2>
+      <ul>
+        <li><strong>Password managers</strong> won't autofill on a wrong domain</li>
+        <li><strong>Passkeys</strong> are bound to the origin → unphishable by design</li>
+        <li>User training: documented but modest, decays without reinforcement</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §7</span>
+      <aside class="notes">
+        Phishing is fundamentally a people problem (Schneier). The platform-layer answer is binding credentials to origins — which password managers approximate and passkeys nail.
+      </aside>
+    </section>
+
+    <!-- 22 — Server: SQL injection -->
+    <section>
+      <h2><i class="fas fa-database"></i> Server-side — SQL injection</h2>
+      <pre><code>// Vulnerable
+db.query(`SELECT * FROM users
+  WHERE name = '${user}' AND pass = '${pass}'`)
+
+// Bypass: name = admin' --
+//   → strips the AND pass clause</code></pre>
+      <ul>
+        <li>String-concatenated SQL → injection</li>
+        <li>Fix: <strong>parameterized queries</strong> (driver substitutes safely)</li>
+        <li>ORMs do this for you, with the bonus of types</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+      <aside class="notes">
+        Classic, never goes away. The fix is one line — but you have to know to write it that way every time. ORMs reduce the surface; raw SQL means every query is a chance to mess up.
+      </aside>
+    </section>
+
+    <!-- 23 — Server: SSRF -->
+    <section>
+      <h2><i class="fas fa-route"></i> Server-side — SSRF</h2>
+      <pre><code>// Attacker submits:
+{ "avatar_url":
+  "http://169.254.169.254/latest/meta-data/..." }
+
+// Your code:
+const img = await fetch(req.body.avatar_url);
+// → server fetches AWS metadata service</code></pre>
+      <ul>
+        <li>Your server is on the internal network — attacker isn't</li>
+        <li>Allowlist hosts, or validate the resolved IP isn't private</li>
+        <li>Beware DNS rebinding — re-resolve before connecting</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+      <aside class="notes">
+        Capital One was a major SSRF breach. Image proxies, webhook delivery, PDF rendering, URL previews — all common SSRF entry points.
+      </aside>
+    </section>
+
+    <!-- 24 — Server: supply chain + rate limiting -->
+    <section>
+      <h2><i class="fas fa-boxes"></i> Server-side — supply chain &amp; rate limiting</h2>
+      <ul>
+        <li><strong>Supply chain:</strong> dependency confusion, typosquatting, maintainer compromise</li>
+        <li>Pin versions (lockfile), audit (<code>npm audit</code>, Dependabot, Renovate)</li>
+        <li><strong>Rate-limit everything</strong> — credential stuffing, scraping, denial-of-wallet are mass-volume</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+      <aside class="notes">
+        Supply chain is the rising attack class — recent npm package compromises hit major projects. Lockfiles + automated audit + minimal direct deps cut the surface. Rate limits aren't glamour but are first-class defense.
+      </aside>
+    </section>
+
+    <!-- 25 — Storing passwords -->
+    <section>
+      <h2><i class="fas fa-key"></i> Storing passwords</h2>
+      <ul>
+        <li><strong>Hash, don't encrypt</strong> (encryption is reversible)</li>
+        <li><strong>Salt:</strong> random per-user, defeats rainbow tables</li>
+        <li><strong>Slow function:</strong> bcrypt / scrypt / Argon2id (~100ms per hash)</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §9</span>
+      <aside class="notes">
+        Don't roll your own — use the library. Bcrypt cost tuned so legitimate login is fast enough for users (~100ms) but brute-force is painful (100ms × billions of guesses).
+      </aside>
+    </section>
+
+    <!-- 26 — NIST 800-63B -->
+    <section>
+      <h2>Modern password rules (NIST SP 800-63B)</h2>
+      <ul>
+        <li>No forced periodic rotation (encourages weak, sequential passwords)</li>
+        <li>No silly composition rules — <strong>length beats complexity</strong></li>
+        <li>Block known-breached passwords (HIBP k-anonymity API)</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §9</span>
+      <aside class="notes">
+        Forced 90-day rotation pushes users to Spring2026! → Summer2026!. Allow long passwords (64 chars) and spaces. Rate-limit failed attempts. Never email or SMS passwords. Use 2FA / passkeys where it matters.
+      </aside>
+    </section>
+
+    <!-- 27 — Auth mechanisms comparison -->
+    <section>
+      <h2><i class="fas fa-id-card"></i> Auth mechanisms</h2>
+      <table>
+        <tr><th></th><th>State</th><th>Revoke</th><th>Phishing-proof?</th></tr>
+        <tr><td>Session cookie</td><td>Server-side</td><td>Easy</td><td>No</td></tr>
+        <tr><td>JWT bearer</td><td>Stateless</td><td>Hard</td><td>No</td></tr>
+        <tr><td>OAuth2 + PKCE</td><td>Token-issuer</td><td>Issuer's job</td><td>No</td></tr>
+        <tr><td><strong>WebAuthn / Passkeys</strong></td><td>Public keys</td><td>Easy</td><td><strong>Yes</strong></td></tr>
+      </table>
+      <ul>
+        <li>Session cookie: simple, easy to revoke, needs a shared store at scale</li>
+        <li>JWT bearer: stateless and nice for fleets — but revocation is hard</li>
+        <li>WebAuthn / Passkeys: the only structurally unphishable option</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+      <aside class="notes">
+        Choose based on revocation needs, scale, and threat model. For new apps in 2026, passkeys for users + JWT for service-to-service is a common combo.
+      </aside>
+    </section>
+
+    <!-- 28 — JWT essentials -->
+    <section>
+      <h2>JWT — what's actually in one</h2>
+      <pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9     ← header
+  .eyJzdWIiOiJhbGljZSIsInJvbGUiOiJ1c2VyIn0  ← payload
+  .K7rL3p…signature…                       ← signature</code></pre>
+      <ul>
+        <li>3 base64url parts: header.payload.signature</li>
+        <li>Payload is <strong>readable</strong> (signed, not encrypted) — never put secrets in it</li>
+        <li>Foot-guns: <code>alg: "none"</code>, algorithm confusion (HS vs RS)</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+      <aside class="notes">
+        Always pin the expected algorithm server-side — don't trust the alg field in the token's header. High-profile breaches have come from libraries that switched algs based on what the token claimed.
+      </aside>
+    </section>
+
+    <!-- 29 — WebAuthn / Passkeys -->
+    <section>
+      <h2><i class="fas fa-fingerprint"></i> WebAuthn / Passkeys</h2>
+      <ul>
+        <li>Per-site keypair stored in secure hardware (TPM / Secure Enclave / hardware key)</li>
+        <li>Browser binds the signature to the actual origin → <strong>ends phishing</strong></li>
+        <li>Server stores only public keys → a breach reveals nothing usable</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+      <aside class="notes">
+        Apple, Google, Microsoft, 1Password sync passkeys via cloud accounts. User experience is "use Face ID to log in." Server libraries: @simplewebauthn/server, fido2-lib.
+      </aside>
+    </section>
+
+    <!-- 30 — Closing -->
+    <section data-background="#333333" style="color: white;">
+      <h2>Five rules</h2>
+      <ol style="font-size: 0.7em; text-align: left; max-width: 700px; margin: 30px auto;">
+        <li>Never trust user data</li>
+        <li>Complexity is the enemy of security</li>
+        <li>Be explicit, fail fast</li>
+        <li>Stack defenses</li>
+        <li>Use the platform's good defaults</li>
+      </ol>
+      <p style="font-size: 0.6em; margin-top: 20px;">Companion page has the depth. Lab has the practice.</p>
+      <aside class="notes">
+        The companion page has everything in detail with hands-on exercises. The CTF lab takes it from concept to running attacks.
+      </aside>
+    </section>
+
+  </div></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+  <script src="./script.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Widgets — in-browser tests</title>
+  <link rel="stylesheet" href="12-security.css">
+  <style>
+    body { display: block; padding: 24px; }
+    #results { font-family: ui-monospace, Menlo, monospace; }
+    #results .pass { color: var(--ok-fg); }
+    #results .fail { color: var(--bad-fg); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Widget tests</h1>
+  <ol id="results"></ol>
+
+  <h2>Live samples</h2>
+
+  <!-- predict-reveal -->
+  <predict-reveal id="pr-test">
+    <p slot="question">What is 2 + 2?</p>
+    <p slot="answer">4.</p>
+  </predict-reveal>
+
+  <!-- samesite-sim -->
+  <h3>samesite-sim</h3>
+  <samesite-sim></samesite-sim>
+
+  <!-- xss-sandbox -->
+  <h3>xss-sandbox</h3>
+  <xss-sandbox></xss-sandbox>
+
+  <!-- sqli-demo -->
+  <h3>sqli-demo</h3>
+  <sqli-demo></sqli-demo>
+
+  <!-- password-hashing -->
+  <h3>password-hashing</h3>
+  <password-hashing></password-hashing>
+
+  <!-- jwt-tamper -->
+  <h3>jwt-tamper</h3>
+  <jwt-tamper></jwt-tamper>
+
+  <!-- Loader for widgets and tests -->
+  <script src="widgets/_common.js"></script>
+  <script src="widgets/predict-reveal.js"></script>
+  <script src="widgets/samesite-sim.js"></script>
+  <script src="widgets/xss-sandbox.js"></script>
+  <script src="widgets/sqli-demo.js"></script>
+  <script src="vendor/bcrypt.min.js"></script>
+  <script src="widgets/password-hashing.js"></script>
+  <script src="widgets/jwt-tamper.js"></script>
+  <script>
+    const results = document.getElementById('results');
+    async function test(name, fn) {
+      const li = document.createElement('li');
+      try { await fn(); li.textContent = 'PASS — ' + name; li.className = 'pass'; }
+      catch (e) { li.textContent = 'FAIL — ' + name + ' — ' + e.message; li.className = 'fail'; }
+      results.append(li);
+    }
+    function assert(cond, msg) { if (!cond) throw new Error(msg || 'assertion failed'); }
+
+    // Wait one tick for connectedCallback
+    setTimeout(async () => {
+      test('predict-reveal: answer hidden initially', () => {
+        const ans = document.querySelector('#pr-test [slot="answer"]');
+        assert(ans.style.display === 'none', 'expected display:none, got ' + ans.style.display);
+      });
+      test('predict-reveal: reveal button exists', () => {
+        const btn = document.querySelector('#pr-test button');
+        assert(btn && btn.textContent === 'Reveal', 'button missing or wrong label');
+      });
+      test('predict-reveal: clicking reveal shows answer', () => {
+        const btn = document.querySelector('#pr-test button');
+        btn.click();
+        const ans = document.querySelector('#pr-test [slot="answer"]');
+        assert(ans.style.display === '', 'expected answer visible after click');
+      });
+
+      // samesite-sim decision tests
+      const D = window.SecWidgets.samesiteDecide;
+
+      test('samesite: same-origin always sends', () => {
+        const r = D({ secure: false, sameSite: 'Strict', scenario: 'same-origin-fetch', isHttps: true });
+        assert(r.sent, r.reason);
+      });
+      test('samesite: Lax blocks cross-site POST', () => {
+        const r = D({ secure: true, sameSite: 'Lax', scenario: 'cross-origin-form-post', isHttps: true });
+        assert(!r.sent, 'expected blocked, got ' + r.reason);
+      });
+      test('samesite: None allows cross-site POST', () => {
+        const r = D({ secure: true, sameSite: 'None', scenario: 'cross-origin-form-post', isHttps: true });
+        assert(r.sent, 'expected sent, got ' + r.reason);
+      });
+      test('samesite: Strict blocks top-level GET cross-site', () => {
+        const r = D({ secure: true, sameSite: 'Strict', scenario: 'top-level-get', isHttps: true });
+        assert(!r.sent, r.reason);
+      });
+      test('samesite: Lax allows top-level GET cross-site', () => {
+        const r = D({ secure: true, sameSite: 'Lax', scenario: 'top-level-get', isHttps: true });
+        assert(r.sent, r.reason);
+      });
+      test('samesite: Secure blocks over HTTP', () => {
+        const r = D({ secure: true, sameSite: 'None', scenario: 'same-origin-fetch', isHttps: false });
+        assert(!r.sent, r.reason);
+      });
+
+      // sqli-demo tests
+      const sqliExec = window.SecWidgets.sqliExec;
+      const sqliBuild = window.SecWidgets.sqliBuild;
+
+      test('sqli: legitimate login matches one row', () => {
+        const r = sqliExec(sqliBuild('alice', 'hunter2'));
+        assert(r.length === 1 && r[0].name === 'alice', 'expected alice, got ' + JSON.stringify(r));
+      });
+      test('sqli: wrong password no rows', () => {
+        const r = sqliExec(sqliBuild('alice', 'wrong'));
+        assert(r.length === 0, 'expected empty, got ' + JSON.stringify(r));
+      });
+      test("sqli: admin' -- bypass returns admin row", () => {
+        const r = sqliExec(sqliBuild("admin' --", 'anything'));
+        assert(r.length === 1 && r[0].name === 'admin', 'expected admin, got ' + JSON.stringify(r));
+      });
+      test("sqli: ' OR '1'='1 returns all rows", () => {
+        const r = sqliExec(sqliBuild("' OR '1'='1", "' OR '1'='1"));
+        assert(r.length === 3, 'expected 3 rows, got ' + r.length);
+      });
+
+      // password-hashing tests
+      test('hashSha256: deterministic and 64 hex chars', async () => {
+        const h1 = await window.SecWidgets.hashSha256('hello');
+        const h2 = await window.SecWidgets.hashSha256('hello');
+        assert(h1 === h2, 'expected same hash twice');
+        assert(/^[0-9a-f]{64}$/.test(h1), 'expected 64 hex chars, got ' + h1);
+      });
+      test('hashSha256: different inputs give different hashes', async () => {
+        const h1 = await window.SecWidgets.hashSha256('hello');
+        const h2 = await window.SecWidgets.hashSha256('hellp');
+        assert(h1 !== h2, 'expected different hashes');
+      });
+      test('hashBcrypt: different calls give different output (random salt)', () => {
+        const h1 = window.SecWidgets.hashBcrypt('hello', 4);
+        const h2 = window.SecWidgets.hashBcrypt('hello', 4);
+        assert(h1 !== h2, 'expected different hashes due to random salt');
+      });
+
+      // jwt-tamper tests
+      test('jwt: roundtrip verifies', async () => {
+        const t = await window.SecWidgets.jwtBuild({ alg: 'HS256', typ: 'JWT' }, { sub: 'a' }, 'secret');
+        const r = await window.SecWidgets.jwtVerify(t, 'secret');
+        assert(r.valid, r.reason);
+      });
+      test('jwt: wrong secret fails to verify', async () => {
+        const t = await window.SecWidgets.jwtBuild({ alg: 'HS256', typ: 'JWT' }, { sub: 'a' }, 'secret');
+        const r = await window.SecWidgets.jwtVerify(t, 'other-secret');
+        assert(!r.valid, 'expected invalid');
+      });
+      test("jwt: alg=none must be rejected", async () => {
+        const t = await window.SecWidgets.jwtBuild({ alg: 'none', typ: 'JWT' }, { sub: 'admin' }, '');
+        const r = await window.SecWidgets.jwtVerify(t, 'any');
+        assert(!r.valid, "alg=none must not validate");
+      });
+      test('jwt: tampered payload breaks signature', async () => {
+        const t = await window.SecWidgets.jwtBuild({ alg: 'HS256', typ: 'JWT' }, { sub: 'a' }, 'secret');
+        const [h, p, s] = t.split('.');
+        const evilPayload = btoa(JSON.stringify({ sub: 'admin' })).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+        const r = await window.SecWidgets.jwtVerify(`${h}.${evilPayload}.${s}`, 'secret');
+        assert(!r.valid, 'expected tampered token to fail');
+      });
+    }, 0);
+  </script>
+</body>
+</html>

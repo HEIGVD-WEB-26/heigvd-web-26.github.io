@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Web Security (v2)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.css" id="theme" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css" />
+  <link rel="stylesheet" href="./fontawesome-6.2.0/css/all.min.css" />
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .companion-link { position: absolute; bottom: 12px; right: 16px; font-size: 0.5em; color: #888; }
+    .companion-link i { margin-right: 4px; }
+  </style>
+  <script src="print.js"></script>
+</head>
+<body>
+  <div class="reveal"><div class="slides">
+    <!-- Slide 1 -->
+    <section data-background="#333333">
+      <h2>Web</h2>
+      <h1>Web Security</h1>
+      <p style="font-size: 0.6em; margin-top: 30px;">Companion page: <code>pages/12-security.html</code></p>
+    </section>
+
+    <!-- Slide 2 — Disclaimer -->
+    <section data-markdown style="font-size: 0.85em">
+      <textarea data-template>
+        ## <i class="fas fa-gavel"></i> It's illegal
+        Don't pick at a site unless explicitly allowed.
+
+        Go on a **Bug Bounty** instead.
+        Notes:
+        CFAA in the US — up to 20 years, applies to non-US citizens. Art. 143bis CP in CH. Bug bounty programs (HackerOne, Bugcrowd) are the legitimate way to practice.
+      </textarea>
+    </section>
+
+    <!-- Slide 3 — Threat map -->
+    <section>
+      <h2><i class="fas fa-map"></i> Threat map</h2>
+      <table style="font-size: 0.65em; margin: 0 auto;">
+        <tr><th>Browser</th><th>Network</th><th>Server</th></tr>
+        <tr><td>SOP, XSS,<br/>CSRF, phishing</td><td>CORS,<br/>HTTPS / HSTS</td><td>SQLi, SSRF,<br/>info leaks, supply chain,<br/>weak password storage</td></tr>
+      </table>
+      <span class="companion-link"><i class="fas fa-book"></i> §1</span>
+      <aside class="notes">
+        Three layers: browser, network, server. Each layer has its own attack classes. We'll go top-down.
+      </aside>
+    </section>
+
+    <!-- Slide 4 — SOP -->
+    <section>
+      <h2><i class="fas fa-shield-alt"></i> Same-Origin Policy</h2>
+      <p style="font-size: 0.7em">Two pages from different origins can't interfere.</p>
+      <table style="font-size: 0.65em; margin: 0 auto;">
+        <tr><th>Page A</th><th>Page B</th><th>Same origin?</th></tr>
+        <tr><td>http://a.com</td><td>https://a.com</td><td>No (protocol)</td></tr>
+        <tr><td>https://a.com</td><td>https://a.com:8443</td><td>No (port)</td></tr>
+        <tr><td>https://a.com</td><td>https://api.a.com</td><td>No (host)</td></tr>
+        <tr><td>https://a.com</td><td>https://a.com:443</td><td>Yes (443 is the default)</td></tr>
+      </table>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+      <aside class="notes">
+        Origin = scheme + host + port. Exceptions: images, scripts, form action — and explicit cross-origin via postMessage / CORS.
+      </aside>
+    </section>
+
+    <!-- Slide 5 — CORS -->
+    <section>
+      <h2><i class="fas fa-globe-europe"></i> CORS</h2>
+      <pre style="font-size: 0.55em;"><code>// Browser:                  // Server:
+fetch('https://api.com',
+      {method:'DELETE'}) ──▶ OPTIONS /  (preflight)
+                          ◀── Access-Control-Allow-Methods: DELETE
+                          ──▶ DELETE /  (real request)
+                          ◀── 200 OK</code></pre>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+      <aside class="notes">
+        Enforced by the browser, not the server. Preflight only for non-simple methods/headers/content-types. Credentialed requests need both credentials:include and Allow-Credentials: true.
+      </aside>
+    </section>
+
+    <!-- Slide 6 — Cookies -->
+    <section>
+      <h2><i class="fas fa-cookie-bite"></i> Cookies that don't get stolen</h2>
+      <pre style="font-size: 0.62em;"><code>Set-Cookie: __Host-session=eyJ…;
+            Secure; HttpOnly; SameSite=Lax;
+            Path=/; Max-Age=86400</code></pre>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+      <aside class="notes">
+        Secure → HTTPS only. HttpOnly → invisible to JS. SameSite=Lax → modern default, blocks naked CSRF. __Host- prefix → enforces Secure+Path=/+no Domain. Use it.
+      </aside>
+    </section>
+
+    <!-- Slide 7 — CSRF -->
+    <section>
+      <h2><i class="fas fa-user-secret"></i> CSRF (modern view)</h2>
+      <pre style="font-size: 0.6em;"><code>&lt;!-- evil.com --&gt;
+&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input name="to"     value="attacker"&gt;
+  &lt;input name="amount" value="1000"&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit()&lt;/script&gt;</code></pre>
+      <p style="font-size: 0.65em">SameSite=Lax (the modern default) closes this for POST. Tokens remain for defense in depth.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+      <aside class="notes">
+        Before 2020 this was an everyday bug. Now: naked CSRF on POST is closed by the default. But top-level GETs still travel under Lax, and older browsers / intranets need a CSRF token in depth.
+      </aside>
+    </section>
+
+    <!-- Slide 8 — XSS reflected -->
+    <section>
+      <h2><i class="fas fa-code"></i> XSS — reflected</h2>
+      <pre style="font-size: 0.6em;"><code>// Server:
+res.send(`&lt;h1&gt;Hello, ${req.query.user}&lt;/h1&gt;`)
+
+// URL:
+?user=&lt;img src=x onerror=alert(1)&gt;</code></pre>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+      <aside class="notes">
+        Same pattern in stored XSS (content from the DB) and DOM-XSS (untrusted data → innerHTML on the client). The "img onerror" trick works even when innerHTML refuses to run script tags.
+      </aside>
+    </section>
+
+    <!-- Slide 9 — XSS defenses -->
+    <section>
+      <h2><i class="fas fa-shield-virus"></i> XSS — three pillars</h2>
+      <ol style="font-size: 0.75em">
+        <li><strong>Escape on the way out</strong> — per context, via template engine</li>
+        <li><strong>CSP with nonces</strong> — <code>script-src 'self' 'nonce-…'</code></li>
+        <li><strong>Trusted Types</strong> — structural fix for DOM-XSS</li>
+      </ol>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+      <aside class="notes">
+        Trusted Types is Chromium-stable. require-trusted-types-for 'script' makes innerHTML throw on raw strings — forces all DOM sinks through sanitizer policies.
+      </aside>
+    </section>
+
+    <!-- Slide 10 — Phishing -->
+    <section>
+      <h2><i class="fas fa-fish"></i> Phishing</h2>
+      <p style="font-size: 1.3em; font-family: arial">https://www.<span style="color:#cf222e">а</span>pple.com/</p>
+      <p style="font-size: 0.6em">Cyrillic <code>а</code> (U+0430). Browser punycode: <code>xn--pple-43d.com</code>.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §7</span>
+      <aside class="notes">
+        Password managers won't autofill on the wrong domain. Passkeys can't even be asked for the wrong-origin signature. Phishing is solved at the platform layer, not the user-training layer.
+      </aside>
+    </section>
+
+    <!-- Slide 11 — Server-side threats -->
+    <section>
+      <h2><i class="fas fa-server"></i> Server-side threats</h2>
+      <div style="display: flex; justify-content: space-around; font-size: 0.7em; margin-top: 30px;">
+        <div><i class="fas fa-database"></i><br/>SQLi</div>
+        <div><i class="fas fa-route"></i><br/>SSRF</div>
+        <div><i class="fas fa-leak"></i><br/>Info leak</div>
+        <div><i class="fas fa-boxes"></i><br/>Supply chain</div>
+      </div>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+      <aside class="notes">
+        Attacker on the server doesn't go through your UI or browser. Parameterized queries for SQLi. Allowlist for SSRF. Generic error messages for leaks. Lockfile + audit for supply chain. And rate-limit everything.
+      </aside>
+    </section>
+
+    <!-- Slide 12 — Passwords -->
+    <section>
+      <h2><i class="fas fa-key"></i> Storing passwords</h2>
+      <ul style="font-size: 0.75em">
+        <li><strong>Hash, don't encrypt</strong></li>
+        <li><strong>Salt</strong> — random, per-user, stored with the hash</li>
+        <li><strong>Slow function</strong> — bcrypt / scrypt / Argon2id</li>
+        <li><strong>Use a library</strong> — "don't roll your own crypto"</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §9</span>
+      <aside class="notes">
+        NIST 800-63B: no forced rotation, no composition rules, allow long passwords, block known-breached, rate-limit. Length beats complexity.
+      </aside>
+    </section>
+
+    <!-- Slide 13 — Auth mechanisms strip -->
+    <section>
+      <h2><i class="fas fa-id-card"></i> Auth mechanisms</h2>
+      <table style="font-size: 0.55em; margin: 0 auto;">
+        <tr><th></th><th>State</th><th>Revoke</th><th>Phishing-proof?</th></tr>
+        <tr><td>Session cookie</td><td>Server-side</td><td>Easy</td><td>No</td></tr>
+        <tr><td>JWT bearer</td><td>Stateless</td><td>Hard</td><td>No</td></tr>
+        <tr><td>OAuth2 + PKCE</td><td>Token-issuer</td><td>Issuer's job</td><td>No</td></tr>
+        <tr><td><strong>WebAuthn / Passkeys</strong></td><td>Public keys</td><td>Easy</td><td><strong>Yes</strong></td></tr>
+      </table>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+      <aside class="notes">
+        JWT pitfalls: alg=none, algorithm confusion, payload is readable. OAuth2 PKCE: app generates verifier → hashes to challenge → exchanges code + verifier for token. WebAuthn: per-origin keypair in secure hardware, signature bound to origin → structurally ends phishing.
+      </aside>
+    </section>
+
+    <!-- Slide 14 — Closing -->
+    <section data-background="#333333" style="color: white;">
+      <h2>Five rules</h2>
+      <ol style="font-size: 0.7em; text-align: left; max-width: 700px; margin: 30px auto;">
+        <li>Never trust user data</li>
+        <li>Complexity is the enemy of security</li>
+        <li>Be explicit, fail fast</li>
+        <li>Stack defenses</li>
+        <li>Use the platform's good defaults</li>
+      </ol>
+      <aside class="notes">
+        The companion page has everything — read it, do the embedded exercises, then attack the CTF lab.
+      </aside>
+    </section>
+  </div></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+  <script src="./script.js" type="module"></script>
+</body>
+</html>

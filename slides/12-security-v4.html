@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Web Security (v4 — readable alone)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.css" id="theme" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css" />
+  <link rel="stylesheet" href="./fontawesome-6.2.0/css/all.min.css" />
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .companion-link { position: absolute; bottom: 8px; right: 16px; font-size: 0.42em; color: #888; }
+    .companion-link i { margin-right: 4px; }
+    .reveal section { font-size: 0.65em; text-align: left; }
+    .reveal section h2 { font-size: 1.3em; text-align: left; }
+    .reveal section p { margin: 0.45em 0; }
+    .reveal section pre { font-size: 0.5em; margin: 0.5em 0; }
+    .reveal section ul, .reveal section ol { font-size: 0.95em; margin: 0.4em 0 0.4em 1.2em; }
+    .reveal section li { margin: 0.15em 0; }
+    .reveal section table { font-size: 0.85em; margin: 0.4em 0; }
+    .reveal section .center { text-align: center; }
+    .keypoints { background: #f3f6f9; border-left: 3px solid #0969da; padding: 6px 12px; margin-top: 0.6em; font-size: 0.92em; }
+    .keypoints strong { font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; color: #57606a; display: block; margin-bottom: 2px; }
+    .keypoints ul { font-size: 1em; margin: 0 0 0 1em; }
+  </style>
+  <script src="print.js"></script>
+</head>
+<body>
+  <div class="reveal"><div class="slides">
+
+    <!-- 1 — Title -->
+    <section data-background="#333333" class="center" style="text-align: center;">
+      <h2 style="text-align: center;">Web</h2>
+      <h1>Web Security</h1>
+      <p style="font-size: 0.7em; margin-top: 30px;">Companion page: <code>pages/12-security.html</code></p>
+      <p style="font-size: 0.55em; color: #aaa; margin-top: 20px;">This deck is self-contained — every slide explains its concept end-to-end so it's readable without the lecturer's narration.</p>
+    </section>
+
+    <!-- 2 — Disclaimer -->
+    <section>
+      <h2><i class="fas fa-gavel"></i> It's illegal</h2>
+      <p>Probing the security of a website without the owner's explicit permission is a crime in most jurisdictions, even if you don't actually do anything malicious — even if you only "look."</p>
+      <p>In the US, the <strong>Computer Fraud and Abuse Act</strong> carries penalties up to 20 years in prison and applies to non-US citizens. In Switzerland, <strong>Art. 143bis CP</strong> is the equivalent offense ("unauthorized access to a data processing system").</p>
+      <p>If you want to practice on real systems, go on a <strong>Bug Bounty</strong> program (HackerOne, Bugcrowd, Intigriti) where the owner has given written authorization to test specific scopes in exchange for disclosure.</p>
+      <div class="keypoints">
+        <strong>Key points</strong>
+        <ul>
+          <li>No site is fair game without written authorization</li>
+          <li>"Just curious" doesn't hold up legally</li>
+          <li>Bug bounty programs are the legitimate practice ground</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3 — Threat map -->
+    <section>
+      <h2><i class="fas fa-map"></i> Threat map — three layers</h2>
+      <p>A web application stretches across three physical layers, and each layer is its own attack surface with its own defenders. The browser layer is constrained by what the platform enforces (SOP, CORS). The network layer is mostly about transport security (HTTPS / HSTS). The server layer is where YOUR code runs and where the attacker is least constrained — they can send any bytes to any endpoint.</p>
+      <table>
+        <tr><th>Browser</th><th>Network</th><th>Server</th></tr>
+        <tr><td>SOP, XSS, CSRF, phishing, variable injection</td><td>CORS (browser-enforced), HTTPS, HSTS, eavesdropping</td><td>SQL injection, SSRF, info leaks, supply chain, weak password storage, rate limiting</td></tr>
+      </table>
+      <p>A recurring principle: the security model lives at the boundaries. Once an attacker is past a boundary, the inner layer doesn't get to second-guess them. So defense in depth means every boundary takes its job seriously.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §1</span>
+    </section>
+
+    <!-- 4 — Same-Origin Policy -->
+    <section>
+      <h2><i class="fas fa-shield-alt"></i> Same-Origin Policy — the rule</h2>
+      <p>The Same-Origin Policy says <em>two pages from different origins should not be able to interfere with each other.</em> This is the foundational rule that makes it safe to have multiple tabs open at once — your banking tab and an attacker's tab can coexist without the attacker reading your bank's data.</p>
+      <p>An <strong>origin</strong> is the triple <code>(protocol, host, port)</code>. Two URLs are same-origin only if all three match. Default ports (80 for http, 443 for https) are implicit.</p>
+      <table>
+        <tr><th>Page A</th><th>Page B</th><th>Same origin?</th></tr>
+        <tr><td>http://a.com</td><td>https://a.com</td><td>No — protocol differs</td></tr>
+        <tr><td>https://a.com</td><td>https://a.com:8443</td><td>No — port differs</td></tr>
+        <tr><td>https://a.com</td><td>https://api.a.com</td><td>No — host differs (subdomain counts!)</td></tr>
+        <tr><td>https://a.com</td><td>https://a.com:443</td><td>Yes — 443 is the default port for https</td></tr>
+      </table>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+    </section>
+
+    <!-- 5 — SOP: what's blocked, what's allowed -->
+    <section>
+      <h2>SOP — what's blocked and what's allowed</h2>
+      <p>The Same-Origin Policy is most concrete when you list what it actually blocks. Three categories of cross-origin interaction are forbidden:</p>
+      <ul>
+        <li>Reading or modifying the DOM of another page (e.g. via an <code>iframe</code>'s <code>contentDocument</code>)</li>
+        <li>Reading the response body of a cross-origin <code>fetch</code></li>
+        <li>Reading another origin's cookies, <code>localStorage</code>, or <code>IndexedDB</code></li>
+      </ul>
+      <p>Some cross-origin interactions remain allowed because the web platform depends on them — they were grandfathered in from before SOP existed:</p>
+      <ul>
+        <li>Embedded static resources: <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;link rel="stylesheet"&gt;</code></li>
+        <li>Submitting a form with <code>action</code> pointing to another origin</li>
+        <li>Explicit, opt-in mechanisms: <code>postMessage</code> for iframe comms, CORS for fetch</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+    </section>
+
+    <!-- 6 — postMessage -->
+    <section>
+      <h2><i class="fas fa-comments"></i> Cross-origin iframe communication</h2>
+      <p>When you embed an iframe from a different origin, the SOP blocks direct DOM access in both directions. The legitimate channel is <code>postMessage</code>: an explicit message-passing API where both sides choose to communicate.</p>
+<pre><code>// Parent at parent.example.com — send a message
+iframe.contentWindow.postMessage(msg, "https://child.example.com");
+
+// Child at child.example.com — receive it
+window.addEventListener("message", (event) =&gt; {
+  if (event.origin !== "https://parent.example.com") return;
+  // safe to use event.data
+});</code></pre>
+      <p>The two security rules that matter: the sender must always pass a specific <code>targetOrigin</code> (never <code>"*"</code> for sensitive data — that delivers your message to whoever happens to have loaded the iframe), and the receiver must always verify <code>event.origin</code> before trusting <code>event.data</code>.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §2</span>
+    </section>
+
+    <!-- 7 — CORS overview -->
+    <section>
+      <h2><i class="fas fa-globe-europe"></i> CORS — Cross-Origin Resource Sharing</h2>
+      <p>The Same-Origin Policy blocks most cross-origin <code>fetch</code> by default. CORS (Cross-Origin Resource Sharing) is the opt-in mechanism that lets a server selectively allow them. Without CORS headers in the response, the browser hides the response body from your JS — even if the request itself succeeded and the server processed it.</p>
+      <p><strong>This is enforced by the browser, not the server.</strong> The request still reaches the network, and any side effects on the server still happen. CORS protects the <em>user's</em> data (the response body) from being read by hostile JS in a tab they didn't initiate. It does NOT protect your server from unwanted requests — for that, you need real authentication and CSRF tokens.</p>
+<pre><code>// Response from api.com:
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: https://app.com</code></pre>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+    </section>
+
+    <!-- 8 — CORS preflight -->
+    <section>
+      <h2>CORS — preflight requests</h2>
+      <p>For <em>non-simple</em> requests (PUT/DELETE, requests with <code>Content-Type: application/json</code>, or custom headers), the browser refuses to send the real request until it gets server permission. It sends a <strong>preflight</strong>: an <code>OPTIONS</code> request asking "may I do this?"</p>
+<pre><code>OPTIONS /api/account HTTP/1.1
+Origin: https://app.example.com
+Access-Control-Request-Method: DELETE
+Access-Control-Request-Headers: X-Auth, Content-Type
+
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Methods: DELETE, GET
+Access-Control-Allow-Headers: X-Auth, Content-Type
+Access-Control-Max-Age: 600</code></pre>
+      <p>Only after the server responds with the allow-list does the browser send the actual <code>DELETE</code>. This is the only browser-enforced check that prevents some classes of cross-origin abuse — but simple GET/POST with form-encoded bodies skip the preflight entirely.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+    </section>
+
+    <!-- 9 — CORS credentials -->
+    <section>
+      <h2>CORS — credentialed requests</h2>
+      <p>By default, cookies and HTTP auth are <strong>not</strong> sent on cross-origin <code>fetch</code> requests, and the server can't read them. To include them, you have to opt in on both sides.</p>
+<pre><code>// Client opts in
+fetch("https://api.com/me", { credentials: "include" });
+
+// Server opts in
+Access-Control-Allow-Origin: https://app.com     // must be specific, not *
+Access-Control-Allow-Credentials: true</code></pre>
+      <p>The constraint that catches people: with credentials, <code>Access-Control-Allow-Origin: *</code> is invalid. The server must echo back the specific allowed origin. If either side forgets to opt in, the browser drops the response.</p>
+      <div class="keypoints">
+        <strong>Key points</strong>
+        <ul>
+          <li>CORS is enforced by the browser, not the server</li>
+          <li>Preflight asks permission for non-simple methods</li>
+          <li>Credentials require both <code>credentials: include</code> AND server opt-in</li>
+        </ul>
+      </div>
+      <span class="companion-link"><i class="fas fa-book"></i> §3</span>
+    </section>
+
+    <!-- 10 — Cookies anatomy -->
+    <section>
+      <h2><i class="fas fa-cookie-bite"></i> Cookies — anatomy</h2>
+      <p>A cookie is a single key-value pair the server tells the browser to store. With every subsequent request to that origin, the browser sends all stored cookies back. Cookies are how stateful sessions work on top of HTTP's stateless protocol.</p>
+<pre><code>Set-Cookie: session_id=eyJhb...;
+            Domain=example.com; Path=/;
+            Max-Age=86400;
+            Secure; HttpOnly; SameSite=Lax</code></pre>
+      <p>The key-value pair is followed by attributes that the browser interprets. <strong>Domain</strong> and <strong>Path</strong> restrict which requests carry the cookie. <strong>Max-Age</strong> sets expiry (in seconds). <strong>Secure</strong>, <strong>HttpOnly</strong>, and <strong>SameSite</strong> are the security knobs.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+    </section>
+
+    <!-- 11 — Cookie security attributes -->
+    <section>
+      <h2>Cookie security attributes</h2>
+      <p>Three attributes do most of the security work, and they each defend against a different threat:</p>
+      <ul>
+        <li><strong><code>Secure</code></strong> — cookie is only sent over HTTPS. Without it, a network eavesdropper on an HTTP request can steal the cookie.</li>
+        <li><strong><code>HttpOnly</code></strong> — cookie is not readable from JavaScript (<code>document.cookie</code> can't see it). Mitigates session theft when an attacker gets code execution on your origin via XSS.</li>
+        <li><strong><code>SameSite</code></strong> — controls whether the cookie is sent on cross-site requests. Three values:
+          <ul>
+            <li><code>Strict</code> — never on cross-site requests, even when the user clicks a link from another site</li>
+            <li><code>Lax</code> — sent on top-level GET navigation; blocked on cross-site POST and embedded subresources (<strong>this is the modern browser default since Chrome 80, 2020</strong>)</li>
+            <li><code>None</code> — sent on every cross-site request (requires <code>Secure</code>)</li>
+          </ul>
+        </li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+    </section>
+
+    <!-- 12 — Cookie name prefixes -->
+    <section>
+      <h2>Cookie name prefixes — <code>__Host-</code> and <code>__Secure-</code></h2>
+      <p>Modern browsers enforce stronger guarantees when a cookie name starts with one of two reserved prefixes. The browser refuses to set the cookie if the constraints aren't met — so the prefix is a self-enforcing tag.</p>
+      <ul>
+        <li><code>__Secure-name</code> — must be set with the <code>Secure</code> attribute (HTTPS only)</li>
+        <li><code>__Host-name</code> — must be Secure, must have <code>Path=/</code>, must NOT have a <code>Domain</code> attribute. The cookie is bound to that exact host, so a subdomain can't set or override it.</li>
+      </ul>
+<pre><code>Set-Cookie: __Host-session=eyJ...;
+            Secure; HttpOnly; SameSite=Lax;
+            Path=/</code></pre>
+      <p>For session cookies, <code>__Host-</code> is the best choice — it eliminates an entire class of subdomain-takeover attacks at the platform layer.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+    </section>
+
+    <!-- 13 — Sessions -->
+    <section>
+      <h2><i class="fas fa-fingerprint"></i> Sessions</h2>
+      <p>A session ID is a server-issued random secret, sent to the client in a cookie. The server keeps the corresponding state (which user is logged in, what's in their cart) in memory or a database. The cookie just identifies which row to look up.</p>
+      <p>If an attacker steals your session ID, they ARE you for as long as it's valid — they don't need your password, they can't be challenged for 2FA, they just use your session. So the bar for handling session IDs is high:</p>
+      <ul>
+        <li>Generate from a cryptographically secure RNG (Node: <code>crypto.randomBytes(32)</code>). Never sequential, never predictable.</li>
+        <li>Set <code>Secure; HttpOnly; SameSite=Lax</code> and use the <code>__Host-</code> prefix</li>
+        <li>Rotate the session ID on login and on privilege escalation (prevents session fixation)</li>
+        <li>Expire idle sessions <strong>server-side</strong>, not just by the cookie's Max-Age — an old leaked cookie must stop working</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §4</span>
+    </section>
+
+    <!-- 14 — CSRF classic -->
+    <section>
+      <h2><i class="fas fa-user-secret"></i> CSRF — Cross-Site Request Forgery</h2>
+      <p>Browsers send cookies along with every request to their origin, regardless of who triggered the request. CSRF abuses this: a malicious page tricks the user's browser into firing an authenticated request to a target site where the user is already logged in.</p>
+<pre><code>&lt;!-- on evil.com --&gt;
+&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input type="hidden" name="to"     value="attacker"&gt;
+  &lt;input type="hidden" name="amount" value="1000"&gt;
+  &lt;input type="submit" value="Click here to win a free iPad!"&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit();&lt;/script&gt;</code></pre>
+      <p>The browser sends the user's <code>bank.com</code> session cookie along with the POST. If the bank's transfer endpoint trusts the session cookie alone, the transfer succeeds. Pre-2020 this was an everyday bug.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+    </section>
+
+    <!-- 15 — CSRF modern view -->
+    <section>
+      <h2>CSRF — the modern default</h2>
+      <p>Since Chrome 80 (Feb 2020), browsers default cookies without an explicit <code>SameSite</code> to <code>SameSite=Lax</code>. That alone closes the classic CSRF attack on POST requests — the cookie simply isn't sent on a cross-site POST. Naked CSRF is no longer an everyday bug.</p>
+      <p>But the default is not a panacea. Top-level GET navigation still ships the cookie under Lax — so if your endpoint takes destructive action on GET (it shouldn't), you remain exposed. And not every browser is modern enough; older browsers, intranet zones, and some embedded webviews need additional defense.</p>
+      <div class="keypoints">
+        <strong>Key points</strong>
+        <ul>
+          <li>SameSite=Lax default closes cross-site POST CSRF</li>
+          <li>Top-level GET still ships the cookie</li>
+          <li>Never put state changes on GET, even when "small"</li>
+        </ul>
+      </div>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+    </section>
+
+    <!-- 16 — CSRF defenses -->
+    <section>
+      <h2>CSRF — defense in depth with tokens</h2>
+      <p>For sites that need to work in older browsers, that support third-party embeds, or that can't rely on SameSite=Lax everywhere, the time-tested defense is a CSRF token. The server generates a per-session secret and embeds it in every form as a hidden input. The server rejects state-changing requests unless the submitted token matches.</p>
+<pre><code>&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input type="number" name="amount" value="1000"&gt;
+  &lt;input type="hidden" name="csrf"
+         value="eyJ2IjoxLCJldSI6MCwic3QiOjB9"&gt;
+  &lt;input type="submit" value="Send"&gt;
+&lt;/form&gt;</code></pre>
+      <p>An attacker on another origin can't read the token (the Same-Origin Policy blocks them from reading the form), and the token is too long to guess. A stateless variant called <strong>double-submit cookie</strong> sends the same random value as both a cookie AND a request header, and the server checks they match — no server-side storage needed.</p>
+      <p><strong>Important:</strong> CSRF tokens do NOT protect against XSS. Once attacker JS runs on your origin, it can simply read the token from the page and use it.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §5</span>
+    </section>
+
+    <!-- 17 — XSS overview -->
+    <section>
+      <h2><i class="fas fa-code"></i> XSS — Cross-Site Scripting</h2>
+      <p>Cross-Site Scripting is a code-injection vulnerability where untrusted user data unexpectedly becomes executable code on a victim's browser. The injected code runs with the victim's origin and session — it can read their data, perform actions on their behalf, exfiltrate cookies, anything the legitimate page could do.</p>
+      <p>XSS is the single most common web vulnerability in study after study. The defenses are well-understood but easy to get wrong because they're context-dependent — what's safe in one place is dangerous in another.</p>
+      <p>There are three classic flavors:</p>
+      <ul>
+        <li><strong>Reflected</strong> — attacker crafts a URL whose query string is included unescaped in the server's response. Victim clicks the link, runs the code. One click, one victim.</li>
+        <li><strong>Stored</strong> — attacker submits content (a comment, profile field) that the server stores and later serves to other users unescaped. Every viewer is a victim.</li>
+        <li><strong>DOM-based</strong> — vulnerable client-side JS reads untrusted input (URL, postMessage, fragment) and writes it into the DOM as code. No server involvement.</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+    </section>
+
+    <!-- 18 — XSS reflected example -->
+    <section>
+      <h2>XSS — a reflected example</h2>
+      <p>Consider a server that reflects a query parameter into the response without escaping:</p>
+<pre><code>// Server:
+app.get('/', (req, res) =&gt;
+  res.send(`&lt;h1&gt;Hello, ${req.query.user}&lt;/h1&gt;`))
+
+// Attacker sends victim a URL:
+https://target.com/?user=&lt;img src=x onerror=alert(document.cookie)&gt;</code></pre>
+      <p>The browser receives <code>&lt;h1&gt;Hello, &lt;img src=x onerror=alert(document.cookie)&gt;&lt;/h1&gt;</code>, fails to load the bogus image source, and runs the <code>onerror</code> handler — exfiltrating the victim's cookies to the attacker.</p>
+      <p>A common confusion: <code>innerHTML</code> refuses to execute <code>&lt;script&gt;</code> tags inserted at runtime, so developers think it's safe. But the <code>onerror</code> / <code>onload</code> trick works on any element type — <code>&lt;img&gt;</code>, <code>&lt;svg&gt;</code>, <code>&lt;iframe&gt;</code> — and bypasses that intuition.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+    </section>
+
+    <!-- 19 — XSS defense: escaping -->
+    <section>
+      <h2>XSS defense 1 — escape on the way out</h2>
+      <p>The first line of defense is to escape user input at output time, with rules specific to the context where the data lands. Different parts of an HTML document need different escaping:</p>
+      <ul>
+        <li><strong>Element body</strong>: escape <code>&lt;</code> and <code>&amp;</code></li>
+        <li><strong>Attribute value</strong> (quoted): escape <code>"</code>, <code>'</code>, and <code>&amp;</code></li>
+        <li><strong>URL attribute</strong> (<code>href</code>, <code>src</code>): also URL-validate (no <code>javascript:</code> scheme)</li>
+        <li><strong>JS string</strong>: don't — there is no safe escaping into a <code>&lt;script&gt;</code> block. Route the data through an HTML container and parse it client-side.</li>
+      </ul>
+      <p>The right answer is to use a template engine that does context-aware escaping for you: EJS's <code>&lt;%= %&gt;</code>, React's <code>{}</code>, Vue's <code>{{ }}</code>, etc. Never hand-concatenate user input into HTML strings — that's where the bugs live.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+    </section>
+
+    <!-- 20 — XSS defense: CSP -->
+    <section>
+      <h2>XSS defense 2 — Content Security Policy</h2>
+      <p>Even with diligent escaping, mistakes happen. CSP is a defense layer that restricts what scripts the browser will execute — so even if an attacker injects something, it doesn't run. Modern best practice uses <strong>nonces</strong>: every legitimate <code>&lt;script&gt;</code> tag carries a per-response random token, and the browser refuses to run any inline script that doesn't have it.</p>
+<pre><code>Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' 'nonce-r4nd0m';
+  object-src 'none';
+  base-uri 'self';</code></pre>
+<pre><code>&lt;script nonce="r4nd0m"&gt;
+  // legitimate inline JS, runs because the nonce matches
+&lt;/script&gt;</code></pre>
+      <p>An injected <code>&lt;script&gt;</code> tag from a payload doesn't know the nonce (which changes per response), so the browser refuses to execute it. Same for inline event handlers — the policy blocks them by default.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+    </section>
+
+    <!-- 21 — XSS defense: Trusted Types -->
+    <section>
+      <h2>XSS defense 3 — Trusted Types</h2>
+      <p>Trusted Types (Chromium-stable, available in Chrome and Edge) is a structural fix for DOM-based XSS. With the policy enabled, the dangerous DOM sinks — <code>innerHTML</code>, <code>setTimeout(string)</code>, <code>eval</code>, <code>document.write</code>, and others — refuse to consume raw strings. They only accept "trusted" objects produced by a registered sanitizer policy.</p>
+<pre><code>Content-Security-Policy:
+  require-trusted-types-for 'script';
+  trusted-types my-policy;</code></pre>
+      <p>With this in effect, <code>el.innerHTML = userString</code> throws a TypeError unless <code>userString</code> came from a registered sanitizer. You explicitly opt in to processing untrusted strings at well-defined boundaries, and everything else is structurally safe.</p>
+      <div class="keypoints">
+        <strong>Defense in depth — assume XSS will land someday</strong>
+        <ul>
+          <li><code>HttpOnly</code> on session cookies blocks JS theft</li>
+          <li>Re-auth for sensitive actions (password change, transfer)</li>
+          <li>Send confirmation emails for sensitive operations</li>
+        </ul>
+      </div>
+      <span class="companion-link"><i class="fas fa-book"></i> §6</span>
+    </section>
+
+    <!-- 22 — Phishing IDN -->
+    <section>
+      <h2><i class="fas fa-fish"></i> Phishing — IDN homographs</h2>
+      <blockquote style="font-size: 0.9em;">"Security solutions have a technological component, but security is fundamentally a people problem." — Bruce Schneier</blockquote>
+      <p>Phishing tricks the user, not the code. The web platform offers attackers several primitives for impersonation. The classic one is the <strong>internationalized domain name (IDN) homograph</strong>: hostnames may contain Unicode characters, but DNS only understands ASCII — so they're encoded as "punycode."</p>
+      <p class="center" style="font-size: 1.6em; font-family: arial; margin: 12px 0;">https://www.<span style="color:#cf222e">а</span>pple.com/</p>
+      <p>The <code>а</code> in that URL is Cyrillic U+0430, not Latin <code>a</code>. The browser sends <code>xn--pple-43d.com</code> to DNS — a completely different domain than apple.com. Modern browsers show the punycode form when a hostname mixes scripts suspiciously, but exact-script lookalikes and subdomain confusion (<code>apple.com-login.evil.com</code>) still slip past skimming users.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §7</span>
+    </section>
+
+    <!-- 23 — Phishing what helps -->
+    <section>
+      <h2>Phishing — what actually helps</h2>
+      <p>The honest answer is that user training, posters in the breakroom, and "always check the URL!" advice all have <strong>documented but modest</strong> effectiveness and decay quickly without reinforcement. The defenses that actually work move the verification into the platform:</p>
+      <ul>
+        <li><strong>Password managers</strong> bind credentials to domains and refuse to autofill on the wrong one. Even if the user is fooled visually, the manager isn't.</li>
+        <li><strong>Hardware security keys / Passkeys</strong> go further — the browser binds the cryptographic signature to the relying-party's origin. A phishing site at <code>раypal.com</code> simply <em>cannot</em> ask the authenticator for a signature meant for <code>paypal.com</code>. It's structurally impossible, not "merely difficult."</li>
+        <li><strong>Email security</strong> (SPF, DKIM, DMARC) reduces the surface of phishing email reaching the inbox.</li>
+      </ul>
+      <p>The lesson: phishing is solved at the platform layer, not at the user-vigilance layer. We'll come back to passkeys when we talk about authentication.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §7</span>
+    </section>
+
+    <!-- 24 — Server intro -->
+    <section>
+      <h2><i class="fas fa-server"></i> Server-side security — the model changes</h2>
+      <p>On the server, the attacker is no longer constrained by the browser. They can send any bytes to any endpoint, bypass your UI entirely, replay requests, fuzz inputs, and use any tool they like. The browser-enforced rules (SOP, CORS) protect <em>users</em> from each other in the browser — they do <em>nothing</em> to protect your server from a direct attacker.</p>
+      <p>This means the server-side security model has to live in your code. Every endpoint validates input. Every database query treats user data as data, not code. Every cross-host fetch validates the target. Every error message considers what it might reveal.</p>
+      <p>We'll look at four classes: SQL injection, SSRF (Server-Side Request Forgery), information leaks, and supply-chain attacks. Plus the universal hygiene of rate limiting.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+    </section>
+
+    <!-- 25 — SQL injection -->
+    <section>
+      <h2><i class="fas fa-database"></i> SQL injection</h2>
+      <p>The canonical server-side bug. When user input is concatenated directly into a SQL query string, an attacker can break out of the intended data context and inject query syntax.</p>
+<pre><code>// Vulnerable
+db.query(`SELECT * FROM users
+  WHERE name = '${user}' AND pass = '${pass}'`);
+
+// Attacker sends:  user = admin' --
+// Query becomes:
+SELECT * FROM users WHERE name = 'admin' -- ' AND pass = '...'
+//                                       ^^^ everything after ignored
+</code></pre>
+      <p>The classic <code>admin' --</code> trick uses the SQL line comment to strip the password check. With <code>' OR '1'='1</code> you don't even need to know any usernames — the WHERE clause becomes tautological and the query returns every row.</p>
+      <p>The fix is <strong>parameterized queries</strong> (a.k.a. prepared statements). The database driver sends the SQL and the values as separate things; the database substitutes safely. Attacker input can never become query syntax because it's never parsed as syntax.</p>
+<pre><code>// Safe
+db.query('SELECT * FROM users WHERE name = $1', [user]);</code></pre>
+      <p>An ORM (Prisma, Sequelize, Drizzle, …) does this for you and adds type safety. There's no reason to write raw concatenated SQL in 2026.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+    </section>
+
+    <!-- 26 — SSRF -->
+    <section>
+      <h2><i class="fas fa-route"></i> SSRF — Server-Side Request Forgery</h2>
+      <p>Your production server sits on the same network as services the public internet cannot reach: a cloud metadata service, an internal admin API, a database that only listens on a private IP. If your code fetches a URL from user input (image proxy, webhook delivery, URL preview, PDF rendering), the attacker can make YOUR server reach those internal targets.</p>
+<pre><code>// Attacker submits:
+{ "avatar_url":
+  "http://169.254.169.254/latest/meta-data/iam/security-credentials/" }
+
+// Your code:
+const img = await fetch(req.body.avatar_url);
+// Your server obediently fetches AWS metadata — including
+// short-term credentials with whatever role the box has.</code></pre>
+      <p>SSRF was the root cause of the Capital One breach (2019). Defenses:</p>
+      <ul>
+        <li><strong>Allowlist hosts</strong> where possible (e.g. only fetch from <code>cdn.example.com</code>)</li>
+        <li>If users supply arbitrary URLs, resolve DNS yourself and verify the IP is public (not <code>127.0.0.1</code>, <code>10.0.0.0/8</code>, <code>169.254.0.0/16</code>, …). Beware DNS rebinding — re-resolve and re-check before connecting.</li>
+        <li>Short connect timeouts. Don't follow redirects without re-validating.</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+    </section>
+
+    <!-- 27 — Supply chain + leaks -->
+    <section>
+      <h2>Supply chain + information leaks</h2>
+      <p>A modern web app loads hundreds of transitive npm dependencies — any of which can be compromised. Three flavors:</p>
+      <ul>
+        <li><strong>Dependency confusion</strong> — attacker publishes a public package with the same name as your internal private one; your build picks the public one</li>
+        <li><strong>Typosquatting</strong> — <code>colorss</code> instead of <code>colors</code>, <code>nodemom</code> instead of <code>nodemon</code></li>
+        <li><strong>Maintainer compromise</strong> — legitimate package gets a malicious update pushed (this has happened to widely-used packages multiple times in recent years)</li>
+      </ul>
+      <p>Defenses: commit your lockfile, run <code>npm audit</code> / Dependabot / Renovate, avoid <code>postinstall</code> scripts where possible, prefer fewer direct dependencies.</p>
+      <p>Information leaks are the server giving up the breach without an active attack — stack traces in error responses, over-fetching (returning the full user object when the client needed a display name), or verbose errors revealing whether a username exists (the response-discrepancy pattern). Generic error messages and minimal API responses are the fix.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+    </section>
+
+    <!-- 28 — Rate limiting -->
+    <section>
+      <h2><i class="fas fa-tachometer-alt"></i> Rate limiting</h2>
+      <p>Most online attacks are mass-volume: credential stuffing tries millions of leaked passwords, scrapers try to download your entire user base, denial-of-wallet attacks against paid APIs run up your bills. The defense is universal: <strong>rate limit everything</strong>, per-IP and per-account.</p>
+      <ul>
+        <li>Authentication endpoints: failed-login backoff, lockout after N attempts</li>
+        <li>Password reset and signup: prevent enumeration</li>
+        <li>Expensive read endpoints: per-account quotas</li>
+        <li>Anything that costs money on the backend (LLM calls, geocoding APIs, …): per-account limits</li>
+      </ul>
+      <p>Rate limiting isn't glamour — it doesn't show up in OWASP Top 10 as its own item — but it's first-class defense, not a polish item. Most "advanced" attacks fail or are detectable when basic rate limits are in place.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §8</span>
+    </section>
+
+    <!-- 29 — Storing passwords -->
+    <section>
+      <h2><i class="fas fa-key"></i> Storing passwords</h2>
+      <p>Three rules, each defeating a specific attack class:</p>
+      <ul>
+        <li><strong>Hash, don't encrypt.</strong> Encryption is reversible — if your host is compromised, the key likely is too. Hashing is one-way: a leaked database doesn't give the attacker passwords directly.</li>
+        <li><strong>Salt.</strong> Random per-user bytes, stored alongside the hash. Two users with the same password get different hashes; precomputed rainbow tables become useless.</li>
+        <li><strong>Slow function.</strong> Use bcrypt, scrypt, or Argon2id — algorithms designed to be deliberately slow (~100ms per hash on production hardware). The user logs in once per day; the attacker brute-forcing the leak pays 100ms per guess. Tunable: bump the cost as hardware gets faster.</li>
+      </ul>
+      <p><strong>Use a library.</strong> Don't roll your own crypto. The implementations of bcrypt and Argon2 are battle-tested; the ways to subtly screw up a hand-written hash are many.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §9</span>
+    </section>
+
+    <!-- 30 — NIST 800-63B -->
+    <section>
+      <h2>Modern password rules — NIST SP 800-63B</h2>
+      <p>The old advice (complex character classes, forced 90-day rotation, security questions) is now actively harmful. NIST's current guidance, widely adopted as industry consensus:</p>
+      <ul>
+        <li><strong>No mandatory periodic changes.</strong> Forced rotation pushes users toward weak, sequential passwords ("Spring2026!" → "Summer2026!"). Rotate only on suspected compromise.</li>
+        <li><strong>No silly composition rules.</strong> Length beats complexity. Allow long passwords (minimum 64 chars), allow spaces, allow Unicode.</li>
+        <li><strong>Block known-breached passwords.</strong> Check candidates against <a href="https://haveibeenpwned.com/Passwords">Have I Been Pwned</a>'s k-anonymity API at signup and password change. This is more effective than any composition rule.</li>
+        <li><strong>Rate-limit and lock out</strong> failed attempts. Bcrypt cost helps against offline brute force; rate limiting helps against online brute force.</li>
+        <li><strong>Never send passwords by email or SMS.</strong> Use one-time signed links instead.</li>
+        <li><strong>2FA / MFA</strong> on anything important. Prefer WebAuthn/Passkeys over TOTP over SMS.</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §9</span>
+    </section>
+
+    <!-- 31 — Auth comparison -->
+    <section>
+      <h2><i class="fas fa-id-card"></i> Authentication mechanisms — compared</h2>
+      <p>Four common patterns, each with its trade-offs. The right choice depends on revocation needs, scale, and threat model.</p>
+      <table>
+        <tr><th></th><th>State location</th><th>Revocation</th><th>Scaling</th><th>Phishing-proof?</th></tr>
+        <tr><td>Session cookie</td><td>Server-side (DB / Redis)</td><td>Easy (delete the row)</td><td>Needs a shared store</td><td>No</td></tr>
+        <tr><td>JWT bearer</td><td>Self-contained in the token</td><td>Hard (blacklist or short TTL)</td><td>Stateless</td><td>No</td></tr>
+        <tr><td>OAuth2 + PKCE</td><td>Token-issuer's responsibility</td><td>Issuer's job</td><td>Federated</td><td>No</td></tr>
+        <tr><td><strong>WebAuthn / Passkeys</strong></td><td>Public key in DB</td><td>Easy (delete the key)</td><td>Stateless from server</td><td><strong>Yes</strong></td></tr>
+      </table>
+      <p>For new apps in 2026, a common combo is passkeys for human users + JWT/session cookies for service-to-service auth. Federation via OAuth2 covers "log in with Google."</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+    </section>
+
+    <!-- 32 — JWT -->
+    <section>
+      <h2>JWT — what's actually inside</h2>
+      <p>A JSON Web Token is three base64url-encoded parts joined by dots: a header (algorithm and type), a payload (the claims), and a signature over the first two computed with a shared secret (HMAC) or a private key (RSA / EC).</p>
+<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9     ← header   {"alg":"HS256","typ":"JWT"}
+  .eyJzdWIiOiJhbGljZSIsInJvbGUiOiJ1c2VyIn0  ← payload  {"sub":"alice","role":"user"}
+  .K7rL3pXq...                              ← signature</code></pre>
+      <p>The payload is signed but <strong>readable</strong> — base64url is encoding, not encryption. Anyone with the token can decode the claims. Never put secrets in a JWT payload.</p>
+      <p>Classic foot-guns:</p>
+      <ul>
+        <li><code>alg: "none"</code> — some libraries historically accepted unsigned tokens. Always validate <code>alg</code> against an allowlist on the server.</li>
+        <li><strong>Algorithm confusion</strong> — server uses HS256, attacker sends RS256 (or vice versa), tricks the library into validating with the wrong key. Pin the algorithm server-side.</li>
+        <li><strong>Long TTLs without revocation</strong> — JWTs are stateless; you can't easily revoke one. Use short TTLs + a refresh mechanism.</li>
+      </ul>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+    </section>
+
+    <!-- 33 — OAuth2 PKCE -->
+    <section>
+      <h2>OAuth2 — Authorization Code with PKCE</h2>
+      <p>OAuth2 lets a third-party app act on a user's behalf without seeing the user's credentials. For browser apps, the modern recommended flow is <strong>Authorization Code + PKCE</strong> ("Proof Key for Code Exchange"). Step by step:</p>
+      <ol>
+        <li>App generates a random <code>code_verifier</code>, hashes it with SHA-256, base64url-encodes → <code>code_challenge</code></li>
+        <li>App redirects user to <code>GET /authorize?code_challenge=…&amp;client_id=…&amp;redirect_uri=…&amp;state=…</code></li>
+        <li>User logs in at the authorization server, consents</li>
+        <li>Auth server redirects back to <code>redirect_uri?code=AUTH_CODE&amp;state=…</code></li>
+        <li>App POSTs to the token endpoint with the original <code>code_verifier</code>: <code>POST /token  grant_type=authorization_code&amp;code=AUTH_CODE&amp;code_verifier=…</code></li>
+        <li>Auth server hashes the verifier, checks against the challenge from step 2; on match, issues an access token</li>
+      </ol>
+      <p>Why PKCE? Without it, an attacker who intercepts the redirect (malicious app on the device, misconfigured redirect handler) could exchange the auth code themselves. PKCE binds the code exchange to whoever generated the verifier — only they can complete it.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+    </section>
+
+    <!-- 34 — WebAuthn / Passkeys -->
+    <section>
+      <h2><i class="fas fa-fingerprint"></i> WebAuthn / Passkeys</h2>
+      <p>Public-key authentication baked into the browser. On registration, the user's device generates a fresh key pair specific to that site, stores the private key in secure hardware (TPM, Secure Enclave, hardware key), and sends the public key to the server. On login, the server sends a challenge; the device signs it with the private key; the signature is verified server-side against the stored public key.</p>
+      <p>Why it structurally ends phishing — three reasons:</p>
+      <ul>
+        <li>The browser binds the signing operation to the actual origin of the page making the request. A phishing site at <code>раypal.com</code> simply <strong>cannot</strong> ask the authenticator for a signature meant for <code>paypal.com</code>. It's not "hard," it's impossible — the browser refuses.</li>
+        <li>There is no shared secret stored on the server. A database breach leaks public keys — useless to an attacker.</li>
+        <li>The user can't be tricked into revealing the credential, because there's nothing to reveal — it never leaves the secure hardware.</li>
+      </ul>
+      <p>Passkeys are the consumer-friendly name. Apple, Google, Microsoft, and 1Password sync them via cloud accounts. The user experience is "use Face ID to log in." Server-side libraries: <code>@simplewebauthn/server</code>, <code>fido2-lib</code>.</p>
+      <span class="companion-link"><i class="fas fa-book"></i> §10</span>
+    </section>
+
+    <!-- 35 — Closing -->
+    <section data-background="#333333" style="color: white;">
+      <h2 style="color: white;">Five rules</h2>
+      <ol style="font-size: 0.95em;">
+        <li><strong>Never trust user data.</strong> Validate at the trust boundary; escape on the way out.</li>
+        <li><strong>Complexity is the enemy of security.</strong> Reach for boring, well-tested libraries.</li>
+        <li><strong>Be explicit, fail fast.</strong> Reject invalid requests before any business logic runs.</li>
+        <li><strong>Stack defenses.</strong> Assume each layer will be breached someday; bound the blast radius.</li>
+        <li><strong>Pay attention to defaults.</strong> The web's defaults are improving (SameSite=Lax, CSP, passkeys) — use them.</li>
+      </ol>
+      <p style="font-size: 0.85em; margin-top: 20px;">The companion page <code>pages/12-security.html</code> has the full depth with interactive exercises. The lab <code>labos/7-security</code> takes you from concept to running attacks.</p>
+    </section>
+
+  </div></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.js"></script>
+  <script src="./script.js" type="module"></script>
+</body>
+</html>

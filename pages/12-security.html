@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Security — Companion Page</title>
+  <link rel="stylesheet" href="assets/12-security.css">
+</head>
+<body>
+  <nav id="toc" aria-label="Table of contents">
+    <h2>Web Security</h2>
+    <ol>
+      <li><a href="#preface">Preface</a></li>
+      <li><a href="#threat-map">Threat map</a></li>
+      <li><a href="#sop">Same-Origin Policy</a></li>
+      <li><a href="#cors">CORS</a></li>
+      <li><a href="#cookies">Cookies &amp; Sessions</a></li>
+      <li><a href="#csrf">CSRF</a></li>
+      <li><a href="#xss">XSS</a></li>
+      <li><a href="#phishing">Phishing</a></li>
+      <li><a href="#server-side">Server-side security</a></li>
+      <li><a href="#passwords">Storing passwords</a></li>
+      <li><a href="#auth">Auth mechanisms</a></li>
+      <li><a href="#takeaways">Takeaways</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header>
+      <h1>Web Security</h1>
+      <p class="lede">Companion page to chapter 12. The slide deck is a tighter projection of this page.</p>
+    </header>
+
+    <section id="preface">
+      <h2>Preface</h2>
+
+      <h3>It's illegal</h3>
+      <p>Unless you have explicit permission from the owner of a website, you may not pick at it. In the US this is a violation of the Computer Fraud and Abuse Act (CFAA) and can carry up to 20 years in prison; it applies to non-US citizens too. In Switzerland the equivalent is Art. 143bis CP.</p>
+      <p>If you want to practice on real systems, go on a <a href="https://www.hackerone.com/bug-bounty-programs">Bug Bounty</a> program where the owner has signed up to be tested.</p>
+
+      <h3>Vocabulary: <em>crypter</em> vs <em>chiffrer</em></h3>
+      <ul>
+        <li><strong>Chiffrer</strong>: transform a message into an unreadable one using a key. Reversible with the key.</li>
+        <li><strong>Déchiffrer</strong>: reverse the operation using the key.</li>
+        <li><strong>Décrypter</strong>: reverse the operation <em>without</em> the key (i.e. break the cipher).</li>
+        <li><strong>Crypter</strong>: does not exist in French. Use <em>chiffrer</em>.</li>
+      </ul>
+    </section>
+    <section id="threat-map">
+      <h2>Threat map</h2>
+      <p>Web applications span three layers, and each layer is its own attack surface:</p>
+
+      <table>
+        <thead><tr><th>Layer</th><th>What lives here</th><th>Attack classes covered in this chapter</th></tr></thead>
+        <tbody>
+          <tr><td>Browser</td><td>Your HTML, JS, cookies, the user's session</td><td>SOP violations, XSS, CSRF, phishing</td></tr>
+          <tr><td>Network</td><td>HTTP between client and server</td><td>CORS misconfiguration, eavesdropping (HTTPS / HSTS)</td></tr>
+          <tr><td>Server</td><td>Your code, your database, your dependencies</td><td>SQL injection, SSRF, info leaks, supply chain, weak password storage</td></tr>
+        </tbody>
+      </table>
+
+      <p>The rest of the page walks each layer top-down. A recurring assumption: the attacker can send any bytes to your server, and can run any code on their own browser — the security model lives at the boundaries.</p>
+    </section>
+    <section id="sop">
+      <h2>Same-Origin Policy</h2>
+      <p>Rule: <em>two pages from different origins should not be able to interfere with each other</em>. An origin is the triple <code>(protocol, host, port)</code>. Any one of those differing makes it a different origin.</p>
+
+      <h3>What counts as interference</h3>
+      <ul>
+        <li>Reading or modifying the DOM of another page (e.g. via an <code>iframe</code>'s <code>contentDocument</code>)</li>
+        <li><code>fetch</code> from another origin (response body is hidden by default)</li>
+        <li>Reading another origin's cookies, <code>localStorage</code>, <code>IndexedDB</code></li>
+      </ul>
+
+      <h3>Exceptions (intentional cross-origin)</h3>
+      <ul>
+        <li>Embedded static resources: <code>&lt;img&gt;</code>, <code>&lt;script&gt;</code>, <code>&lt;link rel="stylesheet"&gt;</code></li>
+        <li>Form <code>action</code>: <code>&lt;form action="https://otherserver.com"&gt;</code> is allowed</li>
+        <li><code>postMessage</code> for explicit, opt-in cross-origin communication</li>
+      </ul>
+
+      <h3>iframe communication via <code>postMessage</code></h3>
+      <p>The legitimate way for an embedder and its iframe to talk:</p>
+
+<pre><code>// Embedder
+iframe.contentWindow.postMessage(msg, "https://child.example.com");
+
+// Child
+window.addEventListener("message", (event) =&gt; {
+  if (event.origin !== "https://parent.example.com") return;
+  // ... use event.data
+});</code></pre>
+
+      <p><strong>Always verify <code>event.origin</code></strong> and pass a specific <code>targetOrigin</code>, never <code>"*"</code>.</p>
+
+      <h3><code>document.domain</code> is dead</h3>
+      <p>Historically, pages on different subdomains of the same parent (<code>app.example.com</code> and <code>www.example.com</code>) could opt in to scripting each other by both setting <code>document.domain = 'example.com'</code>. As of Chrome 115 (2023) this no longer works — setting <code>document.domain</code> is a no-op. Use <code>postMessage</code> across origins instead.</p>
+
+      <h3>Preventing your page from being embedded</h3>
+      <p>Use <code>Content-Security-Policy: frame-ancestors 'none'</code> (modern) or the legacy <code>X-Frame-Options: DENY</code>.</p>
+
+      <h4>Practice</h4>
+      <predict-reveal>
+        <p slot="question">Two origins or not? <code>http://www.example.com</code> vs <code>http://www.example.com:80</code>.</p>
+        <p slot="answer"><strong>Same origin.</strong> Port 80 is the default for <code>http</code>; the omitted port is implicitly 80.</p>
+      </predict-reveal>
+      <predict-reveal>
+        <p slot="question">Two origins or not? <code>https://example.com</code> vs <code>https://example.com:443</code>.</p>
+        <p slot="answer"><strong>Same origin.</strong> 443 is the default port for <code>https</code>.</p>
+      </predict-reveal>
+      <predict-reveal>
+        <p slot="question">Two origins or not? <code>https://example.com</code> vs <code>https://api.example.com</code>.</p>
+        <p slot="answer"><strong>Different origins.</strong> The host differs (<code>example.com</code> vs <code>api.example.com</code>).</p>
+      </predict-reveal>
+    </section>
+    <section id="cors">
+      <h2>CORS — Cross-Origin Resource Sharing</h2>
+      <p>The Same-Origin Policy blocks most cross-origin requests by default. CORS is the opt-in mechanism that lets a server selectively allow them. <strong>CORS is enforced by the browser</strong>, not the server — the response still reaches the network, the browser just refuses to give it to your JS.</p>
+
+      <h3>Simple requests</h3>
+      <p>A request is "simple" (no preflight required) if it uses <code>GET</code>, <code>HEAD</code>, or <code>POST</code>, with a small set of headers and content types. The browser sends the request; the server's response must include:</p>
+<pre><code>Access-Control-Allow-Origin: https://your-app.example.com</code></pre>
+      <p>If the header is missing or doesn't match, the browser hides the response body from JS.</p>
+
+      <h3>Preflight (non-simple) requests</h3>
+      <p>For <code>PUT</code>, <code>DELETE</code>, requests with <code>Content-Type: application/json</code>, or custom headers, the browser first sends an <code>OPTIONS</code> request:</p>
+<pre><code>OPTIONS /api/account HTTP/1.1
+Host: api.example.com
+Origin: https://app.example.com
+Access-Control-Request-Method: DELETE
+Access-Control-Request-Headers: X-Auth, Content-Type</code></pre>
+      <p>The server responds with the allow-list:</p>
+<pre><code>HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Methods: DELETE, GET
+Access-Control-Allow-Headers: X-Auth, Content-Type
+Access-Control-Max-Age: 600</code></pre>
+      <p>Only then does the browser send the real <code>DELETE</code>.</p>
+
+      <h3>Credentialed requests</h3>
+      <p>Cookies and HTTP auth are NOT sent cross-origin by default. To include them, set <code>credentials: "include"</code> on <code>fetch</code> — and the server must respond with <code>Access-Control-Allow-Credentials: true</code> AND a specific (non-wildcard) <code>Access-Control-Allow-Origin</code>. Either missing → the browser drops the response.</p>
+
+      <h4>Practice</h4>
+      <predict-reveal>
+        <p slot="question">A JS app at <code>https://app.com</code> calls <code>fetch("https://api.com/data")</code>. The server responds 200 with the data but no CORS headers. What does the app see?</p>
+        <p slot="answer">The <code>fetch</code> Promise rejects with a CORS error. The server received the request and processed it (potentially with side effects!), but the browser refused to expose the response to the app's JS.</p>
+      </predict-reveal>
+      <predict-reveal>
+        <p slot="question">Same app sets <code>credentials: "include"</code>. Server responds with <code>Access-Control-Allow-Origin: *</code> and <code>Access-Control-Allow-Credentials: true</code>. Does it work?</p>
+        <p slot="answer">No. With credentials, <code>Allow-Origin: *</code> is invalid — it must be a specific origin. The browser drops the response.</p>
+      </predict-reveal>
+    </section>
+    <section id="cookies">
+      <h2>Cookies and Sessions</h2>
+      <p>Cookies are small key-value pairs the server tells the browser to store; the browser sends them back on every subsequent request to that origin. They are how the web does state across HTTP's stateless model.</p>
+
+      <h3>Anatomy</h3>
+<pre><code>Set-Cookie: session_id=eyJhb...; Domain=example.com; Path=/; Max-Age=86400;
+            Secure; HttpOnly; SameSite=Lax</code></pre>
+
+      <h3>The attributes that matter for security</h3>
+      <ul>
+        <li><strong><code>Secure</code></strong> — only sent over HTTPS. Without it, a network eavesdropper can steal the cookie.</li>
+        <li><strong><code>HttpOnly</code></strong> — not readable from JS (<code>document.cookie</code> can't see it). Mitigates session theft via XSS.</li>
+        <li><strong><code>SameSite</code></strong> — controls sending on cross-site requests:
+          <ul>
+            <li><code>Strict</code> — never on cross-site requests (even clicking a link from another site).</li>
+            <li><code>Lax</code> — sent on top-level GET navigation only. <strong>This is the modern browser default since 2020.</strong></li>
+            <li><code>None</code> — sent on every cross-site request (requires <code>Secure</code>).</li>
+          </ul>
+        </li>
+        <li><strong><code>Domain</code> / <code>Path</code></strong> — restricts which hosts/paths receive the cookie.</li>
+        <li><strong><code>Max-Age</code> / <code>Expires</code></strong> — expiry. Missing both → session cookie (browser-defined lifetime).</li>
+      </ul>
+
+      <h3>Name prefixes — <code>__Host-</code> and <code>__Secure-</code></h3>
+      <p>Modern browsers enforce stronger guarantees if the cookie name starts with one of these prefixes:</p>
+      <ul>
+        <li><code>__Secure-name</code> — must be set with <code>Secure</code> attribute (i.e. only over HTTPS).</li>
+        <li><code>__Host-name</code> — must be <code>Secure</code>, must have <code>Path=/</code>, must NOT have a <code>Domain</code> attribute (host-bound). Best choice for session cookies.</li>
+      </ul>
+
+      <h3><code>Partitioned</code> (CHIPS)</h3>
+      <p>Third-party cookies are being phased out. The <code>Partitioned</code> attribute (CHIPS — Cookies Having Independent Partitioned State) opts a cross-site cookie into the new partitioned model: the same <code>session</code> cookie set on <code>widget.example.com</code> when embedded on <code>siteA.com</code> is a different storage slot from the one on <code>siteB.com</code>. Required for legitimate cross-site embeds going forward.</p>
+<pre><code>Set-Cookie: __Host-session=abc; Secure; HttpOnly; SameSite=None; Partitioned</code></pre>
+
+      <h3>Sessions</h3>
+      <p>A session ID is a server-issued random secret stored in a cookie. The server keeps the corresponding session state (logged-in user, cart, etc.) in memory or a database. If I steal your session ID, I am you — so:</p>
+      <ul>
+        <li>Generate session IDs from a CSPRNG (e.g. Node's <code>crypto.randomBytes(32)</code>). Never sequential or guessable.</li>
+        <li>Set <code>Secure; HttpOnly; SameSite=Lax</code> (or <code>Strict</code> if your UX allows).</li>
+        <li>Use the <code>__Host-</code> prefix.</li>
+        <li>Rotate the session ID on login and on privilege escalation.</li>
+        <li>Expire idle sessions server-side, not just by the cookie's <code>Max-Age</code>.</li>
+      </ul>
+
+      <h4>Practice</h4>
+      <p>Use the simulator below: pick attributes and a scenario, and see whether the cookie ships.</p>
+      <samesite-sim></samesite-sim>
+    </section>
+    <section id="csrf">
+      <h2>CSRF — Cross-Site Request Forgery</h2>
+      <p>Cookies travel with every request to their origin, regardless of who triggered the request. CSRF abuses this: a malicious page tricks the user's browser into firing an authenticated request to a target site where the user already has a session.</p>
+
+      <h3>Classic example</h3>
+<pre><code>&lt;!-- on evil.com --&gt;
+&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input type="hidden" name="to" value="attacker"&gt;
+  &lt;input type="hidden" name="amount" value="1000"&gt;
+  &lt;input type="submit" value="Click here to win a free iPad!"&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit();&lt;/script&gt;</code></pre>
+
+      <p>If the user is logged into <code>bank.com</code> and the bank's transfer endpoint trusts the session cookie alone, the transfer succeeds.</p>
+
+      <h3>How much does the modern default fix?</h3>
+      <p>Most browsers now default to <code>SameSite=Lax</code> for cookies without an explicit attribute. That alone <strong>closes naked CSRF for POST and non-simple methods</strong>: the cookie simply isn't sent on a cross-site POST. Top-level GET navigation still ships the cookie under Lax — so if your endpoint takes destructive action on GET (it shouldn't), you are still exposed.</p>
+
+      <div class="callout">
+        <h4>Defense in depth — when you still want a token</h4>
+        <p>If you support cross-site embeds, third-party SSO, or you can't trust every browser to enforce SameSite=Lax (older browsers, intranet zones, etc.), add a CSRF token:</p>
+        <ul>
+          <li>Server generates a per-session secret token, embeds it in forms as a hidden input.</li>
+          <li>Server rejects state-changing requests unless the submitted token matches the session's token.</li>
+          <li>An attacker on another origin can't read the token (SOP), and can't guess it.</li>
+        </ul>
+        <p>Pattern variant: <strong>double-submit cookie</strong> — the same random value is sent both as a cookie AND as a request header; the server checks they match. Stateless on the server.</p>
+      </div>
+
+      <h3><code>Referer</code> vs <code>Origin</code></h3>
+      <ul>
+        <li><code>Origin</code> — the source's origin only (scheme + host + port). Sent on all non-GET cross-origin requests.</li>
+        <li><code>Referer</code> — full URL of the page that initiated the request. Useful for analytics/logging; <strong>can be stripped or omitted</strong> by the user or by referrer policy, so don't make security decisions on it alone.</li>
+      </ul>
+
+      <h4>Practice</h4>
+      <predict-reveal>
+        <p slot="question">A site sets <code>session=abc; Secure; HttpOnly</code> (no SameSite attribute). User is logged in. Attacker's page does <code>fetch("https://target.com/api/delete", { method: "POST", credentials: "include" })</code>. Does the cookie travel?</p>
+        <p slot="answer"><strong>No</strong> — modern browsers default missing <code>SameSite</code> to <code>Lax</code>, which blocks cross-site POSTs. (Older browsers without that default would send it — defense in depth still matters.)</p>
+      </predict-reveal>
+      <predict-reveal>
+        <p slot="question">Same site, same cookie, but the attacker tricks the user into clicking a link to <code>https://target.com/api/delete?id=42</code>. Does the cookie travel?</p>
+        <p slot="answer"><strong>Yes</strong> — Lax allows top-level GET cross-site navigations. This is why state-changing operations must never be on GET, and why CSRF tokens are still useful.</p>
+      </predict-reveal>
+      <div class="callout lab">
+        <h4>Try this in the lab</h4>
+        <p>The CTF flags in <code>8-security lab</code> rely on attacker-controlled JS running inside Echo's session, which is closely related to CSRF (it's the XSS twist where the attacker is already inside the origin and so SameSite doesn't help). Once you have flags 1–3, look at how you'd defend against them server-side.</p>
+      </div>
+    </section>
+    <section id="xss">
+      <h2>XSS — Cross-Site Scripting</h2>
+      <p>XSS is a code-injection vulnerability where untrusted user data becomes executable code on someone else's browser. It's the most common web vulnerability in study after study; defenses are well-understood but easy to get wrong.</p>
+
+      <h3>Three flavors</h3>
+      <ul>
+        <li><strong>Reflected</strong> — attacker crafts a URL whose query string is included unescaped in the server's response. Victim clicks the link, runs the code.</li>
+        <li><strong>Stored</strong> — attacker submits content (a comment, profile field) that the server stores and later serves to other users unescaped.</li>
+        <li><strong>DOM-based</strong> — vulnerable client-side JS reads untrusted input (URL, postMessage, fragment) and writes it into the DOM in a way that creates code.</li>
+      </ul>
+
+      <h3>Play with it — element body context</h3>
+      <p>Below, a tiny vulnerable server reflects <code>req.query.user</code> into the HTML body. Try payloads:</p>
+      <ul>
+        <li><code>&lt;img src=x onerror=alert(1)&gt;</code></li>
+        <li><code>&lt;svg onload=alert(1)&gt;</code></li>
+        <li><code>&lt;script&gt;alert(1)&lt;/script&gt;</code> — typically does NOT fire when inserted via <code>innerHTML</code>-style reflection, but DOES fire when reflected by the server's HTML response (try both).</li>
+      </ul>
+      <xss-sandbox></xss-sandbox>
+
+      <h3>Same vulnerability, different context — attribute value</h3>
+      <p>If user input lands inside an HTML attribute (here, <code>alt=…</code>), the payload shape changes — you have to break out of the quoted attribute first.</p>
+      <xss-sandbox template="attribute" payload="Nobody' onload='alert(1)"></xss-sandbox>
+
+      <h3>Defenses, in layers</h3>
+      <ol>
+        <li><strong>Escape on the way out, per context.</strong> Use a template engine that does it for you (ejs <code>&lt;%= %&gt;</code>, React's <code>{}</code>, Vue). Never concatenate user input into HTML strings. The required escaping is different for element body, attribute value, JS string, URL — and using the wrong one is silently insecure.</li>
+        <li><strong>Content Security Policy.</strong> A CSP header restricts where scripts may load from and inlines what code can run. Modern best practice uses <em>nonces</em> or <em>hashes</em>:
+<pre><code>Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' 'nonce-r4nd0m';
+  object-src 'none';
+  base-uri 'self';</code></pre>
+          Every legitimate <code>&lt;script nonce="r4nd0m"&gt;</code> tag carries the nonce; injected scripts don't, so the browser refuses to run them.</li>
+        <li><strong>Trusted Types</strong> (Chromium-stable). Forces all DOM sinks like <code>innerHTML</code>, <code>setTimeout(string)</code>, <code>eval</code> to consume only sanitizer-produced policy objects, not raw strings:
+<pre><code>Content-Security-Policy: require-trusted-types-for 'script';
+trusted-types my-policy;</code></pre>
+          With this set, <code>el.innerHTML = userString</code> throws unless <code>userString</code> came from a registered sanitizer policy. Structurally prevents DOM XSS.</li>
+        <li><strong>Stack defenses.</strong> Assume XSS will eventually happen: <code>HttpOnly</code> cookies, re-authenticate for sensitive actions (password change, fund transfer), audit logs, sensible session timeout. Then if XSS does land, the blast radius is bounded.</li>
+      </ol>
+
+      <h3>The "escape into JS" trap</h3>
+      <p>Escaping HTML inside a <code>&lt;script&gt;</code> block is <strong>not safe</strong>. There are two parsers (HTML, JS) and a payload like <code>&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code> breaks out of the script tag regardless of how you escape quotes. If you must pass server data to client JS, route it through an HTML container:</p>
+<pre><code>&lt;template id="user-data"&gt;${htmlEscape(userJson)}&lt;/template&gt;
+&lt;script&gt;
+  const data = JSON.parse(document.getElementById('user-data').textContent);
+&lt;/script&gt;</code></pre>
+
+      <h3>Variable injection (a sibling problem)</h3>
+      <p>HTML elements with an <code>id</code> attribute create a global JS variable of that name. If a user-controlled value becomes an element's <code>id</code>, the attacker can shadow legitimate globals:</p>
+<pre><code>// Server reflects user-controlled displayName into the id attribute:
+&lt;div id="${userDisplayName}"&gt;...&lt;/div&gt;
+
+// If userDisplayName === "nextTimeout", a real global named nextTimeout
+// is created — silently breaking code that expected its own variable.</code></pre>
+
+      <h4>Practice</h4>
+      <predict-reveal>
+        <p slot="question">Server code: <code>res.send(`&lt;a href="${userUrl}"&gt;Click&lt;/a&gt;`)</code>. <code>userUrl</code> is HTML-escaped before reflecting. Is this safe?</p>
+        <p slot="answer"><strong>No.</strong> HTML escaping leaves the payload <code>javascript:alert(1)</code> intact — and the browser executes JS URLs from <code>href</code>. Defense: URL-validate as well (e.g. reject anything not starting with <code>https://</code> or <code>/</code>).</p>
+      </predict-reveal>
+      <predict-reveal>
+        <p slot="question">Are CSRF tokens a mitigation against XSS?</p>
+        <p slot="answer"><strong>No.</strong> CSRF tokens stop other origins from forging requests. XSS runs on your own origin — the injected JS can simply read the CSRF token from the page and use it.</p>
+      </predict-reveal>
+      <div class="callout lab">
+        <h4>Try this in the lab</h4>
+        <p>Flags 1–3 in <code>8-security lab</code> exercise reflected/stored XSS via <code>innerHTML</code> and the <code>&lt;img onerror&gt;</code> trick demonstrated above. Flag 4 exercises variable injection via the <code>id</code> attribute.</p>
+      </div>
+    </section>
+    <section id="phishing">
+      <h2>Phishing</h2>
+      <blockquote>"Security solutions have a technological component, but security is fundamentally a people problem." — Bruce Schneier</blockquote>
+
+      <p>Phishing tricks the user, not the code. The web platform offers attackers several primitives for impersonation:</p>
+
+      <h3>Internationalized Domain Names (IDN)</h3>
+      <p>Hostnames may contain Unicode. They are encoded to ASCII as "punycode" for DNS. So <code>xn--80ak6aa92e.com</code> is what your browser sends; <code>аррӏе.com</code> is what the user reads — and the <code>а</code> is Cyrillic, the <code>ӏ</code> is not an <code>l</code>. Browsers now show punycode when characters mix scripts, but legacy and exact-script lookalikes still slip through.</p>
+
+      <h3>Subdomain confusion</h3>
+<pre><code>http://apple.com-webapps-userid29348325.active-userid.com/login</code></pre>
+      <p>The actual domain is <code>active-userid.com</code>. Browsers help by greying out subdomains in the URL bar, but users skim.</p>
+
+      <h3>UI fakery</h3>
+      <ul>
+        <li>HTML5 <a href="https://feross.org/html5-fullscreen-api-attack/">fullscreen API</a> — pretend to be the OS.</li>
+        <li>The <a href="https://jameshfisher.com/2019/04/27/the-inception-bar-a-new-phishing-method/">inception bar</a> — render a fake address bar after scroll.</li>
+      </ul>
+
+      <h3>What actually helps</h3>
+      <ul>
+        <li><strong>Password managers</strong> won't autofill on a wrong domain.</li>
+        <li><strong>Hardware security keys / Passkeys</strong> are bound to the relying-party's origin and refuse to sign for any other site. This <em>structurally</em> ends phishing for the user. See the Auth section below.</li>
+        <li>User training has documented but modest impact and decays without continuous reinforcement.</li>
+      </ul>
+
+      <h4>Practice — spot the homograph</h4>
+      <predict-reveal>
+        <p slot="question">Is <code>https://www.раypal.com</code> the real PayPal?</p>
+        <p slot="answer"><strong>No.</strong> The <code>а</code> is Cyrillic U+0430, not Latin <code>a</code>. Modern browsers show this as <code>https://www.xn--paypal-c6f.com</code> in the address bar. A password manager would refuse to autofill.</p>
+      </predict-reveal>
+    </section>
+    <section id="server-side">
+      <h2>Server-side security</h2>
+      <p>On the server, the attacker is no longer bound by your UI or by browser-enforced rules like SOP/CORS. They can send any bytes to any endpoint. The security model has to live in your server code.</p>
+
+      <h3>SQL injection</h3>
+      <p>String-concatenated SQL is the canonical bug. Below, the handler concatenates user input into the query — try the classic <code>admin' --</code> trick:</p>
+      <sqli-demo></sqli-demo>
+
+      <p>The fix: <strong>parameterized queries</strong>. The driver sends the SQL and the values as separate things to the database; the database substitutes safely.</p>
+<pre><code>// Vulnerable
+db.query(`SELECT * FROM users WHERE name = '${user}'`)
+
+// Safe
+db.query('SELECT * FROM users WHERE name = $1', [user])</code></pre>
+      <p>An ORM (Prisma, Sequelize, Drizzle…) does this for you, with the side benefit of types.</p>
+
+      <h3>SSRF — Server-Side Request Forgery</h3>
+      <p>Your server is on the same network as services the public internet can't reach (a metadata service, an internal API). If your endpoint takes a URL from the user and fetches it (image proxy, webhook delivery, PDF rendering), the attacker can make your server hit those internal targets:</p>
+<pre><code>// Attacker submits:
+{ "avatar_url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/" }
+
+// Your code:
+const img = await fetch(req.body.avatar_url);  // your server fetches AWS metadata</code></pre>
+      <p>Defenses:</p>
+      <ul>
+        <li><strong>Allowlist hosts</strong> (e.g. only fetch from <code>cdn.example.com</code>).</li>
+        <li>If users supply arbitrary URLs, resolve the DNS yourself and verify the IP is public (not <code>127.0.0.1</code>, <code>10.0.0.0/8</code>, <code>169.254.169.254</code>…). Beware DNS rebinding — re-resolve and re-check before the connect, or use a library that does both.</li>
+        <li>Set short connect timeouts and don't follow redirects without re-validating.</li>
+      </ul>
+
+      <h3>Information leaks</h3>
+      <p>The server may give you the breach without an active attack:</p>
+      <ul>
+        <li>Stack traces in error responses (database names, table names, file paths).</li>
+        <li>Over-fetching — returning the full user object when the client only needed the display name.</li>
+        <li>Verbose errors revealing whether a user exists (login, password reset, signup) — see Auth below for the response-discrepancy pattern.</li>
+      </ul>
+
+      <h3>Supply chain</h3>
+      <p>Web apps load 100s of npm transitive dependencies — any of which can be compromised:</p>
+      <ul>
+        <li><strong>Dependency confusion</strong> — attacker publishes a package with the same name as your internal private one on the public registry; your build picks the public one.</li>
+        <li><strong>Typosquatting</strong> — <code>colorss</code>, <code>nodemon-cli</code>, etc.</li>
+        <li><strong>Maintainer compromise</strong> — legitimate package gets a malicious update pushed.</li>
+      </ul>
+      <p>Defenses: pin versions (lockfile committed), audit (<code>npm audit</code>, Dependabot, Renovate), avoid postinstall scripts where possible, and consider runtime allowlists (e.g. <code>--allow-net</code> in Deno).</p>
+
+      <h3>Rate limiting</h3>
+      <p>Not glamour — but most online attacks (credential stuffing, scraping, denial-of-wallet on paid APIs) are mass-volume. Per-IP and per-account rate limits, with backoff and lockouts on failed auth, are a first-class defense, not a polish item.</p>
+
+      <h4>Practice</h4>
+      <predict-reveal>
+        <p slot="question">A "fetch URL preview" endpoint accepts any HTTP URL. The dev plans to "block <code>localhost</code> and <code>127.0.0.1</code>". Is that enough?</p>
+        <p slot="answer">No. Loopback comes in many shapes — <code>0.0.0.0</code>, <code>[::1]</code>, <code>2130706433</code> (the integer form), <code>127.1</code>, decimal/octal/hex variants, IPv6 mapped IPv4. And the private network ranges (10/8, 172.16/12, 192.168/16) and the link-local 169.254/16 are usually more dangerous than localhost. Allowlist hosts, or resolve DNS yourself and check the IP against a comprehensive private-range list.</p>
+      </predict-reveal>
+      <div class="callout lab">
+        <h4>Try this in the lab</h4>
+        <p>Flag 5 in <code>8-security lab</code> exercises an information leak in error messages — the server returns conversation IDs and content to non-participants. Flag 6 exercises a timing side channel in the login path.</p>
+      </div>
+    </section>
+    <section id="passwords">
+      <h2>Storing passwords</h2>
+
+      <h3>Don't encrypt — hash</h3>
+      <p>Encryption is reversible: someone holds the key. If your host is compromised, the key likely is too. Hashing is one-way: a leaked database doesn't give the attacker passwords directly. But raw hashing is not enough:</p>
+      <ul>
+        <li>Identical passwords produce identical hashes — patterns leak.</li>
+        <li>Precomputed rainbow tables crack common passwords for free.</li>
+      </ul>
+
+      <h3>Hash + salt + slow function</h3>
+      <ul>
+        <li><strong>Salt</strong> — random per-user bytes, stored alongside the hash. Two users with the same password get different hashes; rainbow tables become useless.</li>
+        <li><strong>Slow function</strong> — bcrypt, scrypt, Argon2id. Tuned so a single hash takes ~100ms on production hardware. The user logs in once; the attacker brute-forcing the leak pays 100ms per guess.</li>
+        <li><strong>Use a library.</strong> Don't roll your own — there are many ways to get this subtly wrong.</li>
+      </ul>
+
+      <p>Move the cost slider below — a cost of 4 is roughly 100× faster than a cost of 12. The defender picks the highest cost they can tolerate.</p>
+      <password-hashing></password-hashing>
+
+      <h3>Other implementation rules (NIST SP 800-63B in one bullet list)</h3>
+      <ul>
+        <li><strong>No mandatory periodic changes.</strong> Forced rotation pushes users toward weaker, sequential passwords ("Spring2026!" → "Summer2026!"). Rotate only on suspected compromise.</li>
+        <li><strong>No silly composition rules</strong> (one uppercase, one symbol, …). Length beats complexity. Allow long passwords (min 64 chars), allow spaces.</li>
+        <li><strong>Block known-breached passwords.</strong> Check candidate passwords against <a href="https://haveibeenpwned.com/Passwords">HIBP</a>'s k-anonymity API at signup and password change.</li>
+        <li><strong>Rate-limit and lock out</strong> failed attempts. A bcrypt cost of 12 helps offline; rate limiting helps online.</li>
+        <li><strong>Never send passwords by email or SMS.</strong> Use one-time signed links.</li>
+        <li><strong>2FA / MFA</strong> on anything important. Prefer WebAuthn/Passkeys over TOTP over SMS.</li>
+      </ul>
+      <div class="callout lab">
+        <h4>Try this in the lab</h4>
+        <p>Flag 6 in <code>8-security lab</code> is a timing side-channel that leaks whether a username exists. Once you understand bcrypt's cost, the fix becomes obvious: always run bcrypt, even on missing users.</p>
+      </div>
+    </section>
+    <section id="auth">
+      <h2>Auth mechanisms</h2>
+
+      <h3>Three things often called "auth"</h3>
+      <ul>
+        <li><strong>Identification</strong> — claim who you are (a username).</li>
+        <li><strong>Authentication</strong> — prove it (password, key, biometrics).</li>
+        <li><strong>Authorization</strong> — given that you are X, are you allowed to do this?</li>
+      </ul>
+
+      <h3>The HTTP <code>Authorization</code> header</h3>
+      <p>A standard header with a freely-chosen scheme. Common ones:</p>
+      <ul>
+        <li><code>Authorization: Basic <em>base64(user:pass)</em></code> — only safe over HTTPS; ~plaintext.</li>
+        <li><code>Authorization: Bearer <em>token</em></code> — an opaque or signed token. JWT is a common token format.</li>
+      </ul>
+
+      <h3>Session cookie vs Bearer JWT</h3>
+      <table>
+        <thead><tr><th></th><th>Session cookie</th><th>JWT bearer</th></tr></thead>
+        <tbody>
+          <tr><td>State</td><td>Server holds it (DB / Redis)</td><td>Self-contained in the token</td></tr>
+          <tr><td>Revocation</td><td>Delete the row</td><td>Hard — needs a blacklist or short TTL</td></tr>
+          <tr><td>Scaling</td><td>Needs a shared store</td><td>Stateless; nice for fleets</td></tr>
+          <tr><td>Where sent</td><td>Automatic cookie on every request</td><td>You decide which requests carry it</td></tr>
+          <tr><td>Sensitive data</td><td>Stored server-side; ID is opaque</td><td>Payload is signed but <strong>readable</strong> — base64, not encrypted</td></tr>
+        </tbody>
+      </table>
+
+      <h3>JWT — what's actually in one</h3>
+      <p>Three parts separated by <code>.</code>: base64url-encoded header, base64url-encoded payload, signature over the first two.</p>
+<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+  .eyJzdWIiOiJhbGljZSIsInJvbGUiOiJ1c2VyIn0
+  .K7rL3p…signature…</code></pre>
+      <p><strong>JWT classic foot-guns:</strong></p>
+      <ul>
+        <li><code>alg: "none"</code> — some libraries historically accepted unsigned tokens. Always validate <code>alg</code> against an allowlist on the server.</li>
+        <li>Algorithm confusion — server uses HS256, attacker sends RS256 (or vice versa), tricks the library into validating with the wrong key. Pin algorithm server-side.</li>
+        <li>Putting secrets in the payload — payload is base64, not encrypted. Anyone with the token can read it.</li>
+      </ul>
+      <p>Play with one:</p>
+      <jwt-tamper></jwt-tamper>
+
+      <h3>OAuth2 — Authorization Code with PKCE</h3>
+      <p>OAuth2 lets a third-party app act on a user's behalf without seeing the user's credentials. The modern recommended flow for browser apps is <strong>Authorization Code + PKCE</strong>. Step by step:</p>
+      <ol>
+        <li>The app generates a random <code>code_verifier</code>, hashes it (SHA-256), base64url-encodes it → <code>code_challenge</code>.</li>
+        <li>App sends the user to the authorization server: <code>GET /authorize?response_type=code&amp;client_id=…&amp;code_challenge=…&amp;code_challenge_method=S256&amp;redirect_uri=…&amp;state=…</code></li>
+        <li>User logs in there, consents.</li>
+        <li>Auth server redirects to <code>redirect_uri?code=AUTH_CODE&amp;state=…</code>.</li>
+        <li>App's frontend receives the auth code; it now needs to exchange it for a token. It POSTs to the token endpoint <strong>with the original <code>code_verifier</code></strong>: <code>POST /token  grant_type=authorization_code&amp;code=AUTH_CODE&amp;code_verifier=…&amp;client_id=…</code></li>
+        <li>Auth server hashes the verifier and checks against the challenge it stored in step 2. Match → it issues an access token (often a JWT).</li>
+      </ol>
+      <p>Why PKCE? Without it, an attacker who intercepts the redirect (malicious app on the device, a misconfigured redirect) could exchange the auth code themselves. PKCE binds the code exchange to whoever generated the original verifier.</p>
+
+      <h3>WebAuthn / Passkeys</h3>
+      <p>Public-key authentication baked into the browser. On registration, the user's device generates a fresh key pair per site, stores the private key in secure hardware (TPM, Secure Enclave, hardware key), and sends the public key to the server. On login, the server sends a challenge; the device signs it with the private key. The signature is verified server-side.</p>
+      <p>Why it structurally ends phishing:</p>
+      <ul>
+        <li>The browser binds the signing operation to the actual origin of the page making the request. A phishing site at <code>раypal.com</code> simply <strong>cannot</strong> ask the authenticator for a signature meant for <code>paypal.com</code>.</li>
+        <li>There is no shared secret to steal in a database breach — only public keys.</li>
+        <li>Passkeys (the consumer-friendly name) sync via iCloud / Google / 1Password; the user's experience is "use Face ID to log in."</li>
+      </ul>
+      <p>Server-side, you store a public key per user. Libraries: <code>@simplewebauthn/server</code>, <code>fido2-lib</code>.</p>
+
+      <h4>Practice</h4>
+      <predict-reveal>
+        <p slot="question">A JWT has <code>{"alg":"HS256","typ":"JWT"}</code> in its header. An attacker submits the same token with the header rewritten to <code>{"alg":"none"}</code> and an empty signature. What should the server do?</p>
+        <p slot="answer"><strong>Reject it.</strong> The server's verifier must pin the expected algorithm — never trust the header's <code>alg</code>. Many high-profile breaches have come from libraries that accepted <code>alg: none</code> or that switched between HS/RS based on the header.</p>
+      </predict-reveal>
+      <predict-reveal>
+        <p slot="question">A breach dumps the server's user table. Which storage scheme is least bad: plaintext, AES-encrypted with the key in env vars, SHA-256(password), bcrypt(password)?</p>
+        <p slot="answer">From worst to best: plaintext (instant compromise), SHA-256 (no salt, rainbow-table able, fast — crackable in seconds for common passwords), AES-encrypted (the key is in env vars on the same host — usually compromised too), bcrypt (offline attack still pays per-guess cost). With WebAuthn there's nothing usable in the dump at all — just public keys.</p>
+      </predict-reveal>
+    </section>
+    <section id="takeaways">
+      <h2>Takeaways &amp; references</h2>
+
+      <h3>The five rules</h3>
+      <ol>
+        <li><strong>Never trust user data.</strong> Validate at the trust boundary, escape on the way out.</li>
+        <li><strong>Complexity is the enemy of security.</strong> Reach for boring, well-tested libraries.</li>
+        <li><strong>Be explicit, fail fast.</strong> Reject invalid requests before any business logic runs.</li>
+        <li><strong>Stack defenses.</strong> Assume each layer will be breached someday; bound the blast radius.</li>
+        <li><strong>Pay attention to defaults.</strong> The web's defaults are improving (SameSite=Lax, CSP, passkeys) — use them.</li>
+      </ol>
+
+      <h3>Further reading</h3>
+      <ul>
+        <li><a href="https://owasp.org/www-project-top-ten/">OWASP Top 10</a> — the annual list of most prevalent web vulns.</li>
+        <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheets</a> — concrete, current guidance for each topic.</li>
+        <li><a href="https://web.stanford.edu/class/cs253/">Feross Aboukhadijeh — CS 253 (Stanford)</a> — original inspiration for this chapter.</li>
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/63/b/final">NIST SP 800-63B</a> — password / authenticator guidance.</li>
+        <li><a href="https://developer.mozilla.org/en-US/docs/Web/Security">MDN Web Security</a></li>
+        <li><a href="https://webauthn.guide/">WebAuthn guide</a> · <a href="https://passkeys.dev/">passkeys.dev</a></li>
+      </ul>
+
+      <h3>Play more</h3>
+      <ul>
+        <li><a href="https://xss-game.appspot.com/">xss-game.appspot.com</a> — six levels of XSS.</li>
+        <li><a href="https://xss.pwnfunction.com/warmups/">xss.pwnfunction.com</a> — harder warmups.</li>
+        <li><a href="https://portswigger.net/web-security">PortSwigger Web Security Academy</a> — labs spanning the OWASP Top 10.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="assets/widgets/_common.js"></script>
+  <script src="assets/widgets/predict-reveal.js"></script>
+  <script src="assets/widgets/samesite-sim.js"></script>
+  <script src="assets/widgets/xss-sandbox.js"></script>
+  <script src="assets/widgets/sqli-demo.js"></script>
+  <script src="assets/vendor/bcrypt.min.js"></script>
+  <script src="assets/widgets/password-hashing.js"></script>
+  <script src="assets/widgets/jwt-tamper.js"></script>
+  <script>
+    (function () {
+      const sections = [...document.querySelectorAll('main section[id]')];
+      const links = new Map();
+      document.querySelectorAll('nav#toc a[href^="#"]').forEach(a => {
+        links.set(a.getAttribute('href').slice(1), a);
+      });
+      const obs = new IntersectionObserver(entries => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            links.forEach(a => a.classList.remove('active'));
+            const a = links.get(e.target.id);
+            if (a) a.classList.add('active');
+          }
+        }
+      }, { rootMargin: '-30% 0px -65% 0px' });
+      sections.forEach(s => obs.observe(s));
+    })();
+  </script>
+</body>
+</html>
