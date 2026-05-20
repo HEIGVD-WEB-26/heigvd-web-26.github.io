@@ -150,7 +150,7 @@
 
                             - Compilation does type checking and removes TypeScript's type annotations.
                             - Can target older versions of JS (e.g. ES12 with `--target es2021`).
-                                - By default, targets ES5 (ES2015).
+                                - By default, targets ES5 (recommended ES6/ES2015).
                             - Flags can control how strict the compiler is.
 
                         </textarea>
@@ -265,6 +265,8 @@
               const n: number = obj; // We can assign it to a number !
               ```
 
+              We'll see `unknown` (a type-safe alternative to `any`) and `never` (the type that holds no value) later.
+
             </textarea>
           </section>
 
@@ -340,45 +342,6 @@
                             ```
 
                         </textarea>
-          </section>
-          <!-- TODO move later in the course as we use type intersection-->
-          <section data-markdown style="font-size: 0.6em">
-            <textarea data-template>
-                ## Never type
-
-                `never` is the type of values that never occur. It is a type that holds no value.
-
-                For example, a function that never returns.
-
-                ```typescript
-                function error(message: string): never {
-                    throw new Error(message);
-                }
-                ```
-
-                Or an empty intersection of types (more on intersection later)
-                ```typescript
-                type Alphanumeric = string & number; // never as we can't have a value that is both a string and a number
-                ```
-
-                Since no type can be assigned to `never`, it can also be used to have exhaustive checking in a match statement:
-                ```typescript
-                type Role = 'admin' | 'user'; // (union type, more on this later)
-
-                const authorize = (role: Role): string => {
-                  switch (role) {
-                    case 'admin':
-                      return 'You can do anything';
-                    case 'user':
-                      return 'You can do something';
-                    default:
-                      // never reach here util we add a new role
-                      const _unreachable: never = role; //cannot assign to never -> compile error
-                      throw new Error(`Invalid role: ${_unreachable}`);
-                  }
-                };
-                ```
-            </textarea>
           </section>
           <section data-markdown style="font-size: 0.8em">
             <textarea data-template>
@@ -510,7 +473,12 @@
               interface Vehicle {
                 topSpeed: number;
               }
-              let car: Vehicle = {color: "Green", topSpeed: 25};
+
+              interface Car extends Vehicle {
+                doors: number;
+              }
+
+              let car: Car = {color: "Green", topSpeed: 25, doors: 5};
               ```
 
               </div>
@@ -558,9 +526,15 @@
                 type LockState = "locked" | "unlocked";
                 type PositiveOddNumberUnderTen = 1 | 3 | 5 | 7 | 9;
 
-                function printDouble(x: number | string) {
-                    console.log(x + x);
+                type LockState = "locked" | "unlocked";
+
+                function toggle(state: LockState): LockState {
+                  return state === "locked" ? "unlocked" : "locked";
                 }
+
+                toggle("locked");   // OK
+                toggle("unlocked"); // OK
+                toggle("open");     // Error
                 ```
 
                 <div class="detail">
@@ -616,6 +590,41 @@
 
             </textarea>
           </section>
+          <section data-markdown style="font-size: 0.7em">
+            <textarea data-template>
+              ## Unknown type
+
+              `unknown` is the type-safe counterpart of `any`. Any value can be assigned to it, but it cannot be used without first checking its type.
+
+              ```typescript
+              let value: unknown;
+              value = 42;             // OK
+              value = "hello";        // OK
+              value = { a: 1 };       // OK
+
+              value.toUpperCase();     // Error: 'value' is of type 'unknown'
+              const n: number = value; // Error: not assignable
+              ```
+
+              Narrowing makes it usable:
+
+              ```typescript
+              function parseInput(raw: unknown) {
+                if (typeof raw === "string") {
+                  console.log(raw.toUpperCase()); // OK, raw is a string here
+                }
+              }
+
+              // With `any`, this compiles but crashes at runtime:
+              function parseInputAny(raw: any) {
+                console.log(raw.toUpperCase()); // TypeError if raw is a number
+              }
+              ```
+
+              Use `unknown` for values coming from outside (JSON, user input, `catch (e)`, ...). Use `any` only as a last-resort escape hatch.
+
+            </textarea>
+          </section>
           <section data-markdown style="font-size: 0.6em">
             <textarea data-template>
               ## Intersection types
@@ -654,6 +663,44 @@
 
           </textarea>
         </section>
+          <section data-markdown style="font-size: 0.6em">
+            <textarea data-template>
+                ## Never type
+
+                `never` is the type of values that never occur. It is a type that holds no value.
+
+                For example, a function that never returns.
+
+                ```typescript
+                function error(message: string): never {
+                    throw new Error(message);
+                }
+                ```
+
+                Or an empty intersection of types:
+                ```typescript
+                type Alphanumeric = string & number; // never as we can't have a value that is both a string and a number
+                ```
+
+                Since no type can be assigned to `never`, it can also be used to have exhaustive checking in a match statement:
+                ```typescript
+                type Role = 'admin' | 'user';
+
+                const authorize = (role: Role): string => {
+                  switch (role) {
+                    case 'admin':
+                      return 'You can do anything';
+                    case 'user':
+                      return 'You can do something';
+                    default:
+                      // never reached until we add a new role
+                      const _unreachable: never = role; // cannot assign to never -> compile error
+                      throw new Error(`Invalid role: ${_unreachable}`);
+                  }
+                };
+                ```
+            </textarea>
+          </section>
         </section>
 
 
