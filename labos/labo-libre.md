@@ -45,10 +45,13 @@ Rust malheureusement. Par contre, vous êtes libres de choisir les frameworks et
 À titre d'inspiration, voici quelques projets réalisés par les volées
 précédentes.
 
+<details>
+<summary><strong>Afficher les projets des années précédentes</strong></summary>
+
 ### Jeux multijoueurs temps réel {.unlisted}
 
 | Projet | Description | Technologies |
-|--------|-------------|--------------|
+|--------|-------------|------Yes--------|
 | Pixel War | Jeu collaboratif inspiré de r/Place : grille de 1000×1000 pixels modifiable simultanément, avec cooldown entre chaque clic. | React, MUI, PixiJS, TypeScript, Socket.IO, Node.js |
 | Jeu .io (Agar.io-like) | Chaque joueur contrôle une cellule qui absorbe particules et autres cellules plus petites en 2D. | Vue.js, TailwindCSS, Nuxt + WebSocket, Prisma, PixiJS |
 | slither.io | Contrôler un serpent qui grandit en mangeant des particules sans toucher les autres. | Express, Socket.IO, Canvas |
@@ -88,10 +91,15 @@ précédentes.
 | Diaporama collaboratif | Soumission de photos via OAuth Google, validation par un admin, puis affichage sur grand écran avec mise à jour temps réel. | Express.js, Long-polling, OAuth Google, Bootstrap |
 | Bibliothèque de jeux libres | Catalogue avec stats globales, filtres, favoris et statistiques par utilisateur. | React, SQLite, Passport, Chart.js |
 
+</details>
+
 ## Idées de librairies et APIs Web à explorer
 
 Voici une liste non-exhaustive de technologies que vous pouvez explorer pour
 votre projet. N'hésitez pas à en proposer d'autres !
+
+<details>
+<summary><strong>Afficher les librairies et APIs Web</strong></summary>
 
 ### Rendu graphique & jeux {.unlisted}
 
@@ -178,6 +186,8 @@ votre projet. N'hésitez pas à en proposer d'autres !
 - [neverthrow](https://github.com/supermacro/neverthrow) — gestion d'erreurs typée (`Result<T, E>`).
 - [Zustand](https://zustand-demo.pmnd.rs/) / [Pinia](https://pinia.vuejs.org/) — gestion d'état frontend.
 
+</details>
+
 # Timeline
 
 La timeline sera la suivante.
@@ -203,30 +213,38 @@ La timeline sera la suivante.
 Nous vous encourageons vivement à venir nous voir régulièrement pour discuter de
 l'avancement de votre projet.
 
+## Délais de rendu des projets et des présentations
+### Groupes qui présentent mercredi 10.06
+Mercredi 10 juin à 14h30
+
+### Groupes qui présentent vendredi 12.06
+Vendredi 12 juin à 13h00
+
 # Présentation finale
 
-## Ordre de passage (à confirmer)
+## Ordre de passage
 
 L'ordre de passage est donné ci-dessous, avec les horaires que nous souhaitons respecter.
 
 Toutes les équipes doivent assister aux pr  ésentations des autres équipes, afin de découvrir les projets des autres et d'apprendre de nouvelles choses.
 
 Un intervalle de **2 minutes** est prévu entre deux passages pour l'installation.
-L'horaire de fin indiqué correspond à la durée **maximale** autorisée pour la
-taille de l'équipe ; une présentation plus courte est tout à fait possible.
 
-### Mercredi (assistant : STV) — début à 14h15
+L'horaire de fin indiqué correspond à la durée **maximale** autorisée pour la
+taille de l'équipe. Merci de respecter les durées minimales et maximales prévues pour la taille de votre équipe.
+
+### Mercredi 10.09 (assistant : STV) — début à 14h30
 
 | Nb personnes | Équipe                          | Projet               | Temps      | Heure de passage |
 |--------------|---------------------------------|----------------------|------------|------------------|
-| 2            | Thomas, Charles                 | whoiselected         | 10-15 min  | 14h15 – 14h30    |
-| 1            | Michael                         | NetRecon             | 8-13 min   | 14h32 – 14h45    |
-| 2            | Dylan, Guo Yu                   | Pirates CSG 3D       | 10-15 min  | 14h47 – 15h02    |
-| 1            | Maksym                          | Better flashcards    | 8-13 min   | 15h04 – 15h17    |
-| 4            | Aymeric, Tadeusz, Jules, Yanni  | Tchoutchou transport | 14-19 min  | 15h19 – 15h38    |
-| 4            | Louis, Quentin, Simão, Colin    | Möbelhem             | 14-19 min  | 15h40 – 15h59    |
+| 2            | Thomas, Charles                 | whoiselected         | 10-15 min  | 14h30 – 14h45    |
+| 1            | Michael                         | NetRecon             | 8-13 min   | 14h47 – 15h00    |
+| 2            | Dylan, Guo Yu                   | Pirates CSG 3D       | 10-15 min  | 15h02 – 15h17    |
+| 1            | Maksym                          | Better flashcards    | 8-13 min   | 15h19 – 15h32    |
+| 4            | Aymeric, Tadeusz, Jules, Yanni  | Tchoutchou transport | 14-19 min  | 15h34 – 15h53    |
+| 4            | Louis, Quentin, Simão, Colin    | Möbelhem             | 14-19 min  | 15h55 – 16h14    |
 
-### Vendredi (assistante : CFN) — début à 13h00
+### Vendredi 12.09 (assistante : CFN) — début à 13h00
 
 | Nb personnes | Équipe                          | Projet                | Temps      | Heure de passage |
 |--------------|---------------------------------|-----------------------|------------|------------------|
@@ -237,8 +255,7 @@ taille de l'équipe ; une présentation plus courte est tout à fait possible.
 | 3            | Theo, Maxime, Santiago          | Build and Jump        | 12-17 min  | 14h16 – 14h33    |
 
 
-
-## Durée de votre présentation (à confirmer)
+## Durée de votre présentation
 
 Vos présentations ne devront **strictement** pas dépasser les durées maximales suivantes,
 en fonction de la taille de votre équipe. Ce choix est justifié par le fait
