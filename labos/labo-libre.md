@@ -211,9 +211,30 @@ L'ordre de passage est donné ci-dessous, avec les horaires que nous souhaitons 
 
 Toutes les équipes doivent assister aux pr  ésentations des autres équipes, afin de découvrir les projets des autres et d'apprendre de nouvelles choses.
 
-| Nb personnes | Équipe                                                           | Projet                                       | Heure de passage / Temps |
-|--------------|------------------------------------------------------------------|----------------------------------------------|--------------------------|
-| 2            | Alice, Bob                                                        | Tetris en AR avec AR.js                      | TBD                      |
+Un intervalle de **2 minutes** est prévu entre deux passages pour l'installation.
+L'horaire de fin indiqué correspond à la durée **maximale** autorisée pour la
+taille de l'équipe ; une présentation plus courte est tout à fait possible.
+
+### Mercredi (assistant : STV) — début à 14h15
+
+| Nb personnes | Équipe                          | Projet               | Temps      | Heure de passage |
+|--------------|---------------------------------|----------------------|------------|------------------|
+| 2            | Thomas, Charles                 | whoiselected         | 10-15 min  | 14h15 – 14h30    |
+| 1            | Michael                         | NetRecon             | 8-13 min   | 14h32 – 14h45    |
+| 2            | Dylan, Guo Yu                   | Pirates CSG 3D       | 10-15 min  | 14h47 – 15h02    |
+| 1            | Maksym                          | Better flashcards    | 8-13 min   | 15h04 – 15h17    |
+| 4            | Aymeric, Tadeusz, Jules, Yanni  | Tchoutchou transport | 14-19 min  | 15h19 – 15h38    |
+| 4            | Louis, Quentin, Simão, Colin    | Möbelhem             | 14-19 min  | 15h40 – 15h59    |
+
+### Vendredi (assistant : CFN) — début à 13h00
+
+| Nb personnes | Équipe                          | Projet                | Temps      | Heure de passage |
+|--------------|---------------------------------|-----------------------|------------|------------------|
+| 2            | Koray, Jonatan                  | Racing                | 10-15 min  | 13h00 – 13h15    |
+| 3            | Sofian, Mirco, François         | feuille caillou ciseau| 12-17 min  | 13h17 – 13h34    |
+| 4            | Yann, Léo, Mauro, Julien        | Space Invader         | 14-19 min  | 13h36 – 13h55    |
+| 3            | Pierre, Maikol, Nolan           | Space Dashboard       | 12-17 min  | 13h57 – 14h14    |
+| 3            | Theo, Maxime, Santiago          | Build and Jump        | 12-17 min  | 14h16 – 14h33    |
 
 
 
@@ -224,11 +245,12 @@ en fonction de la taille de votre équipe. Ce choix est justifié par le fait
 qu’une plus grande équipe aura travaillé sur plus de choses et aura donc plus de
 contenu à présenter.
 
-| Taille de l'équipe | Durée de la présentation (min-max)        |
-| ------------------ |-------------------------------------------|
-| 2                  | 10-13 minutes + ~3 min pour les questions |
-| 3                  | 13-16 minutes + ~4 min pour les questions |
-| 4                  | 16-19 minutes + ~5 min pour les questions |
+| Taille de l'équipe | Durée de la présentation (min-max) |
+| ------------------ | ---------------------------------- |
+| 1                  | 8-13 minutes                       |
+| 2                  | 10-15 minutes                      |
+| 3                  | 12-17 minutes                      |
+| 4                  | 14-19 minutes                      |
 
 # Évaluation (à confirmer)
 
