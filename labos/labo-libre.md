@@ -9,6 +9,7 @@ css: style.css
 |-------|-------------------------------------------------------------------------|
 | 29.04 | Version initiale                                                        |
 | 08.05 | Ajout d'exemples de projets et librairies et clarification de la donnée |
+| 03.06 | Ajout de l'ordre de passage et délais de rendu                          |
 
 # Description
 
