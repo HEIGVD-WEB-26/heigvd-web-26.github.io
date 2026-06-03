@@ -205,7 +205,7 @@ l'avancement de votre projet.
 
 # Présentation finale
 
-## Ordre de passage
+## Ordre de passage (à confirmer)
 
 L'ordre de passage est donné ci-dessous, avec les horaires que nous souhaitons respecter.
 
@@ -226,7 +226,7 @@ taille de l'équipe ; une présentation plus courte est tout à fait possible.
 | 4            | Aymeric, Tadeusz, Jules, Yanni  | Tchoutchou transport | 14-19 min  | 15h19 – 15h38    |
 | 4            | Louis, Quentin, Simão, Colin    | Möbelhem             | 14-19 min  | 15h40 – 15h59    |
 
-### Vendredi (assistant : CFN) — début à 13h00
+### Vendredi (assistante : CFN) — début à 13h00
 
 | Nb personnes | Équipe                          | Projet                | Temps      | Heure de passage |
 |--------------|---------------------------------|-----------------------|------------|------------------|
