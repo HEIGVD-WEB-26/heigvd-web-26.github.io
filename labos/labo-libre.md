@@ -10,6 +10,7 @@ css: style.css
 | 29.04 | Version initiale                                                        |
 | 08.05 | Ajout d'exemples de projets et librairies et clarification de la donnée |
 | 03.06 | Ajout de l'ordre de passage et délais de rendu                          |
+| 05.06 | Mise à jour de l'ordre de passage                                       |
 
 # Description
 
@@ -244,16 +245,16 @@ taille de l'équipe. Merci de respecter les durées minimales et maximales prév
 | 1            | Maksym                          | Better flashcards    | 8-13 min   | 15h19 – 15h32    |
 | 4            | Aymeric, Tadeusz, Jules, Yanni  | Tchoutchou transport | 14-19 min  | 15h34 – 15h53    |
 | 4            | Louis, Quentin, Simão, Colin    | Möbelhem             | 14-19 min  | 15h55 – 16h14    |
+| 2            | Koray, Jonatan                  | Racing               | 10-15 min  | 16h16 – 16h31    |
 
 ### Vendredi 12.09 (assistante : CFN) — début à 13h00
 
 | Nb personnes | Équipe                          | Projet                | Temps      | Heure de passage |
 |--------------|---------------------------------|-----------------------|------------|------------------|
-| 2            | Koray, Jonatan                  | Racing                | 10-15 min  | 13h00 – 13h15    |
-| 3            | Sofian, Mirco, François         | feuille caillou ciseau| 12-17 min  | 13h17 – 13h34    |
-| 4            | Yann, Léo, Mauro, Julien        | Space Invader         | 14-19 min  | 13h36 – 13h55    |
-| 3            | Pierre, Maikol, Nolan           | Space Dashboard       | 12-17 min  | 13h57 – 14h14    |
-| 3            | Theo, Maxime, Santiago          | Build and Jump        | 12-17 min  | 14h16 – 14h33    |
+| 3            | Sofian, Mirco, François         | feuille caillou ciseau| 12-17 min  | 13h00 – 13h17    |
+| 4            | Yann, Léo, Mauro, Julien        | Space Invader         | 14-19 min  | 13h19 – 13h38    |
+| 3            | Pierre, Maikol, Nolan           | Space Dashboard       | 12-17 min  | 13h40 – 13h57    |
+| 3            | Theo, Maxime, Santiago          | Build and Jump        | 12-17 min  | 13h59 – 14h16    |
 
 
 ## Durée de votre présentation

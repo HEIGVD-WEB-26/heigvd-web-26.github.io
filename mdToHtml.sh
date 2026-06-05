@@ -12,6 +12,6 @@ do
     filename=$(basename -- "$file")
     dst="labos/${filename%.*}.html"
 
-    pandoc --toc $file -f markdown -t html -s -o $dst --template labos/pandoc-template.html --highlight-style zenburn
+    pandoc --toc $file -f markdown -t html -s -o $dst --template labos/pandoc-template.html --syntax-highlighting zenburn
 
 done
