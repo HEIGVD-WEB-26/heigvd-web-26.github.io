@@ -11,6 +11,7 @@ css: style.css
 | 08.05 | Ajout d'exemples de projets et librairies et clarification de la donnée |
 | 03.06 | Ajout de l'ordre de passage et délais de rendu                          |
 | 05.06 | Mise à jour de l'ordre de passage                                       |
+| 09.06 | Mise à jour du barème pour les présentations                            |
 
 # Description
 
@@ -293,10 +294,10 @@ Critères de notation:
 - Retour sur les technologies (3pts): <br/>
   vous devez présenter les librairies ou APIs que vous avez utilisées, et expliquer pourquoi vous les avez choisies, ce que vous avez appris, les avantages et inconvénients de chaque technologie. Apprenez-nous des choses !
 
-- Demo (2pts): <br />
+- Demo (3pts): <br />
   vous devez faire une démonstration fonctionnelle de votre solution.
 
-- Réponse aux questions (2pts): <br />
+- Réponse aux questions (1pt): <br />
   votre équipe doit être prête à répondre aux questions.
 
 ## Code (16pts)
