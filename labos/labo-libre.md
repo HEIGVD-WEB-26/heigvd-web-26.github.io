@@ -272,7 +272,7 @@ contenu à présenter.
 | 3                  | 12-17 minutes                      |
 | 4                  | 14-19 minutes                      |
 
-# Évaluation (à confirmer)
+# Évaluation
 
 Vous serez évalués sur les critères suivants.
 
@@ -300,7 +300,7 @@ Critères de notation:
 - Réponse aux questions (1pt): <br />
   votre équipe doit être prête à répondre aux questions.
 
-## Code (16pts)
+## Code (16pts) (à confirmer)
 - Respect des délais et répartition du travail sur la durée (2pts): <br />
   Vous devez rendre votre projet à temps, et avoir réparti le travail sur tout le temps imparti.
 
