@@ -231,7 +231,7 @@ L'ordre de passage est donné ci-dessous, avec les horaires que nous souhaitons 
 
 Toutes les équipes doivent assister aux pr  ésentations des autres équipes, afin de découvrir les projets des autres et d'apprendre de nouvelles choses.
 
-Un intervalle de **2 minutes** est prévu entre deux passages pour l'installation.
+Un intervalle de **5 minutes** est prévu entre deux passages pour l'installation.
 
 L'horaire de fin indiqué correspond à la durée **maximale** autorisée pour la
 taille de l'équipe. Merci de respecter les durées minimales et maximales prévues pour la taille de votre équipe.
@@ -253,9 +253,10 @@ taille de l'équipe. Merci de respecter les durées minimales et maximales prév
 | Nb personnes | Équipe                          | Projet                | Temps      | Heure de passage |
 |--------------|---------------------------------|-----------------------|------------|------------------|
 | 3            | Sofian, Mirco, François         | feuille caillou ciseau| 12-17 min  | 13h00 – 13h17    |
-| 4            | Yann, Léo, Mauro, Julien        | Space Invader         | 14-19 min  | 13h19 – 13h38    |
-| 3            | Pierre, Maikol, Nolan           | Space Dashboard       | 12-17 min  | 13h40 – 13h57    |
-| 3            | Theo, Maxime, Santiago          | Build and Jump        | 12-17 min  | 13h59 – 14h16    |
+| 4            | Yann, Léo, Mauro, Julien        | Space Invader         | 14-19 min  | 13h22 – 13h41    |
+| 3            | Pierre, Maikol, Nolan           | Space Dashboard       | 12-17 min  | 13h46 – 14h03    |
+| 3            | Theo, Maxime, Santiago          | Build and Jump        | 12-17 min  | 14h08 – 14h25    |
+| 1            | Antoine                         | Quiz de culture générale | 8-13 min   | 14h30 – 14h43    |
 
 
 ## Durée de votre présentation
@@ -292,7 +293,8 @@ Critères de notation:
   vous avez un temps de parole défini, et il est important que vous le respectiez.
 
 - Retour sur les technologies (3pts): <br/>
-  vous devez présenter les librairies ou APIs que vous avez utilisées, et expliquer pourquoi vous les avez choisies, ce que vous avez appris, les avantages et inconvénients de chaque technologie. Apprenez-nous des choses !
+  vous devez présenter les librairies ou APIs que vous avez utilisées, et expliquer pourquoi vous les avez choisies, 
+  ce que vous avez appris, les avantages et inconvénients de chaque technologie. Apprenez-nous des choses !
 
 - Demo (3pts): <br />
   vous devez faire une démonstration fonctionnelle de votre solution.
